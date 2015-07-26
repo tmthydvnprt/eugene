@@ -342,26 +342,34 @@ class Tree(object):
         for i, child in enumerate(self.nodes.children):
             Tree(child).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
 
-    def edges(self):
+    def list_edges(self):
         """get edges of tree"""
         # fill node numbers if blank or if on root node
         if self.nodes.num == None or self.nodes.num == 0:
             self.set_nums()
         # get list of tuple edges between nodes e.g. [(n1,n2),(n1,n3)...]
-        edges         = [(self.nodes.value + str(self.nodes.num), c.value + str(c.num) if len(c.children) > 0 else c.value) for c in self.nodes.children]
-        childrenNodes = [Tree(c).edges() for c in self.nodes.children if len(c.children) > 0]
-        for i in range( len( childrenNodes ) ) :
-            edges += childrenNodes[i]
+        edges = [(self.nodes.value + str(self.nodes.num), c.value + str(c.num) if len(c.children) > 0 else c.value) for c in self.nodes.children]
+        children_nodes = [Tree(c).list_edges() for c in self.nodes.children if len(c.children) > 0]
+        for i in range( len( children_nodes ) ) :
+            edges += children_nodes[i]
         return edges
 
-    def nodes(self):
+    def list_nodes(self):
         """return nodes of tree"""
         # fill node numbers if blank or if on root node
         if self.nodes.num == None or self.nodes.num == 0:
             self.set_nums()
+
         # get list of nodes
-        currentNode = [str(self.value) + str(self.num)]
-        return currentNode + [c.value for c in self.children if len(c.children) == 0] + [c.nodes() for c in self.children if len(c.children) > 0]
+        node_list = []
+        node_list.append('[%s]%s' % (self.nodes.num, self.nodes.value))
+        # add children
+        node_list.extend(['[%s]%s' % (c.num, c.value) for c in self.nodes.children if len(c.children) == 0])
+        # add children's children
+        grand_children = [Tree(c).list_nodes() for c in self.nodes.children if len(c.children) > 0]
+        node_list.extend([y for x in grand_children for y in x])
+
+        return node_list
 
 def random_tree(max_level=20, min_level=1, current_level=0):
     """generate a random tree"""
@@ -405,14 +413,14 @@ def random_node(max_level=20, min_level=1, current_level=0):
             return Node(binaries[r.randint(0,len(binaries) - 1)], random_node(max_level, min_level, current_level + 1), random_node(max_level, min_level, current_level + 1))
         # return a n-ary operator
         elif rand_node == 6:
-            naryNodeNum = r.randint(2, 5)
-            if naryNodeNum == 2:
+            nary_node_num = r.randint(2, 5)
+            if nary_node_num == 2:
                 return Node(naries[r.randint(0, len(naries) - 1)], random_node(max_level - 1, current_level + 1 ), random_node(max_level - 1, current_level + 1))
-            elif naryNodeNum == 3:
+            elif nary_node_num == 3:
                 return Node(naries[r.randint(0, len(naries) - 1)], random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1))
-            elif naryNodeNum == 4:
+            elif nary_node_num == 4:
                 return Node(naries[r.randint(0, len(naries) - 1)], random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1))
-            elif naryNodeNum == 5:
+            elif nary_node_num == 5:
                 return Node(naries[r.randint(0, len(naries) - 1)], random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1))
 
 
@@ -437,11 +445,70 @@ class Individual(object):
         gene_expression = self.chromosomes.evaluate()
         return objective_function(gene_expression)
 
-    def mate(self, spouse=None):
+    def mate(self, spouse=None, mutate_probability=0.5):
         """mate this Individual with a spouse"""
 
-        return children
+        # perform genetic exchange
+        child1, child2 = self.crossover(spouse)
 
+        # probabilistically mutate
+        if r.random() >= mutate_probability:
+            child1.mutate()
+        if r.random() >= mutate_probability:
+            child2.mutate()
+
+        return (child1, child2)
+
+    def crossover(self, spouse=None):
+        """randomly crossover two chromosomes"""
+
+        # create random crossover point
+        xpoint = r.randint(0, min(self.nodes.total, spouse.nodes.total))
+
+        # clone parent chromosomes
+        c1 = cp.deepcopy(self)
+        c2 = cp.deepcopy(spouse)
+
+        # get nodes to cross
+        c1n = c1.get_node(xpoint)
+        c2n = c2.get_node(xpoint)
+
+        # transfer nodes
+        c1.set_node(xpoint, c2n)
+        c2.set_node(xpoint, c1n)
+
+        return (c1, c2)
+
+    def mutate(self):
+        """ alter a random node in chromosomes"""
+
+        # randomly select node to mutate
+        mpoint = r.randint(0, self.nodes.total)
+        node = self.get_node(mpoint)
+
+        # determine how node can mutate based on node type
+        # constant
+        if node.value in consts:
+            mutated_value = consts[r.randint(0, len(consts) - 1)]
+        # variable
+        elif node.value in variables:
+            mutated_value = variables[r.randint(0, len(variables) - 1)]
+        # a unary operator
+        elif node.value in unaries:
+            mutated_value = unaries[r.randint(0,len(unaries) - 1)]
+        # a binary operator
+        elif node.value in binaries:
+            mutated_value = binaries[r.randint(0,len(binaries) - 1)]
+        # a n-ary operator
+        elif node.value in naries:
+            mutated_value = naries[r.randint(0,len(naries) - 1)]
+        # ephemeral constant random ( 0:1, uniform -500:500, or normal -500:500 )
+        else:
+            mutated_value = ephemeral[r.randint(1, len(ephemeral) - 1)]
+
+        # mutate node value (keeps children, if applicable)
+        node.value = mutated_value
+        self.set_node(mpoint, node)
 
 class Population(object):
 
