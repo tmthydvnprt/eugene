@@ -594,21 +594,41 @@ class Population(object):
         fitness_probability = ranked_fitness / float(ranked_fitness.sum())
         cum_prob_dist = fitness_probability.cumsum()
 
-        for n in xrange(number):
+        for s in xrange(number):
             # randomly select two individuals with weighted probability proportial to fitness
             p1 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
             p2 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
             selections.append((p1, p2))
-        selections
+        return selections
 
     def stochastic(self, number=self.size):
-        """select parent pairs based on stochastic method (fitness probability)"""
+        """select parent pairs based on stochastic method (probability uniform across fitness)"""
 
-        return selection
+        selections = []
+
+        # unpack
+        ranked_fitness, ranked_individuals = (list(i) for i in zip(*self.ranking))
+        ranked_fitness = np.array(ranked_fitness)
+
+        # calculate weighted probability proportial to fitness
+        fitness_probability = ranked_fitness / float(ranked_fitness.sum())
+        cum_prob_dist = fitness_probability.cumsum()
+
+        # determine uniform points
+        p_dist = 1 / float(number)
+        p0 = p_dist * r.random()
+        points = p0 + p_dist * np.array(range(0, number))
+
+        for p in points:
+            # randomly select two individuals with weighted probability proportial to fitness
+            p1 = ranked_individuals[bisect.bisect(cum_prob_dist, p * cum_prob_dist[-1])]
+            p2 = ranked_individuals[bisect.bisect(cum_prob_dist, p * cum_prob_dist[-1])]
+            selections.append((p1, p2))
+        return selections
 
     def tournament(self, number=self.size, tournaments=4):
         """select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins)"""
-        for n in xrange(number):
+        for s in xrange(number):
             # select two groups of random competitors
             competitors1 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, 3))]
             competitors2 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, 3))]
@@ -638,12 +658,12 @@ class Population(object):
         scaled_rank_probability = scaled_rank / float(scaled_rank.sum())
         cum_prob_dist = scaled_rank_probability.cumsum()
 
-        for n in xrange(number):
+        for s in xrange(number):
             # randomly select two individuals with weighted probability proportial to scaled rank
             p1 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
             p2 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
             selections.append((p1, p2))
-        selections
+        return selections
 
     def create_generation(self):
         """create the next generations, this is main function that loops"""
