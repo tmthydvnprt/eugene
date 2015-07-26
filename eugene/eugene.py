@@ -513,16 +513,18 @@ class Individual(object):
 
 class Population(object):
 
-    def __init__(self, max_init_population=1000, min_fitness=0.0, max_generations=10000, stagnation_factor=20):
+    def __init__(self, max_init_population=1000, min_fitness=0.0, max_generations=10000, stagnation_factor=20, minimiz_fitness=False):
         # parameters
         self.max_init_population = max_init_population
         self.min_fitness = min_fitness
         self.max_generations = max_generations
         self.gamma = gamma
         self.stagnation_factor = stagnation_factor
+        self.minimiz_fitness = minimiz_fitness
         # initialize variables
         self.created = False
         self.individuals = []
+        self.ranking = []
         self.generation = 0
         self.fitness_record = list(np.zeros(max_generations))
         # cached values
@@ -580,20 +582,81 @@ class Population(object):
                 individual = Individual(random_tree())
                 self.individuals.append(individual)
 
-    def run(self, number_of_generations=self.max_generations):
-        """run algorithm"""
+    def roulette(self, number=self.size):
+        """select parent pairs based on roulette method (probability proportional to fitness)"""
+        selections = []
 
-        while self.generation < number_of_generations or not self.stagnate:
-            self.create_generation()
+        # unpack
+        ranked_fitness, ranked_individuals = (list(i) for i in zip(*self.ranking))
+        ranked_fitness = np.array(ranked_fitness)
+
+        # calculate weighted probability proportial to fitness
+        fitness_probability = ranked_fitness / float(ranked_fitness.sum())
+        cum_prob_dist = fitness_probability.cumsum()
+
+        for n in xrange(number):
+            # randomly select two individuals with weighted probability proportial to fitness
+            p1 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
+            p2 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
+            selections.append((p1, p2))
+        selections
+
+    def stochastic(self, number=self.size):
+        """select parent pairs based on stochastic method (fitness probability)"""
+
+        return selection
+
+    def tournament(self, number=self.size, tournaments=4):
+        """select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins)"""
+        for n in xrange(number):
+            # select two groups of random competitors
+            competitors1 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, 3))]
+            competitors2 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, 3))]
+            # groups compete in fitness tournament (local group sorting)
+            competitors1.sort()
+            competitors2.sort()
+            # select most fit from each group
+            winner1 = competitors1[0] if self.minimiz_fitness else competitors1[-1]
+            winner2 = competitors2[0] if self.minimiz_fitness else competitors2[-1]
+            selections.append( (winner1[1], winner2[1]) )
+        return selections
+
+    def rank_roulette(self, number=self.size, pressure=2):
+        """select parent pairs based on rank roulette method (probability proportional to fitness rank)"""
+
+        selections = []
+
+        # unpack
+        ranked_fitness, ranked_individuals = (list(i) for i in zip(*self.ranking))
+
+        # create a scaled rank by fitness (individuals already sorted, so just create rank range, then scale)
+        n = self.size
+        rank = range(n, 0, -1) if minimiz_fitness else range(1, n + 1)
+        scaled_rank = 2.0 - pressure + (2.0 * (pressure - 1) * (np.array(rank) - 1) / (n - 1))
+
+        # calculate weighted probability proportial to scaled rank
+        scaled_rank_probability = scaled_rank / float(scaled_rank.sum())
+        cum_prob_dist = scaled_rank_probability.cumsum()
+
+        for n in xrange(number):
+            # randomly select two individuals with weighted probability proportial to scaled rank
+            p1 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
+            p2 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
+            selections.append((p1, p2))
+        selections
 
     def create_generation(self):
         """create the next generations, this is main function that loops"""
 
-        # determine fitness of current generations
-        fitness = self.fitness
-        self.fitness_record[self.generation] = fitness.mean()
+        # determine fitness of current generations and log average fitness
+        self.fitness_record[self.generation] = self.fitness.mean()
+
+        # rank individuals by fitness
+        self.ranking = zip(self.fitness, self.individuals)
+        self.ranking.sort()
 
         # selection parent chromosome pairs
+        parent_pairs
 
         # mate next generation
 
@@ -602,3 +665,9 @@ class Population(object):
 
         # log generation
         self.generation += 1
+
+    def run(self, number_of_generations=self.max_generations):
+        """run algorithm"""
+
+        while self.generation < number_of_generations or not self.stagnate:
+            self.create_generation()
