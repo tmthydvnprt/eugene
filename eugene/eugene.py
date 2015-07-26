@@ -282,6 +282,7 @@ class Tree(object):
         return str(self.nodes)
 
     def evaluate(self):
+        """evaluate expression stored in tree"""
         try:
             return eval(compile(self.__str__(), '', 'eval'))
         except:
@@ -336,7 +337,7 @@ class Tree(object):
             if level_list[-1] == '      ':
                 nodeStr = '    ' + ''.join(level_list[:-1]) + '\-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
             else :
-                nodeStr = '    ' + ''.join(level_list[:-1]) + '|-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
+              nodeStr = '    ' + ''.join(level_list[:-1]) + '|-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
         print nodeStr
         for i, child in enumerate(self.nodes.children):
             Tree(child).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
@@ -421,24 +422,26 @@ def DEFAULT_OBJECTIVE(x):
 class Individual(object):
     """docstring for Individual"""
 
-    def __init__(self, chromosomes = None):
+    def __init__(self, chromosomes=None):
         super(Individual, self).__init__()
         self.chromosomes = chromosomes
 
-    def __repr__( self ):
+    def __repr__(self):
         return self.__str__()
 
-    def __str__( self ):
-        return str( self.chromosomes )
+    def __str__(self):
+        return str(self.chromosomes)
 
-    def fitness( self, objective_function=DEFAULT_OBJECTIVE):
+    def fitness(self, objective_function=DEFAULT_OBJECTIVE):
         """return the fitness of an Individual based on the objective_function"""
         gene_expression = self.chromosomes.evaluate()
         return objective_function(gene_expression)
 
     def mate(self, spouse=None):
         """mate this Individual with a spouse"""
-        pass
+
+        return children
+
 
 class Population(object):
 
@@ -478,3 +481,7 @@ class Population(object):
             self.size = len(seed)
         else :
             self.randomTreePop()
+
+    def run(self, count=10000):
+        """run algorithm"""
+        pass
