@@ -513,14 +513,46 @@ class Individual(object):
 
 class Population(object):
 
-    def __init__(self, size=100, ind_type='tree', max_size=4, min_size=2, gamma=1.0):
-        self.size = size
-        self.indType = ind_type
-        self.max_size = max_size
-        self.min_size = min_size
-        self.created = False
-        self.fitness = 0
+    def __init__(self, max_init_population=1000, min_fitness=0.0, max_generations=10000, stagnation_factor=20):
+        # parameters
+        self.max_init_population = max_init_population
+        self.min_fitness = min_fitness
+        self.max_generations = max_generations
         self.gamma = gamma
+        self.stagnation_factor = stagnation_factor
+        # initialize variables
+        self.created = False
+        self.individuals = []
+        self.generation = 0
+        self.fitness_record = list(np.zeros(max_generations))
+        # cached values
+        self._fitness = []
+
+    @property
+    def size(self):
+        """return the size of the population"""
+        return len(self.individuals)
+
+    @property
+    def fitness(self):
+        """return the fitness of each individual in population"""
+        if self._fitness:
+            return self._fitness
+        else:
+            return np.array([i.fitness() for i in self.individuals])
+
+    @property
+    def stagnate(self):
+        """
+        determine if the population has stagnated and reached local min
+        where average fitness over last n generations has not changed
+        """
+        if self.size <= stagnate_factor:
+            return False
+        else:
+            last_gen2 = self.fitness_record[(self.generation - 2 - self.stagnate_factor):(self.generation - 2)]
+            last_gen1 = self.fitness_record[(self.generation - 1 - self.stagnate_factor):(self.generation - 1)]
+            return last_gen2 == last_gen1
 
     def __repr__(self):
         return self.__str__()
@@ -528,28 +560,45 @@ class Population(object):
     def __str__(self):
         if self.created:
             population_string  = 'Population\n'
-            population_string += 'Size            : ' + str(self.size) + '\n'
-            population_string += 'Average fitness : ' + str(self.fitness) + '\n'
-            population_string += 'Max fitness     : ' + str(max(self.fitness)) + '\n'
-            population_string += 'Min fitness     : ' + str(min(self.fitness)) + '\n'
-            return str(population_string)
         else :
             population_string  = 'POPULATION NOT INITIALIZED\n'
-            population_string += 'Size            : ' + str(self.size) + '\n'
-            population_string += 'Average fitness : ' + str(self.fitness) + '\n'
-            population_string += 'Max fitness     : ' + str(self.fitness) + '\n'
-            population_string += 'Min fitness     : ' + str(self.fitness) + '\n'
-            return str(population_string)
+        population_string += 'Size               : ' + str(self.size) + '\n'
+        population_string += 'Current Generation : ' + str(self.generation) + '\n'
+        population_string += 'Average fitness    : ' + str(self.fitness) + '\n'
+        population_string += 'Max fitness        : ' + str(self.fitness) + '\n'
+        population_string += 'Min fitness        : ' + str(self.fitness) + '\n'
+
+        return str(population_string)
 
     def initialize(self, seed=None):
         """initialize a population based on seed or randomly"""
         self.created = True
-        if seed :
+        if seed:
             self.individuals = seed
-            self.size = len(seed)
-        else :
-            self.randomTreePop()
+        else:
+            while len(self.individuals) < self.max_init_population:
+                individual = Individual(random_tree())
+                self.individuals.append(individual)
 
-    def run(self, count=10000):
+    def run(self, number_of_generations=self.max_generations):
         """run algorithm"""
-        pass
+
+        while self.generation < number_of_generations or not self.stagnate:
+            self.create_generation()
+
+    def create_generation(self):
+        """create the next generations, this is main function that loops"""
+
+        # determine fitness of current generations
+        fitness = self.fitness
+        self.fitness_record[self.generation] = fitness.mean()
+
+        # selection parent chromosome pairs
+
+        # mate next generation
+
+        # clear cached values
+        self._fitness = []
+
+        # log generation
+        self.generation += 1
