@@ -445,7 +445,7 @@ class Individual(object):
         gene_expression = self.chromosomes.evaluate()
         return objective_function(gene_expression)
 
-    def mate(self, spouse=None, mutate_probability=0.5):
+    def mate(self, spouse=None, mutate_probability=0.15):
         """mate this Individual with a spouse"""
 
         # perform genetic exchange
@@ -462,20 +462,21 @@ class Individual(object):
     def crossover(self, spouse=None):
         """randomly crossover two chromosomes"""
 
-        # create random crossover point
-        xpoint = r.randint(0, min(self.nodes.total, spouse.nodes.total))
+        # create random crossover points
+        x1 = r.randint(0, self.nodes.total)
+        x2 = r.randint(0, spouse.nodes.total)
 
         # clone parent chromosomes
         c1 = cp.deepcopy(self)
         c2 = cp.deepcopy(spouse)
 
         # get nodes to cross
-        c1n = c1.get_node(xpoint)
-        c2n = c2.get_node(xpoint)
+        c1n = c1.get_node(x1)
+        c2n = c2.get_node(x2)
 
         # transfer nodes
-        c1.set_node(xpoint, c2n)
-        c2.set_node(xpoint, c1n)
+        c1.set_node(x1, c2n)
+        c2.set_node(x2, c1n)
 
         return (c1, c2)
 
