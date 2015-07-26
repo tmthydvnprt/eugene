@@ -1,0 +1,120 @@
+eugene
+************* Module eugene.eugene
+I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
+I:147, 0: Locally disabling invalid-name (C0103) (locally-disabled)
+I:202, 0: Locally enabling invalid-name (C0103) (locally-enabled)
+E:173, 8: Module 'scipy.special' has no 'erf' member (no-member)
+E:174, 9: Module 'scipy.special' has no 'erfc' member (no-member)
+R:260, 0: Too few public methods (0/2) (too-few-public-methods)
+W:303, 8: No exception type(s) specified (bare-except)
+R:394, 0: Too many branches (17/16) (too-many-branches)
+R:559, 0: Too many instance attributes (12/8) (too-many-instance-attributes)
+
+
+Report
+======
+369 statements analysed.
+
+Statistics by type
+------------------
+
++---------+-------+-----------+-----------+------------+---------+
+|type     |number |old number |difference |%documented |%badname |
++=========+=======+===========+===========+============+=========+
+|module   |2      |2          |=          |100.00      |0.00     |
++---------+-------+-----------+-----------+------------+---------+
+|class    |4      |4          |=          |100.00      |0.00     |
++---------+-------+-----------+-----------+------------+---------+
+|method   |33     |33         |=          |100.00      |0.00     |
++---------+-------+-----------+-----------+------------+---------+
+|function |16     |16         |=          |100.00      |0.00     |
++---------+-------+-----------+-----------+------------+---------+
+
+
+
+External dependencies
+---------------------
+::
+
+    numpy (eugene.eugene)
+    pandas (eugene.eugene)
+    scipy 
+      \-misc (eugene.eugene)
+      \-special (eugene.eugene)
+
+
+
+Raw metrics
+-----------
+
++----------+-------+------+---------+-----------+
+|type      |number |%     |previous |difference |
++==========+=======+======+=========+===========+
+|code      |423    |62.67 |422      |+1.00      |
++----------+-------+------+---------+-----------+
+|docstring |168    |24.89 |168      |=          |
++----------+-------+------+---------+-----------+
+|comment   |34     |5.04  |34       |=          |
++----------+-------+------+---------+-----------+
+|empty     |50     |7.41  |50       |=          |
++----------+-------+------+---------+-----------+
+
+
+
+Duplication
+-----------
+
++-------------------------+------+---------+-----------+
+|                         |now   |previous |difference |
++=========================+======+=========+===========+
+|nb duplicated lines      |0     |0        |=          |
++-------------------------+------+---------+-----------+
+|percent duplicated lines |0.000 |0.000    |=          |
++-------------------------+------+---------+-----------+
+
+
+
+Messages by category
+--------------------
+
++-----------+-------+---------+-----------+
+|type       |number |previous |difference |
++===========+=======+=========+===========+
+|convention |0      |0        |=          |
++-----------+-------+---------+-----------+
+|refactor   |3      |3        |=          |
++-----------+-------+---------+-----------+
+|warning    |1      |1        |=          |
++-----------+-------+---------+-----------+
+|error      |2      |4        |-2.00      |
++-----------+-------+---------+-----------+
+
+
+
+Messages
+--------
+
++-----------------------------+------------+
+|message id                   |occurrences |
++=============================+============+
+|no-member                    |2           |
++-----------------------------+------------+
+|locally-disabled             |2           |
++-----------------------------+------------+
+|too-many-instance-attributes |1           |
++-----------------------------+------------+
+|too-many-branches            |1           |
++-----------------------------+------------+
+|too-few-public-methods       |1           |
++-----------------------------+------------+
+|locally-enabled              |1           |
++-----------------------------+------------+
+|bare-except                  |1           |
++-----------------------------+------------+
+
+
+
+Global evaluation
+-----------------
+Your code has been rated at 9.62/10 (previous run: 9.35/10, +0.27)
+

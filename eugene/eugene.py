@@ -1,16 +1,17 @@
+# pylint: disable=eval-used
 """
 Eugene
 
-Operators :
+Operators:
 ===========
-    Unary :
+    Unary:
     -------
         o.abs(a)          - Same as abs(a).
         o.inv(a)          - Same as ~a.
         o.neg(a)          - Same as -a.
         o.pos(a)          - Same as +a.
 
-    Binary :
+    Binary:
     --------
         o.or_(a, b)       - Same as a | b.
         o.add(a, b)       - Same as a + b.
@@ -30,9 +31,9 @@ Operators :
         o.truediv(a, b)   - Same as a / b when __future__.division is in effect.
         o.xor(a, b)       - Same as a ^ b.
 
-Functions :
+Functions:
 ===========
-    Unary :
+    Unary:
     -------
         np.acos(x)         - Return the arc cosine (measured in radians) of x.
         np.acosh(x)        - Return the hyperbolic arc cosine (measured in radians) of x.
@@ -67,7 +68,7 @@ Functions :
         np.tanh(x)         - Return the hyperbolic tangent of x.
         np.trunc(x:Real)   - Truncates x to the nearest Integral toward 0. Uses the __trunc__ magic method. -> Integral
 
-    Binary :
+    Binary:
     --------
         np.atan2(y, x)     - Return the arc tangent (measured in radians) of y/x. Unlike atan(y/x), the signs of both x and y are considered.
         np.copysign(x, y)  - Return x with the sign of y.
@@ -77,170 +78,184 @@ Functions :
         np.pow(x, y)       - Return x**y (x to the power of y).
         np.round(x[, y])   - Return the floating point value x rounded to y digits after the decimal point.
 
-    N-ary :
+    N-ary:
     --------
         np.max(x, y, ...)  - Return the largest item in an iterable or the largest of two or more arguments.
         np.min(x, y, ...)  - Return the smallest item in an iterable or the smallest of two or more arguments.
         np.fsum([x,y,...]) - Return an accurate floating point sum of values in the iterable.
         np.prod([x,y,...]) - Return an accurate floating point product of values in the iterable.
 
-Constants :
+Constants:
 ===========
     np.p - The mathematical constant pi = 3.141592..., to available precision.
     np.e - The mathematical constant e  = 2.718281..., to available precision.
 
-Ephemeral Variables : - once created stay constant, only can be used during initialization or mutation
+EPHEMERAL VARIABLES : - once created stay constant, only can be used during initialization or mutation
 =====================
     r.random()                 - Returns x in the interval [0, 1).
     r.randint(a, b)            - Returns integer x in range [a, b].
     r.uniform(a, b)            - Returns number x in the range [a, b) or [a, b] depending on rounding.
     r.normalvariate(mu, sigma) - Returns number x from Normal distribution. mu is the mean, and sigma is the standard deviation.
 
-Variables :
+VARIABLES:
 ===========
     a, b, c, ..., x, y, z    - whatever you need
 
-To add :
+To add:
 ========
 pd.shift()
 
-removed :
+removed:
 =========
 o.not_() - can't operate on array, but o.inv() can & produces the same result
 
 """
 
 # dependancies
-import operator      as o
-import random        as r
-import numpy         as np
-import pandas        as pd
-import copy          as cp
+import bisect
+import operator as o
+import random as r
+import numpy as np
+import pandas as pd
+import copy as cp
 import scipy.special as sp
-import scipy.misc    as sm
+import scipy.misc as sm
 
-variables = ['x']
+VARIABLES = ['x']
+x = np.zeros(100)
 
-unaries   = [
+UNARIES = [
     'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \
     'n_cosh', 'n_degrees', 'n_erf', 'n_erfc', 'n_exp', 'n_expm1', 'n_fabs', 'n_factorial', 'n_floor', 'n_gamma', 'n_isinf', \
-    'n_isnan','n_gammaln', 'n_log10', 'n_log2', 'n_log1p', 'n_log', 'n_radians', 'n_sin', 'n_sinh', 'n_sqrt', 'n_tan', \
+    'n_isnan', 'n_gammaln', 'n_log10', 'n_log2', 'n_log1p', 'n_log', 'n_radians', 'n_sin', 'n_sinh', 'n_sqrt', 'n_tan', \
     'n_tanh', 'n_trunc'
 ]
-binaries  = [
+BINARIES = [
     'n_or', 'n_add', 'n_and', 'n_div', 'n_eq', 'n_floordiv', 'n_ge', 'n_gt', 'n_le', 'n_lt', 'n_mod', 'n_mul', \
     'n_ne', 'n_sub', 'n_xor', 'n_atan2', 'n_copysign', 'n_fmod', 'n_hypot', 'n_ldexp', 'n_pow', 'n_round'
 ]
-naries    = ['n_max', 'n_min', 'n_sum', 'n_prod']
-consts    = ['np.pi', 'np.e']
+NARIES = ['n_max', 'n_min', 'n_sum', 'n_prod']
+CONSTS = ['np.pi', 'np.e']
 
-ephemeral = {
-    0: r.randint(-500,500),
+EPHEMERAL = {
+    0: r.randint(-500, 500),
     1: r.random(),
-    2: r.uniform(-500,500),
-    3: r.normalvariate(0,100)
+    2: r.uniform(-500, 500),
+    3: r.normalvariate(0, 100)
 }
 
-n_abs       =       o.abs
-
-n_neg       =       o.neg
-n_pos       =       o.pos
-n_or        =       o.or_
-n_add       =       o.add
-n_and       =       o.and_
-
-n_eq        =       o.eq
-
-n_ge        =       o.ge
-n_gt        =       o.gt
-n_le        =       o.le
-n_lt        =       o.lt
-
-n_mul       =       o.mul
-n_ne        =       o.ne
-n_sub       =       o.sub
-n_xor       =       o.xor
-n_acos      =       np.arccos
-n_acosh     =       np.arccosh
-n_asin      =       np.arcsin
-n_asinh     =       np.arcsinh
-n_atan      =       np.arctan
-n_atanh     =       np.arctanh
-n_ceil      =       np.ceil
-n_cos       =       np.cos
-n_cosh      =       np.cosh
-n_degrees   =       np.degrees
-n_erf       =       sp.erf
-n_erfc      =       sp.erfc
-n_exp       =       np.exp
-n_expm1     =       np.expm1
-n_fabs      =       np.fabs
-n_factorial =       sm.factorial
-n_floor     =       np.floor
-n_gamma     =       sp.gamma
-n_isinf     =       np.isinf
-n_isnan     =       np.isnan
-n_gammaln   =       sp.gammaln
-n_log10     =       np.log10
-n_log2      =       np.log2
-n_log1p     =       np.log1p
-n_radians   =       np.radians
-n_sin       =       np.sin
-n_sinh      =       np.sinh
-n_sqrt      =       np.sqrt
-n_tan       =       np.tan
-n_tanh      =       np.tanh
-n_trunc     =       np.trunc
-n_atan2     =       np.arctan2
-n_copysign  =       np.copysign
-n_fmod      =       np.fmod
-n_hypot     =       np.hypot
-n_ldexp     =       np.ldexp
-n_log       =       np.log
-n_pow       =       np.power
-n_round     =       np.around
+# pylint: disable=invalid-name
+n_abs = o.abs
+n_neg = o.neg
+n_pos = o.pos
+# n_or = o.or_
+# n_add = o.add
+# n_and = o.and_
+n_eq = o.eq
+n_ge = o.ge
+n_gt = o.gt
+n_le = o.le
+n_lt = o.lt
+n_mul = o.mul
+n_ne = o.ne
+n_sub = o.sub
+# n_xor = o.xor
+n_acos = np.arccos
+n_acosh = np.arccosh
+n_asin = np.arcsin
+n_asinh = np.arcsinh
+n_atan = np.arctan
+n_atanh = np.arctanh
+n_ceil = np.ceil
+n_cos = np.cos
+n_cosh = np.cosh
+n_degrees = np.degrees
+n_erf = sp.erf
+n_erfc = sp.erfc
+n_exp = np.exp
+n_expm1 = np.expm1
+n_fabs = np.fabs
+n_factorial = sm.factorial
+n_floor = np.floor
+n_gamma = sp.gamma
+n_isinf = np.isinf
+n_isnan = np.isnan
+n_gammaln = sp.gammaln
+n_log10 = np.log10
+n_log2 = np.log2
+n_log1p = np.log1p
+n_radians = np.radians
+n_sin = np.sin
+n_sinh = np.sinh
+n_sqrt = np.sqrt
+n_tan = np.tan
+n_tanh = np.tanh
+n_trunc = np.trunc
+n_atan2 = np.arctan2
+n_copysign = np.copysign
+n_fmod = np.fmod
+n_hypot = np.hypot
+# n_ldexp = np.ldexp
+n_log = np.log
+n_pow = np.power
+# n_round = np.around
+# pylint: enable=invalid-name
 
 # safe functions, graceful error fallbacks
-def intify(x):
-    return 1 if np.isnan(x) or not np.isfinite(x) else int(x) if type(x) != pd.core.series.Series else x.fillna(0).astype(int)
+def intify(_):
+    """safe intify"""
+    return 1 if np.isnan(_) or not np.isfinite(_) else int(_) if not isinstance(_, 'pd.core.series.Series') else _.fillna(0).astype(int)
 
 def n_inv(a):
+    """safe inv"""
     return o.inv(intify(a))
 
 def n_and(a, b):
+    """safe and"""
     return o.and_(intify(a), intify(b))
 
 def n_or(a, b):
+    """safe or"""
     return o.or_(intify(a), intify(b))
 
 def n_xor(a, b):
+    """safe xor"""
     return o.xor(intify(a), intify(b))
 
 def n_mod(a, b):
+    """safe mod"""
     return pd.Series(np.where(b != 0, o.mod(a, b), 1))
 
 def n_div(a, b):
+    """safe div"""
     return pd.Series(np.where(b != 0, o.div(a, b), 1))
 
 def n_floordiv(a, b):
+    """safe floordiv"""
     return pd.Series(np.where(b != 0, o.floordiv(a, b), 1))
 
 def n_round(a, b):
+    """safe round"""
     element_round = np.vectorize(np.round)
     return element_round(a, intify(b))
 
 def n_ldexp(a, b):
+    """safe ldexp"""
     return np.ldexp(a, intify(b))
 
 # n-ary custom functions
-def n_max(x):
-    return reduce(np.maximum, x)
-def n_min(x):
-    return reduce(np.minimum, x)
-def n_sum(x):
-    return reduce(np.add, x)
-def n_prod(x):
-    return reduce(np.multiply, x)
+def n_max(_):
+    """max reduction"""
+    return reduce(np.maximum, _)
+def n_min(_):
+    """min reduction"""
+    return reduce(np.minimum, _)
+def n_sum(_):
+    """sum reduction"""
+    return reduce(np.add, _)
+def n_prod(_):
+    """product reduction"""
+    return reduce(np.multiply, _)
 
 class Node(object):
     """
@@ -248,13 +263,13 @@ class Node(object):
     """
 
     def __init__(self, value=None, *children):
-        self.value    = value
+        self.value = value
         self.children = children
-        self.num      = None
-        self.total    = None
+        self.num = None
+        self.total = None
 
     def __repr__(self):
-         return self.__str__()
+        return self.__str__()
 
     def __str__(self):
         # node is a variable or constant
@@ -262,9 +277,9 @@ class Node(object):
             return str(self.value)
         # node is a unary, binary or n-ary function
         else:
-            if self.value in naries:
+            if self.value in NARIES:
                 return str(self.value) + '([' + ','.join([str(c) for c in self.children]) + '])'
-            else :
+            else:
                 return str(self.value) + '(' + ','.join([str(c) for c in self.children]) + ')'
 
 class Tree(object):
@@ -288,10 +303,11 @@ class Tree(object):
         except:
             return pd.Series(np.zeros(x.shape))
 
-    def set_nums(self, count=-1) :
+    def set_nums(self, count=-1):
+        """set node numbers (depth first)"""
         count += 1
         self.nodes.num = count
-        if len(self.nodes.children) > 0 :
+        if len(self.nodes.children) > 0:
             for c in self.nodes.children:
                 count = Tree(c).set_nums(count)
         self.nodes.total = count
@@ -303,14 +319,14 @@ class Tree(object):
         if self.nodes.num == None or self.nodes.num == 0:
             self.set_nums()
         # search tree until node number is found and take sub tree
-        if self.nodes.num == n :
+        if self.nodes.num == n:
             return cp.deepcopy(self.nodes)
-        elif len(self.nodes.children) > 0 :
-            for c in (self.nodes.children) :
+        elif len(self.nodes.children) > 0:
+            for c in self.nodes.children:
                 cn = Tree(c).get_node(n)
-                if cn :
+                if cn:
                     return cn
-        else :
+        else:
             return None
 
     def set_node(self, n=0, node=None):
@@ -321,7 +337,7 @@ class Tree(object):
         # search tree until node number is found, and store sub tree
         if self.nodes.num == n:
             self.nodes = node
-        else :
+        else:
             self.nodes.children = tuple([Tree(c).set_node(n, node) for c in self.nodes.children])
         return self.nodes
 
@@ -332,13 +348,13 @@ class Tree(object):
         if self.nodes.num == None or self.nodes.num == 0 or level == 0:
             self.set_nums()
         if level == 0:
-            nodeStr = '[0:' + str(self.nodes.num) + '] ' + str(self.nodes.value)
+            node_str = '[0:' + str(self.nodes.num) + '] ' + str(self.nodes.value)
         else:
             if level_list[-1] == '      ':
-                nodeStr = '    ' + ''.join(level_list[:-1]) + '\-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
-            else :
-              nodeStr = '    ' + ''.join(level_list[:-1]) + '|-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
-        print nodeStr
+                node_str = '    ' + ''.join(level_list[:-1]) + r'\-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
+            else:
+                node_str = '    ' + ''.join(level_list[:-1]) + r'|-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
+        print node_str
         for i, child in enumerate(self.nodes.children):
             Tree(child).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
 
@@ -350,7 +366,7 @@ class Tree(object):
         # get list of tuple edges between nodes e.g. [(n1,n2),(n1,n3)...]
         edges = [(self.nodes.value + str(self.nodes.num), c.value + str(c.num) if len(c.children) > 0 else c.value) for c in self.nodes.children]
         children_nodes = [Tree(c).list_edges() for c in self.nodes.children if len(c.children) > 0]
-        for i in range( len( children_nodes ) ) :
+        for i in xrange(len(children_nodes)):
             edges += children_nodes[i]
         return edges
 
@@ -367,7 +383,7 @@ class Tree(object):
         node_list.extend(['[%s]%s' % (c.num, c.value) for c in self.nodes.children if len(c.children) == 0])
         # add children's children
         grand_children = [Tree(c).list_nodes() for c in self.nodes.children if len(c.children) > 0]
-        node_list.extend([y for x in grand_children for y in x])
+        node_list.extend([node for grand_child in grand_children for node in grand_child])
 
         return node_list
 
@@ -376,56 +392,84 @@ def random_tree(max_level=20, min_level=1, current_level=0):
     return Tree(random_node(max_level, min_level, current_level))
 
 def random_node(max_level=20, min_level=1, current_level=0):
-    """return a random node or nodes"""
+    """node = a random node or nodes"""
     if current_level == max_level:
         rand_node = r.randint(0, 3)
-        # return a constant
+        # node = a constant
         if rand_node == 0:
-            return Node(consts[r.randint(0, len(consts) - 1)])
-        # return ephemeral constant random ( 0:1, uniform -500:500, or normal -500:500 )
+            node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
+        # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
         elif rand_node == 1:
-            return Node(ephemeral[r.randint(1, len(ephemeral) - 1)])
-        # return ephemeral constant random integer
+            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+        # node = EPHEMERAL constant random integer
         elif rand_node == 2:
-            return Node(ephemeral[0])
-        # return variable
+            node = Node(EPHEMERAL[0])
+        # node = variable
         elif rand_node == 3:
-            return Node(variables[r.randint(0, len(variables) - 1)])
+            node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
     else:
         rand_node = r.randint(4, 6) if current_level < min_level else r.randint(0, 6)
-        # return a constant
+        # node = a constant
         if rand_node == 0:
-            return Node(consts[r.randint(0, len(consts) - 1)])
-        # return ephemeral constant random ( 0:1, uniform -500:500, or normal -500:500 )
+            node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
+        # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
         elif rand_node == 1:
-            return Node(ephemeral[r.randint(1, len(ephemeral) - 1)])
-        # return ephemeral constant random integer
+            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+        # node = EPHEMERAL constant random integer
         elif rand_node == 2:
-            return Node(ephemeral[0])
-        # return variable
+            node = Node(EPHEMERAL[0])
+        # node = variable
         elif rand_node == 3:
-            return Node(variables[r.randint(0, len(variables) - 1)])
-        # return a unary operator
+            node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
+        # node = a unary operator
         elif rand_node == 4:
-            return Node(unaries[r.randint(0,len(unaries) - 1)], random_node(max_level, min_level, current_level + 1))
-        # return a binary operator
-        elif rand_node == 5 :
-            return Node(binaries[r.randint(0,len(binaries) - 1)], random_node(max_level, min_level, current_level + 1), random_node(max_level, min_level, current_level + 1))
-        # return a n-ary operator
+            node = Node(
+                UNARIES[r.randint(0, len(UNARIES) - 1)],
+                random_node(max_level, min_level, current_level + 1)
+            )
+        # node = a binary operator
+        elif rand_node == 5:
+            node = Node(
+                BINARIES[r.randint(0, len(BINARIES) - 1)],
+                random_node(max_level, min_level, current_level + 1),
+                random_node(max_level, min_level, current_level + 1)
+            )
+        # node = a n-ary operator
         elif rand_node == 6:
             nary_node_num = r.randint(2, 5)
             if nary_node_num == 2:
-                return Node(naries[r.randint(0, len(naries) - 1)], random_node(max_level - 1, current_level + 1 ), random_node(max_level - 1, current_level + 1))
+                node = Node(
+                    NARIES[r.randint(0, len(NARIES) - 1)],
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1)
+                )
             elif nary_node_num == 3:
-                return Node(naries[r.randint(0, len(naries) - 1)], random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1))
+                node = Node(
+                    NARIES[r.randint(0, len(NARIES) - 1)],
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1)
+                )
             elif nary_node_num == 4:
-                return Node(naries[r.randint(0, len(naries) - 1)], random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1))
+                node = Node(
+                    NARIES[r.randint(0, len(NARIES) - 1)],
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1)
+                )
             elif nary_node_num == 5:
-                return Node(naries[r.randint(0, len(naries) - 1)], random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1), random_node(max_level - 1, current_level + 1))
+                node = Node(
+                    NARIES[r.randint(0, len(NARIES) - 1)],
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1)
+                )
+    return node
 
-
-def DEFAULT_OBJECTIVE(x):
-    return 1.0
+DEFAULT_OBJECTIVE = lambda x: 1.0
 
 class Individual(object):
     """docstring for Individual"""
@@ -433,6 +477,7 @@ class Individual(object):
     def __init__(self, chromosomes=None):
         super(Individual, self).__init__()
         self.chromosomes = chromosomes
+        self.size = self.chromosomes.nodes.total
 
     def __repr__(self):
         return self.__str__()
@@ -463,20 +508,20 @@ class Individual(object):
         """randomly crossover two chromosomes"""
 
         # create random crossover points
-        x1 = r.randint(0, self.nodes.total)
-        x2 = r.randint(0, spouse.nodes.total)
+        x1 = r.randint(0, self.size)
+        x2 = r.randint(0, spouse.size)
 
         # clone parent chromosomes
         c1 = cp.deepcopy(self)
         c2 = cp.deepcopy(spouse)
 
         # get nodes to cross
-        c1n = c1.get_node(x1)
-        c2n = c2.get_node(x2)
+        c1n = c1.chromosomes.get_node(x1)
+        c2n = c2.chromosomes.get_node(x2)
 
         # transfer nodes
-        c1.set_node(x1, c2n)
-        c2.set_node(x2, c1n)
+        c1.chromosomes.set_node(x1, c2n)
+        c2.chromosomes.set_node(x2, c1n)
 
         return (c1, c2)
 
@@ -484,51 +529,52 @@ class Individual(object):
         """ alter a random node in chromosomes"""
 
         # randomly select node to mutate
-        mpoint = r.randint(0, self.nodes.total)
-        node = self.get_node(mpoint)
+        mpoint = r.randint(0, self.size)
+        node = self.chromosomes.get_node(mpoint)
 
         # determine how node can mutate based on node type
         # constant
-        if node.value in consts:
-            mutated_value = consts[r.randint(0, len(consts) - 1)]
+        if node.value in CONSTS:
+            mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
         # variable
-        elif node.value in variables:
-            mutated_value = variables[r.randint(0, len(variables) - 1)]
+        elif node.value in VARIABLES:
+            mutated_value = VARIABLES[r.randint(0, len(VARIABLES) - 1)]
         # a unary operator
-        elif node.value in unaries:
-            mutated_value = unaries[r.randint(0,len(unaries) - 1)]
+        elif node.value in UNARIES:
+            mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]
         # a binary operator
-        elif node.value in binaries:
-            mutated_value = binaries[r.randint(0,len(binaries) - 1)]
+        elif node.value in BINARIES:
+            mutated_value = BINARIES[r.randint(0, len(BINARIES) - 1)]
         # a n-ary operator
-        elif node.value in naries:
-            mutated_value = naries[r.randint(0,len(naries) - 1)]
-        # ephemeral constant random ( 0:1, uniform -500:500, or normal -500:500 )
+        elif node.value in NARIES:
+            mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
+        # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
         else:
-            mutated_value = ephemeral[r.randint(1, len(ephemeral) - 1)]
+            mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]
 
         # mutate node value (keeps children, if applicable)
         node.value = mutated_value
-        self.set_node(mpoint, node)
+        self.chromosomes.set_node(mpoint, node)
 
 class Population(object):
+    """Defines Population of Individuals with ability to create generations and evaluate fitness"""
 
-    def __init__(self, max_init_population=1000, min_fitness=0.0, max_generations=10000, stagnation_factor=20, minimiz_fitness=False):
+    def __init__(self, max_init_population=1000, min_fitness=0.0, max_generations=10000, stagnation_factor=20, minimiz_fitness=False, rank_pressure=2.0):
         # parameters
         self.max_init_population = max_init_population
         self.min_fitness = min_fitness
         self.max_generations = max_generations
-        self.gamma = gamma
         self.stagnation_factor = stagnation_factor
         self.minimiz_fitness = minimiz_fitness
-        # initialize variables
+        self.rank_pressure = rank_pressure
+        # initialize VARIABLES
         self.created = False
         self.individuals = []
         self.ranking = []
         self.generation = 0
         self.fitness_record = list(np.zeros(max_generations))
         # cached values
-        self._fitness = []
+        self._fitness = np.array([])
 
     @property
     def size(self):
@@ -549,11 +595,11 @@ class Population(object):
         determine if the population has stagnated and reached local min
         where average fitness over last n generations has not changed
         """
-        if self.size <= stagnate_factor:
+        if self.size <= self.stagnation_factor:
             return False
         else:
-            last_gen2 = self.fitness_record[(self.generation - 2 - self.stagnate_factor):(self.generation - 2)]
-            last_gen1 = self.fitness_record[(self.generation - 1 - self.stagnate_factor):(self.generation - 1)]
+            last_gen2 = self.fitness_record[(self.generation - 2 - self.stagnation_factor):(self.generation - 2)]
+            last_gen1 = self.fitness_record[(self.generation - 1 - self.stagnation_factor):(self.generation - 1)]
             return last_gen2 == last_gen1
 
     def __repr__(self):
@@ -561,9 +607,9 @@ class Population(object):
 
     def __str__(self):
         if self.created:
-            population_string  = 'Population\n'
-        else :
-            population_string  = 'POPULATION NOT INITIALIZED\n'
+            population_string = 'Population\n'
+        else:
+            population_string = 'POPULATION NOT INITIALIZED\n'
         population_string += 'Size               : ' + str(self.size) + '\n'
         population_string += 'Current Generation : ' + str(self.generation) + '\n'
         population_string += 'Average fitness    : ' + str(self.fitness) + '\n'
@@ -582,8 +628,9 @@ class Population(object):
                 individual = Individual(random_tree())
                 self.individuals.append(individual)
 
-    def roulette(self, number=self.size):
+    def roulette(self, number=None):
         """select parent pairs based on roulette method (probability proportional to fitness)"""
+        number = number if number else self.size
         selections = []
 
         # unpack
@@ -594,16 +641,16 @@ class Population(object):
         fitness_probability = ranked_fitness / float(ranked_fitness.sum())
         cum_prob_dist = fitness_probability.cumsum()
 
-        for s in xrange(number):
+        for _ in xrange(number):
             # randomly select two individuals with weighted probability proportial to fitness
             p1 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
             p2 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
             selections.append((p1, p2))
         return selections
 
-    def stochastic(self, number=self.size):
+    def stochastic(self, number=None):
         """select parent pairs based on stochastic method (probability uniform across fitness)"""
-
+        number = number if number else self.size
         selections = []
 
         # unpack
@@ -626,39 +673,41 @@ class Population(object):
             selections.append((p1, p2))
         return selections
 
-    def tournament(self, number=self.size, tournaments=4):
+    def tournament(self, number=None, tournaments=4):
         """select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins)"""
-        for s in xrange(number):
+        number = number if number else self.size
+        selections = []
+        for _ in xrange(number):
             # select two groups of random competitors
-            competitors1 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, 3))]
-            competitors2 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, 3))]
+            competitors1 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, tournaments))]
+            competitors2 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, tournaments))]
             # groups compete in fitness tournament (local group sorting)
             competitors1.sort()
             competitors2.sort()
             # select most fit from each group
             winner1 = competitors1[0] if self.minimiz_fitness else competitors1[-1]
             winner2 = competitors2[0] if self.minimiz_fitness else competitors2[-1]
-            selections.append( (winner1[1], winner2[1]) )
+            selections.append((winner1[1], winner2[1]))
         return selections
 
-    def rank_roulette(self, number=self.size, pressure=2):
+    def rank_roulette(self, number=None, pressure=2):
         """select parent pairs based on rank roulette method (probability proportional to fitness rank)"""
-
+        number = number if number else self.size
         selections = []
 
         # unpack
-        ranked_fitness, ranked_individuals = (list(i) for i in zip(*self.ranking))
+        _, ranked_individuals = (list(i) for i in zip(*self.ranking))
 
         # create a scaled rank by fitness (individuals already sorted, so just create rank range, then scale)
         n = self.size
-        rank = range(n, 0, -1) if minimiz_fitness else range(1, n + 1)
+        rank = range(n, 0, -1) if self.minimiz_fitness else range(1, n + 1)
         scaled_rank = 2.0 - pressure + (2.0 * (pressure - 1) * (np.array(rank) - 1) / (n - 1))
 
         # calculate weighted probability proportial to scaled rank
         scaled_rank_probability = scaled_rank / float(scaled_rank.sum())
         cum_prob_dist = scaled_rank_probability.cumsum()
 
-        for s in xrange(number):
+        for _ in xrange(number):
             # randomly select two individuals with weighted probability proportial to scaled rank
             p1 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
             p2 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
@@ -679,19 +728,23 @@ class Population(object):
         parent_pairs = self.roulette(int(self.size/4.0)) \
             + self.stochastic(int(self.size/4.0)) \
             + self.tournament(int(self.size/4.0)) \
-            + self.rank_roulette(int(self.size/4.0))
+            + self.rank_roulette(int(self.size/4.0), self.rank_pressure)
 
         # mate next generation
         next_generation = [p1.mate(p2) for p1, p2 in parent_pairs]
 
+        # create new population
+        self.individuals = next_generation
+
         # clear cached values
-        self._fitness = []
+        self._fitness = np.array([])
 
         # log generation
         self.generation += 1
 
-    def run(self, number_of_generations=self.max_generations):
+    def run(self, number_of_generations=None):
         """run algorithm"""
 
+        number_of_generations = number_of_generations if number_of_generations else self.max_generations
         while self.generation < number_of_generations or not self.stagnate:
             self.create_generation()
