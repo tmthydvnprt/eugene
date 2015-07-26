@@ -676,9 +676,13 @@ class Population(object):
         self.ranking.sort()
 
         # selection parent chromosome pairs
-        parent_pairs
+        parent_pairs = self.roulette(int(self.size/4.0)) \
+            + self.stochastic(int(self.size/4.0)) \
+            + self.tournament(int(self.size/4.0)) \
+            + self.rank_roulette(int(self.size/4.0))
 
         # mate next generation
+        next_generation = [p1.mate(p2) for p1, p2 in parent_pairs]
 
         # clear cached values
         self._fitness = []
