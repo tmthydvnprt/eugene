@@ -112,6 +112,7 @@ o.not_() - can't operate on array, but o.inv() can & produces the same result
 """
 
 # dependancies
+import sys
 import bisect
 import operator as o
 import random as r
@@ -120,6 +121,7 @@ import pandas as pd
 import copy as cp
 import scipy.special as sp
 import scipy.misc as sm
+import tabulate
 
 VARIABLES = ['x']
 x = np.zeros(100)
@@ -257,6 +259,45 @@ def n_prod(_):
     """product reduction"""
     return reduce(np.multiply, _)
 
+class ProgressBar(object):
+    """implements a comand-line progress bar"""
+
+    def __init__(self, iterations):
+        """create a progress bar"""
+        self.iterations = iterations
+        self.prog_bar = '[]'
+        self.fill_char = '*'
+        self.width = 40
+        self.__update_amount(0)
+
+    def animate(self, iterate):
+        """animate progress"""
+        print '\r', self,
+        sys.stdout.flush()
+        self.update_iteration(iterate + 1)
+        return self
+
+    def update_iteration(self, elapsed_iter):
+        """increment progress"""
+        self.__update_amount((elapsed_iter / float(self.iterations)) * 100.0)
+        self.prog_bar = '%s  %s of %s complete' % (self.prog_bar, elapsed_iter, self.iterations)
+        return self
+
+    def __update_amount(self, new_amount):
+        """update amout of progress"""
+        percent_done = int(round((new_amount / 100.0) * 100.0))
+        all_full = self.width - 2
+        num_hashes = int(round((percent_done / 100.0) * all_full))
+        self.prog_bar = '[%s%s]' % ((self.fill_char * num_hashes), ' ' * (all_full - num_hashes))
+        pct_place = (len(self.prog_bar) // 2) - len(str(percent_done))
+        pct_string = '%s%%' % (percent_done)
+        self.prog_bar = '%s%s%s' % (self.prog_bar[0:pct_place], pct_string, self.prog_bar[pct_place + len(pct_string):])
+        return self
+
+    def __str__(self):
+        """string representation"""
+        return str(self.prog_bar)
+
 class Node(object):
     """
     Defines a node of the tree
@@ -289,6 +330,7 @@ class Tree(object):
 
     def __init__(self, nodes=None):
         self.nodes = nodes
+        #self.set_nums()
 
     def __repr__(self):
         return self.__str__()
@@ -299,9 +341,9 @@ class Tree(object):
     def evaluate(self):
         """evaluate expression stored in tree"""
         try:
-            return eval(compile(self.__str__(), '', 'eval'))
+            return np.array(eval(compile(self.__str__(), '', 'eval')))
         except:
-            return pd.Series(np.zeros(x.shape))
+            return np.zeros(x.shape)
 
     def set_nums(self, count=-1):
         """set node numbers (depth first)"""
@@ -475,7 +517,6 @@ class Individual(object):
     """docstring for Individual"""
 
     def __init__(self, chromosomes=None):
-        super(Individual, self).__init__()
         self.chromosomes = chromosomes
         self.size = self.chromosomes.nodes.total
 
@@ -485,9 +526,15 @@ class Individual(object):
     def __str__(self):
         return str(self.chromosomes)
 
-    def fitness(self, objective_function=DEFAULT_OBJECTIVE):
+    def fitness(self, objective_function=None):
         """return the fitness of an Individual based on the objective_function"""
+        objective_function = objective_function if objective_function else DEFAULT_OBJECTIVE
+        # compute gene expression by evaluate function stored in tree
         gene_expression = self.chromosomes.evaluate()
+        # remove NaNs and Infs
+        gene_expression[np.isnan(gene_expression)] = 0.0
+        gene_expression[np.isinf(gene_expression)] = 0.0
+        # objectively determine fitness
         return objective_function(gene_expression)
 
     def mate(self, spouse=None, mutate_probability=0.15):
@@ -512,18 +559,18 @@ class Individual(object):
         x2 = r.randint(0, spouse.size)
 
         # clone parent chromosomes
-        c1 = cp.deepcopy(self)
-        c2 = cp.deepcopy(spouse)
+        c1 = cp.deepcopy(self.chromosomes)
+        c2 = cp.deepcopy(spouse.chromosomes)
 
         # get nodes to cross
-        c1n = c1.chromosomes.get_node(x1)
-        c2n = c2.chromosomes.get_node(x2)
+        c1n = c1.get_node(x1)
+        c2n = c2.get_node(x2)
 
         # transfer nodes
-        c1.chromosomes.set_node(x1, c2n)
-        c2.chromosomes.set_node(x2, c1n)
+        c1.set_node(x1, c2n)
+        c2.set_node(x2, c1n)
 
-        return (c1, c2)
+        return (Individual(c1), Individual(c2))
 
     def mutate(self):
         """ alter a random node in chromosomes"""
@@ -559,14 +606,16 @@ class Individual(object):
 class Population(object):
     """Defines Population of Individuals with ability to create generations and evaluate fitness"""
 
-    def __init__(self, max_init_population=1000, min_fitness=0.0, max_generations=10000, stagnation_factor=20, minimiz_fitness=False, rank_pressure=2.0):
+    def __init__(self, init_population_size=1000, objective_function=None, init_tree_size=3, min_fitness=0.0, max_generations=10000, stagnation_factor=20, minimiz_fitness=False, rank_pressure=2.0):
         # parameters
-        self.max_init_population = max_init_population
+        self.init_population_size = init_population_size
+        self.init_tree_size = init_tree_size
         self.min_fitness = min_fitness
         self.max_generations = max_generations
         self.stagnation_factor = stagnation_factor
         self.minimiz_fitness = minimiz_fitness
         self.rank_pressure = rank_pressure
+        self.objective_function = objective_function
         # initialize VARIABLES
         self.created = False
         self.individuals = []
@@ -584,10 +633,11 @@ class Population(object):
     @property
     def fitness(self):
         """return the fitness of each individual in population"""
-        if self._fitness:
-            return self._fitness
-        else:
-            return np.array([i.fitness() for i in self.individuals])
+        if self._fitness.shape == (0,):
+            self._fitness = np.array([i.fitness(self.objective_function) for i in self.individuals])
+            self._fitness[np.isnan(self._fitness)] = 0.0
+            self._fitness[np.isinf(self._fitness)] = 0.0
+        return self._fitness
 
     @property
     def stagnate(self):
@@ -602,31 +652,70 @@ class Population(object):
             last_gen1 = self.fitness_record[(self.generation - 1 - self.stagnation_factor):(self.generation - 1)]
             return last_gen2 == last_gen1
 
-    def __repr__(self):
-        return self.__str__()
+    def describe(self):
+        """print out all data"""
+        self.describe_init()
+        print '\n'
+        self.describe_current()
 
-    def __str__(self):
-        if self.created:
-            population_string = 'Population\n'
+    def describe_init(self):
+        """print out parameters used to intialize population"""
+        print '\nPopulation Initialized w/ Parameters:'
+        data = [
+            ['Initial number of individuals:', self.init_population_size],
+            ['Initial size of individuals:', self.init_tree_size],
+            ['Min. fitness to survive:', self.min_fitness],
+            ['Max. number of generations:', self.max_generations],
+            ['Stagnation factor:', self.stagnation_factor],
+            ['Minimize fitness:', self.minimiz_fitness],
+            ['Selective pressure:', self.rank_pressure]
+        ]
+        print tabulate.tabulate(data)
+
+    def describe_current(self):
+        """print out status about current population"""
+        print '\nCurrent Population Status:'
+        # initialize VARIABLES
+        data = [
+            ['Current generation:', self.generation],
+            ['Number of individuals:', self.size]
+        ]
+        # if fitness is empty
+        if self.fitness.shape == (0,):
+            data.extend([
+                ['Max fitness:', 0.0],
+                ['Average fitness:', 0.0],
+                ['Min fitness:', 0.0],
+            ])
         else:
-            population_string = 'POPULATION NOT INITIALIZED\n'
-        population_string += 'Size               : ' + str(self.size) + '\n'
-        population_string += 'Current Generation : ' + str(self.generation) + '\n'
-        population_string += 'Average fitness    : ' + str(self.fitness) + '\n'
-        population_string += 'Max fitness        : ' + str(self.fitness) + '\n'
-        population_string += 'Min fitness        : ' + str(self.fitness) + '\n'
-
-        return str(population_string)
+            data.extend([
+                ['Max fitness:', self.fitness.max()],
+                ['Average fitness:', self.fitness.mean()],
+                ['Min fitness:', self.fitness.min()],
+            ])
+        print tabulate.tabulate(data)
+        if self.fitness.max() == self.fitness.mean() == self.fitness.min():
+            print '\n'
+            print 'Constant Fitness: It looks like the template objective functions is being used!'
+            print '                  Please add your own with '
 
     def initialize(self, seed=None):
         """initialize a population based on seed or randomly"""
+
+        self.describe_init()
         self.created = True
         if seed:
+            print '\nUsing seed for inital population'
             self.individuals = seed
         else:
-            while len(self.individuals) < self.max_init_population:
-                individual = Individual(random_tree())
+            print '\nInitializing Population with Individuals composed of random Trees:'
+            pb = ProgressBar(self.init_population_size)
+            while len(self.individuals) < self.init_population_size:
+                individual = Individual(random_tree(self.init_tree_size))
                 self.individuals.append(individual)
+                pb.animate(self.size)
+        print '\n'
+        self.describe_current()
 
     def roulette(self, number=None):
         """select parent pairs based on roulette method (probability proportional to fitness)"""
@@ -714,6 +803,11 @@ class Population(object):
             selections.append((p1, p2))
         return selections
 
+    def rank(self):
+        """create ranking of individuals"""
+        self.ranking = zip(self.fitness, self.individuals)
+        self.ranking.sort()
+
     def create_generation(self):
         """create the next generations, this is main function that loops"""
 
@@ -721,8 +815,7 @@ class Population(object):
         self.fitness_record[self.generation] = self.fitness.mean()
 
         # rank individuals by fitness
-        self.ranking = zip(self.fitness, self.individuals)
-        self.ranking.sort()
+        self.rank()
 
         # selection parent chromosome pairs
         parent_pairs = self.roulette(int(self.size/4.0)) \

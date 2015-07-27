@@ -1,19 +1,21 @@
 eugene
 ************* Module eugene.eugene
 I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
-I:147, 0: Locally disabling invalid-name (C0103) (locally-disabled)
-I:202, 0: Locally enabling invalid-name (C0103) (locally-enabled)
-E:173, 8: Module 'scipy.special' has no 'erf' member (no-member)
-E:174, 9: Module 'scipy.special' has no 'erfc' member (no-member)
-R:260, 0: Too few public methods (0/2) (too-few-public-methods)
-W:303, 8: No exception type(s) specified (bare-except)
-R:394, 0: Too many branches (17/16) (too-many-branches)
-R:559, 0: Too many instance attributes (12/8) (too-many-instance-attributes)
+I:149, 0: Locally disabling invalid-name (C0103) (locally-disabled)
+I:204, 0: Locally enabling invalid-name (C0103) (locally-enabled)
+C:609, 0: Line too long (197/160) (line-too-long)
+E:175, 8: Module 'scipy.special' has no 'erf' member (no-member)
+E:176, 9: Module 'scipy.special' has no 'erfc' member (no-member)
+R:301, 0: Too few public methods (0/2) (too-few-public-methods)
+W:345, 8: No exception type(s) specified (bare-except)
+R:436, 0: Too many branches (17/16) (too-many-branches)
+R:606, 0: Too many instance attributes (14/8) (too-many-instance-attributes)
+R:609, 4: Too many arguments (9/8) (too-many-arguments)
 
 
 Report
 ======
-369 statements analysed.
+420 statements analysed.
 
 Statistics by type
 ------------------
@@ -23,9 +25,9 @@ Statistics by type
 +=========+=======+===========+===========+============+=========+
 |module   |2      |2          |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
-|class    |4      |4          |=          |100.00      |0.00     |
+|class    |5      |4          |+1.00      |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
-|method   |33     |33         |=          |100.00      |0.00     |
+|method   |40     |33         |+7.00      |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
 |function |16     |16         |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
@@ -41,6 +43,7 @@ External dependencies
     scipy 
       \-misc (eugene.eugene)
       \-special (eugene.eugene)
+    tabulate (eugene.eugene)
 
 
 
@@ -50,13 +53,13 @@ Raw metrics
 +----------+-------+------+---------+-----------+
 |type      |number |%     |previous |difference |
 +==========+=======+======+=========+===========+
-|code      |423    |62.67 |422      |+1.00      |
+|code      |486    |63.86 |423      |+63.00     |
 +----------+-------+------+---------+-----------+
-|docstring |168    |24.89 |168      |=          |
+|docstring |184    |24.18 |168      |+16.00     |
 +----------+-------+------+---------+-----------+
-|comment   |34     |5.04  |34       |=          |
+|comment   |34     |4.47  |34       |=          |
 +----------+-------+------+---------+-----------+
-|empty     |50     |7.41  |50       |=          |
+|empty     |57     |7.49  |50       |+7.00      |
 +----------+-------+------+---------+-----------+
 
 
@@ -80,13 +83,13 @@ Messages by category
 +-----------+-------+---------+-----------+
 |type       |number |previous |difference |
 +===========+=======+=========+===========+
-|convention |0      |0        |=          |
+|convention |1      |0        |+1.00      |
 +-----------+-------+---------+-----------+
-|refactor   |3      |3        |=          |
+|refactor   |4      |3        |+1.00      |
 +-----------+-------+---------+-----------+
 |warning    |1      |1        |=          |
 +-----------+-------+---------+-----------+
-|error      |2      |4        |-2.00      |
+|error      |2      |2        |=          |
 +-----------+-------+---------+-----------+
 
 
@@ -105,9 +108,13 @@ Messages
 +-----------------------------+------------+
 |too-many-branches            |1           |
 +-----------------------------+------------+
+|too-many-arguments           |1           |
++-----------------------------+------------+
 |too-few-public-methods       |1           |
 +-----------------------------+------------+
 |locally-enabled              |1           |
++-----------------------------+------------+
+|line-too-long                |1           |
 +-----------------------------+------------+
 |bare-except                  |1           |
 +-----------------------------+------------+
@@ -116,5 +123,5 @@ Messages
 
 Global evaluation
 -----------------
-Your code has been rated at 9.62/10 (previous run: 9.35/10, +0.27)
+Your code has been rated at 9.62/10 (previous run: 9.62/10, -0.00)
 
