@@ -378,6 +378,9 @@ class Tree(object):
             self.nodes = node
         else:
             self.nodes.children = tuple([Tree(c, subtree=True).set_node(n, node) for c in self.nodes.children])
+
+        # rebase the numbers of the Tree
+        self.nodes.set_nums()
         return self.nodes
 
     def display(self, level=0, level_list=None):
