@@ -358,9 +358,7 @@ class Tree(object):
 
     def get_node(self, n=0):
         """return a node"""
-        # fill node numbers if blank or if on root node
-        # if self.nodes.num == None or self.nodes.num == 0:
-        #     self.set_nums()
+
         # search tree until node number is found and take sub tree
         if self.nodes.num == n:
             return cp.deepcopy(self.nodes)
@@ -374,9 +372,7 @@ class Tree(object):
 
     def set_node(self, n=0, node=None):
         """set a node in the tree"""
-        # fill node numbers if blank or if on root node
-        # if self.nodes.num == None or self.nodes.num == 0:
-        #     self.set_nums()
+
         # search tree until node number is found, and store sub tree
         if self.nodes.num == n:
             self.nodes = node
@@ -387,9 +383,7 @@ class Tree(object):
     def display(self, level=0, level_list=None):
         """display helper"""
         level_list = level_list if level_list else []
-        # fill node numbers if blank or if on root node
-        # if self.nodes.num == None or self.nodes.num == 0 or level == 0:
-        #     self.set_nums()
+
         if level == 0:
             node_str = '[0:' + str(self.nodes.num) + '] ' + str(self.nodes.value)
         else:
@@ -403,9 +397,7 @@ class Tree(object):
 
     def list_edges(self):
         """get edges of tree"""
-        # fill node numbers if blank or if on root node
-        # if self.nodes.num == None or self.nodes.num == 0:
-        #     self.set_nums()
+
         # get list of tuple edges between nodes e.g. [(n1,n2),(n1,n3)...]
         edges = [(self.nodes.value + str(self.nodes.num), c.value + str(c.num) if len(c.children) > 0 else c.value) for c in self.nodes.children]
         children_nodes = [Tree(c, subtree=True).list_edges() for c in self.nodes.children if len(c.children) > 0]
@@ -415,9 +407,6 @@ class Tree(object):
 
     def list_nodes(self):
         """return nodes of tree"""
-        # fill node numbers if blank or if on root node
-        # if self.nodes.num == None or self.nodes.num == 0:
-        #     self.set_nums()
 
         # get list of nodes
         node_list = []
