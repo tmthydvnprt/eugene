@@ -323,14 +323,25 @@ class Node(object):
             else:
                 return str(self.value) + '(' + ','.join([str(c) for c in self.children]) + ')'
 
+    def set_nums(self, count=-1):
+        """set node numbers (depth first)"""
+        count += 1
+        self.num = count
+        if len(self.children) > 0:
+            for c in self.children:
+                count = c.set_nums(count)
+        self.total = count
+        return count
+
 class Tree(object):
     """
     Defined a Tree with nodes
     """
 
-    def __init__(self, nodes=None):
+    def __init__(self, nodes=None, subtree=False):
         self.nodes = nodes
-        #self.set_nums()
+        if not subtree:
+            self.nodes.set_nums()
 
     def __repr__(self):
         return self.__str__()
@@ -345,27 +356,17 @@ class Tree(object):
         except:
             return np.zeros(x.shape)
 
-    def set_nums(self, count=-1):
-        """set node numbers (depth first)"""
-        count += 1
-        self.nodes.num = count
-        if len(self.nodes.children) > 0:
-            for c in self.nodes.children:
-                count = Tree(c).set_nums(count)
-        self.nodes.total = count
-        return count
-
     def get_node(self, n=0):
         """return a node"""
         # fill node numbers if blank or if on root node
-        if self.nodes.num == None or self.nodes.num == 0:
-            self.set_nums()
+        # if self.nodes.num == None or self.nodes.num == 0:
+        #     self.set_nums()
         # search tree until node number is found and take sub tree
         if self.nodes.num == n:
             return cp.deepcopy(self.nodes)
         elif len(self.nodes.children) > 0:
             for c in self.nodes.children:
-                cn = Tree(c).get_node(n)
+                cn = Tree(c, subtree=True).get_node(n)
                 if cn:
                     return cn
         else:
@@ -374,21 +375,21 @@ class Tree(object):
     def set_node(self, n=0, node=None):
         """set a node in the tree"""
         # fill node numbers if blank or if on root node
-        if self.nodes.num == None or self.nodes.num == 0:
-            self.set_nums()
+        # if self.nodes.num == None or self.nodes.num == 0:
+        #     self.set_nums()
         # search tree until node number is found, and store sub tree
         if self.nodes.num == n:
             self.nodes = node
         else:
-            self.nodes.children = tuple([Tree(c).set_node(n, node) for c in self.nodes.children])
+            self.nodes.children = tuple([Tree(c, subtree=True).set_node(n, node) for c in self.nodes.children])
         return self.nodes
 
     def display(self, level=0, level_list=None):
         """display helper"""
         level_list = level_list if level_list else []
         # fill node numbers if blank or if on root node
-        if self.nodes.num == None or self.nodes.num == 0 or level == 0:
-            self.set_nums()
+        # if self.nodes.num == None or self.nodes.num == 0 or level == 0:
+        #     self.set_nums()
         if level == 0:
             node_str = '[0:' + str(self.nodes.num) + '] ' + str(self.nodes.value)
         else:
@@ -398,16 +399,16 @@ class Tree(object):
                 node_str = '    ' + ''.join(level_list[:-1]) + r'|-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
         print node_str
         for i, child in enumerate(self.nodes.children):
-            Tree(child).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
+            Tree(child, subtree=True).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
 
     def list_edges(self):
         """get edges of tree"""
         # fill node numbers if blank or if on root node
-        if self.nodes.num == None or self.nodes.num == 0:
-            self.set_nums()
+        # if self.nodes.num == None or self.nodes.num == 0:
+        #     self.set_nums()
         # get list of tuple edges between nodes e.g. [(n1,n2),(n1,n3)...]
         edges = [(self.nodes.value + str(self.nodes.num), c.value + str(c.num) if len(c.children) > 0 else c.value) for c in self.nodes.children]
-        children_nodes = [Tree(c).list_edges() for c in self.nodes.children if len(c.children) > 0]
+        children_nodes = [Tree(c, subtree=True).list_edges() for c in self.nodes.children if len(c.children) > 0]
         for i in xrange(len(children_nodes)):
             edges += children_nodes[i]
         return edges
@@ -415,8 +416,8 @@ class Tree(object):
     def list_nodes(self):
         """return nodes of tree"""
         # fill node numbers if blank or if on root node
-        if self.nodes.num == None or self.nodes.num == 0:
-            self.set_nums()
+        # if self.nodes.num == None or self.nodes.num == 0:
+        #     self.set_nums()
 
         # get list of nodes
         node_list = []
@@ -424,7 +425,7 @@ class Tree(object):
         # add children
         node_list.extend(['[%s]%s' % (c.num, c.value) for c in self.nodes.children if len(c.children) == 0])
         # add children's children
-        grand_children = [Tree(c).list_nodes() for c in self.nodes.children if len(c.children) > 0]
+        grand_children = [Tree(c, subtree=True).list_nodes() for c in self.nodes.children if len(c.children) > 0]
         node_list.extend([node for grand_child in grand_children for node in grand_child])
 
         return node_list
