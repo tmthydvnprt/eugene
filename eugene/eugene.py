@@ -340,8 +340,10 @@ class Tree(object):
 
     def __init__(self, nodes=None, subtree=False):
         self.nodes = nodes
+        self.size = 1
         if not subtree:
             self.nodes.set_nums()
+            self.size = self.nodes.total + 1
 
     def __repr__(self):
         return self.__str__()
@@ -381,6 +383,7 @@ class Tree(object):
 
         # rebase the numbers of the Tree
         self.nodes.set_nums()
+        self.size = self.nodes.total + 1
         return self.nodes
 
     def display(self, level=0, level_list=None):
@@ -511,7 +514,7 @@ class Individual(object):
 
     def __init__(self, chromosomes=None):
         self.chromosomes = chromosomes
-        self.size = self.chromosomes.nodes.total
+        self.size = self.chromosomes.size
 
     def __repr__(self):
         return self.__str__()
@@ -530,26 +533,12 @@ class Individual(object):
         # objectively determine fitness
         return objective_function(gene_expression)
 
-    def mate(self, spouse=None, mutate_probability=0.15):
-        """mate this Individual with a spouse"""
-
-        # perform genetic exchange
-        child1, child2 = self.crossover(spouse)
-
-        # probabilistically mutate
-        if r.random() >= mutate_probability:
-            child1.mutate()
-        if r.random() >= mutate_probability:
-            child2.mutate()
-
-        return (child1, child2)
-
     def crossover(self, spouse=None):
         """randomly crossover two chromosomes"""
 
         # create random crossover points
-        x1 = r.randint(0, self.size)
-        x2 = r.randint(0, spouse.size)
+        x1 = r.randint(0, self.size - 1)
+        x2 = r.randint(0, spouse.size - 1)
 
         # clone parent chromosomes
         c1 = cp.deepcopy(self.chromosomes)
@@ -569,7 +558,7 @@ class Individual(object):
         """ alter a random node in chromosomes"""
 
         # randomly select node to mutate
-        mpoint = r.randint(0, self.size)
+        mpoint = r.randint(0, self.size - 1)
         node = self.chromosomes.get_node(mpoint)
 
         # determine how node can mutate based on node type
@@ -596,20 +585,34 @@ class Individual(object):
         node.value = mutated_value
         self.chromosomes.set_node(mpoint, node)
 
+    def mate(self, spouse=None, mutate_probability=0.05):
+        """mate this Individual with a spouse"""
+
+        # perform genetic exchange
+        child1, child2 = self.crossover(spouse)
+
+        # probabilistically mutate
+        if r.random() >= mutate_probability:
+            child1.mutate()
+        if r.random() >= mutate_probability:
+            child2.mutate()
+
+        return (child1, child2)
+
 class Population(object):
     """Defines Population of Individuals with ability to create generations and evaluate fitness"""
 
-    def __init__(self, init_population_size=1000, objective_function=None, init_tree_size=3, min_fitness=0.0, max_generations=10000, stagnation_factor=20, minimiz_fitness=False, rank_pressure=2.0):
+    def __init__(self, init_population_size=1000, objective_function=None, init_tree_size=3, min_fitness=0.0, max_generations=10000, stagnation_factor=20, rank_pressure=2.0, mutate_probability=0.05):
         # parameters
         self.init_population_size = init_population_size
         self.init_tree_size = init_tree_size
         self.min_fitness = min_fitness
         self.max_generations = max_generations
         self.stagnation_factor = stagnation_factor
-        self.minimiz_fitness = minimiz_fitness
         self.rank_pressure = rank_pressure
+        self.mutate_probability = mutate_probability
         self.objective_function = objective_function
-        # initialize VARIABLES
+        # initialize variables
         self.created = False
         self.individuals = []
         self.ranking = []
@@ -660,7 +663,7 @@ class Population(object):
             ['Min. fitness to survive:', self.min_fitness],
             ['Max. number of generations:', self.max_generations],
             ['Stagnation factor:', self.stagnation_factor],
-            ['Minimize fitness:', self.minimiz_fitness],
+            ['Mutate probability:', self.mutate_probability],
             ['Selective pressure:', self.rank_pressure]
         ]
         print tabulate.tabulate(data)
@@ -767,8 +770,8 @@ class Population(object):
             competitors1.sort()
             competitors2.sort()
             # select most fit from each group
-            winner1 = competitors1[0] if self.minimiz_fitness else competitors1[-1]
-            winner2 = competitors2[0] if self.minimiz_fitness else competitors2[-1]
+            winner1 = competitors1[-1]
+            winner2 = competitors2[-1]
             selections.append((winner1[1], winner2[1]))
         return selections
 
@@ -782,7 +785,7 @@ class Population(object):
 
         # create a scaled rank by fitness (individuals already sorted, so just create rank range, then scale)
         n = self.size
-        rank = range(n, 0, -1) if self.minimiz_fitness else range(1, n + 1)
+        rank = range(1, n + 1)
         scaled_rank = 2.0 - pressure + (2.0 * (pressure - 1) * (np.array(rank) - 1) / (n - 1))
 
         # calculate weighted probability proportial to scaled rank
@@ -811,16 +814,16 @@ class Population(object):
         self.rank()
 
         # selection parent chromosome pairs
-        parent_pairs = self.roulette(int(self.size/4.0)) \
-            + self.stochastic(int(self.size/4.0)) \
-            + self.tournament(int(self.size/4.0)) \
-            + self.rank_roulette(int(self.size/4.0), self.rank_pressure)
+        parent_pairs = self.roulette(int(self.size/8.0)) \
+            + self.stochastic(int(self.size/8.0)) \
+            + self.tournament(int(self.size/8.0)) \
+            + self.rank_roulette(int(self.size/8.0), self.rank_pressure)
 
         # mate next generation
-        next_generation = [p1.mate(p2) for p1, p2 in parent_pairs]
+        children = [p1.mate(p2, self.mutate_probability) for p1, p2 in parent_pairs]
 
         # create new population
-        self.individuals = next_generation
+        self.individuals = [child for pair in children for child in pair]
 
         # clear cached values
         self._fitness = np.array([])
@@ -832,5 +835,13 @@ class Population(object):
         """run algorithm"""
 
         number_of_generations = number_of_generations if number_of_generations else self.max_generations
+        pb = ProgressBar(self.init_population_size)
         while self.generation < number_of_generations or not self.stagnate:
             self.create_generation()
+
+    def most_fit(self):
+        """return the most fit individual"""
+
+        # make sure the individuals have been ranked
+        self.rank()
+        return self.ranking[-1][1]
