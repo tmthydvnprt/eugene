@@ -391,8 +391,24 @@ class Node(object):
     def __init__(self, value=None, *children):
         self.value = value
         self.children = children
+        # current position of node
         self.num = None
-        self.total = None
+        self.level = None
+        # summary of children
+        self.height = None
+        self.node_num = None
+        self.leaf_num = None
+        self.edge_num = None
+
+    @property
+    def is_leaf(self):
+        """check if this node is a leaf"""
+        return len(self.children) == 0
+
+    @property
+    def ary(self):
+        """return the arity of the node"""
+        return len(self.children)
 
     def __repr__(self):
         return self.__str__()
@@ -408,15 +424,33 @@ class Node(object):
             else:
                 return str(self.value) + '(' + ','.join([str(c) for c in self.children]) + ')'
 
-    def set_nums(self, count=-1):
+    def set_nums(self, node_count=-1, level_count=0, leaf_count=-1, edge_count=-1):
         """set node numbers (depth first)"""
-        count += 1
-        self.num = count
+
+        # count this node
+        node_count += 1
+        self.num = node_count
+        self.level = level_count
+
+        # traverse children if present or count as leaf node
         if len(self.children) > 0:
+            level_count += 1
+            edge_count += len(self.children)
+            height_count = 1
             for c in self.children:
-                count = c.set_nums(count)
-        self.total = count
-        return count
+                node_count, child_height, leaf_count, edge_count = c.set_nums(node_count, level_count, leaf_count, edge_count)
+                height_count = max(height_count, child_height)
+        else:
+            leaf_count += 1
+            height_count = 0
+
+        # store counts of children below
+        self.height = height_count
+        self.node_num = node_count
+        self.leaf_num = leaf_count
+        self.edge_num = edge_count
+
+        return (node_count, height_count+1, leaf_count, edge_count)
 
 class Tree(object):
     """
@@ -425,10 +459,28 @@ class Tree(object):
 
     def __init__(self, nodes=None, subtree=False):
         self.nodes = nodes
-        self.size = 1
         if not subtree:
             self.nodes.set_nums()
-            self.size = self.nodes.total + 1
+
+    @property
+    def height(self):
+        """return the number of levels in the tree"""
+        return self.nodes.height + 1
+
+    @property
+    def node_num(self):
+        """return the number of nodes in the tree"""
+        return self.nodes.node_num + 1
+
+    @property
+    def leaf_num(self):
+        """return the number of leaves in the tree"""
+        return self.nodes.leaf_num + 1
+
+    @property
+    def edge_num(self):
+        """return the number of edges in the tree"""
+        return self.nodes.edge_num + 1
 
     def __repr__(self):
         return self.__str__()
@@ -468,7 +520,6 @@ class Tree(object):
 
         # rebase the numbers of the Tree
         self.nodes.set_nums()
-        self.size = self.nodes.total + 1
         return self.nodes
 
     def list_edges(self):
@@ -500,15 +551,14 @@ class Tree(object):
         level_list = level_list if level_list else []
 
         if level == 0:
-            node_str = '[0:' + str(self.nodes.num) + '] ' + str(self.nodes.value)
+            node_str = '[%s:%s] %s (%s)' % (self.nodes.level, self.nodes.num, self.nodes.value, self.nodes.height)
         else:
-            if level_list[-1] == '      ':
-                node_str = '    ' + ''.join(level_list[:-1]) + r'\-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
-            else:
-                node_str = '    ' + ''.join(level_list[:-1]) + r'|-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
+            branching = '\\' if level_list[-1] == '      ' else '|'
+            indent = ''.join(level_list[:-1])
+            node_str = '    %s%s-[%s:%s] %s (%s)' % (indent, branching, self.nodes.level, self.nodes.num, self.nodes.value, self.nodes.height)
         print node_str
         for i, child in enumerate(self.nodes.children):
-            Tree(child, subtree=True).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
+            Tree(child, subtree=True).display(level + 1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
 
 class Individual(object):
     """docstring for Individual"""
@@ -538,8 +588,8 @@ class Individual(object):
         """randomly crossover two chromosomes"""
 
         # create random crossover points
-        x1 = r.randint(0, self.size - 1)
-        x2 = r.randint(0, spouse.size - 1)
+        x1 = r.randint(0, self.node_num - 1)
+        x2 = r.randint(0, spouse.node_num - 1)
 
         # clone parent chromosomes
         c1 = cp.deepcopy(self.chromosomes)
@@ -559,7 +609,7 @@ class Individual(object):
         """ alter a random node in chromosomes"""
 
         # randomly select node to mutate
-        mpoint = r.randint(0, self.size - 1)
+        mpoint = r.randint(0, self.node_num - 1)
         node = self.chromosomes.get_node(mpoint)
 
         # determine how node can mutate based on node type
