@@ -299,6 +299,90 @@ class ProgressBar(object):
         """string representation"""
         return str(self.prog_bar)
 
+DEFAULT_OBJECTIVE = lambda x: 1.0
+
+def random_tree(max_level=20, min_level=1, current_level=0):
+    """generate a random tree"""
+    return Tree(random_node(max_level, min_level, current_level))
+
+def random_node(max_level=20, min_level=1, current_level=0):
+    """node = a random node or nodes"""
+    if current_level == max_level:
+        rand_node = r.randint(0, 3)
+        # node = a constant
+        if rand_node == 0:
+            node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
+        # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+        elif rand_node == 1:
+            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+        # node = EPHEMERAL constant random integer
+        elif rand_node == 2:
+            node = Node(EPHEMERAL[0])
+        # node = variable
+        elif rand_node == 3:
+            node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
+    else:
+        rand_node = r.randint(4, 6) if current_level < min_level else r.randint(0, 6)
+        # node = a constant
+        if rand_node == 0:
+            node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
+        # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+        elif rand_node == 1:
+            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+        # node = EPHEMERAL constant random integer
+        elif rand_node == 2:
+            node = Node(EPHEMERAL[0])
+        # node = variable
+        elif rand_node == 3:
+            node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
+        # node = a unary operator
+        elif rand_node == 4:
+            node = Node(
+                UNARIES[r.randint(0, len(UNARIES) - 1)],
+                random_node(max_level, min_level, current_level + 1)
+            )
+        # node = a binary operator
+        elif rand_node == 5:
+            node = Node(
+                BINARIES[r.randint(0, len(BINARIES) - 1)],
+                random_node(max_level, min_level, current_level + 1),
+                random_node(max_level, min_level, current_level + 1)
+            )
+        # node = a n-ary operator
+        elif rand_node == 6:
+            nary_node_num = r.randint(2, 5)
+            if nary_node_num == 2:
+                node = Node(
+                    NARIES[r.randint(0, len(NARIES) - 1)],
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1)
+                )
+            elif nary_node_num == 3:
+                node = Node(
+                    NARIES[r.randint(0, len(NARIES) - 1)],
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1)
+                )
+            elif nary_node_num == 4:
+                node = Node(
+                    NARIES[r.randint(0, len(NARIES) - 1)],
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1)
+                )
+            elif nary_node_num == 5:
+                node = Node(
+                    NARIES[r.randint(0, len(NARIES) - 1)],
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1),
+                    random_node(max_level - 1, current_level + 1)
+                )
+    return node
+
 class Node(object):
     """
     Defines a node of the tree
@@ -425,90 +509,6 @@ class Tree(object):
         print node_str
         for i, child in enumerate(self.nodes.children):
             Tree(child, subtree=True).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
-
-def random_tree(max_level=20, min_level=1, current_level=0):
-    """generate a random tree"""
-    return Tree(random_node(max_level, min_level, current_level))
-
-def random_node(max_level=20, min_level=1, current_level=0):
-    """node = a random node or nodes"""
-    if current_level == max_level:
-        rand_node = r.randint(0, 3)
-        # node = a constant
-        if rand_node == 0:
-            node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
-        # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
-        elif rand_node == 1:
-            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
-        # node = EPHEMERAL constant random integer
-        elif rand_node == 2:
-            node = Node(EPHEMERAL[0])
-        # node = variable
-        elif rand_node == 3:
-            node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
-    else:
-        rand_node = r.randint(4, 6) if current_level < min_level else r.randint(0, 6)
-        # node = a constant
-        if rand_node == 0:
-            node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
-        # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
-        elif rand_node == 1:
-            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
-        # node = EPHEMERAL constant random integer
-        elif rand_node == 2:
-            node = Node(EPHEMERAL[0])
-        # node = variable
-        elif rand_node == 3:
-            node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
-        # node = a unary operator
-        elif rand_node == 4:
-            node = Node(
-                UNARIES[r.randint(0, len(UNARIES) - 1)],
-                random_node(max_level, min_level, current_level + 1)
-            )
-        # node = a binary operator
-        elif rand_node == 5:
-            node = Node(
-                BINARIES[r.randint(0, len(BINARIES) - 1)],
-                random_node(max_level, min_level, current_level + 1),
-                random_node(max_level, min_level, current_level + 1)
-            )
-        # node = a n-ary operator
-        elif rand_node == 6:
-            nary_node_num = r.randint(2, 5)
-            if nary_node_num == 2:
-                node = Node(
-                    NARIES[r.randint(0, len(NARIES) - 1)],
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1)
-                )
-            elif nary_node_num == 3:
-                node = Node(
-                    NARIES[r.randint(0, len(NARIES) - 1)],
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1)
-                )
-            elif nary_node_num == 4:
-                node = Node(
-                    NARIES[r.randint(0, len(NARIES) - 1)],
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1)
-                )
-            elif nary_node_num == 5:
-                node = Node(
-                    NARIES[r.randint(0, len(NARIES) - 1)],
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1)
-                )
-    return node
-
-DEFAULT_OBJECTIVE = lambda x: 1.0
 
 class Individual(object):
     """docstring for Individual"""
