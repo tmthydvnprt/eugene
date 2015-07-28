@@ -1,4 +1,4 @@
-# pylint: disable=eval-used
+# pylint: disable=eval-used,bare-except
 """
 Eugene
 
@@ -129,10 +129,11 @@ x = np.zeros(100)
 
 UNARIES = [
     'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \
-    'n_cosh', 'n_degrees', 'n_erf', 'n_erfc', 'n_exp', 'n_expm1', 'n_fabs', 'n_factorial', 'n_floor', 'n_gamma', 'n_isinf', \
+    'n_cosh', 'n_degrees', 'n_exp', 'n_expm1', 'n_fabs', 'n_factorial', 'n_floor', 'n_gamma', 'n_isinf', \
     'n_isnan', 'n_gammaln', 'n_log10', 'n_log2', 'n_log1p', 'n_log', 'n_radians', 'n_sin', 'n_sinh', 'n_sqrt', 'n_tan', \
     'n_tanh', 'n_trunc'
 ]
+# 'n_erf', 'n_erfc',
 BINARIES = [
     'n_or', 'n_add', 'n_and', 'n_div', 'n_eq', 'n_floordiv', 'n_ge', 'n_gt', 'n_le', 'n_lt', 'n_mod', 'n_mul', \
     'n_ne', 'n_sub', 'n_xor', 'n_atan2', 'n_copysign', 'n_fmod', 'n_hypot', 'n_ldexp', 'n_pow', 'n_round'
@@ -173,8 +174,8 @@ n_ceil = np.ceil
 n_cos = np.cos
 n_cosh = np.cosh
 n_degrees = np.degrees
-n_erf = sp.erf
-n_erfc = sp.erfc
+# n_erf = sp.erf
+# n_erfc = sp.erfc
 n_exp = np.exp
 n_expm1 = np.expm1
 n_fabs = np.fabs
@@ -307,6 +308,7 @@ def random_tree(max_level=20, min_level=1, current_level=0):
 
 def random_node(max_level=20, min_level=1, current_level=0):
     """node = a random node or nodes"""
+    # pylint: disable=too-many-branches
     if current_level == max_level:
         rand_node = r.randint(0, 3)
         # node = a constant
@@ -382,6 +384,7 @@ def random_node(max_level=20, min_level=1, current_level=0):
                     random_node(max_level - 1, current_level + 1)
                 )
     return node
+    # pylint: enable=too-many-branches
 
 class Node(object):
     """
@@ -450,7 +453,7 @@ class Node(object):
         self.leaf_num = leaf_count
         self.edge_num = edge_count
 
-        return (node_count, height_count+1, leaf_count, edge_count)
+        return (node_count, height_count + 1, leaf_count, edge_count)
 
 class Tree(object):
     """
@@ -565,7 +568,7 @@ class Individual(object):
 
     def __init__(self, chromosomes=None):
         self.chromosomes = chromosomes
-        self.size = self.chromosomes.size
+        self.size = self.chromosomes.node_num
 
     def __repr__(self):
         return self.__str__()
@@ -588,8 +591,8 @@ class Individual(object):
         """randomly crossover two chromosomes"""
 
         # create random crossover points
-        x1 = r.randint(0, self.node_num - 1)
-        x2 = r.randint(0, spouse.node_num - 1)
+        x1 = r.randint(0, self.size - 1)
+        x2 = r.randint(0, spouse.size - 1)
 
         # clone parent chromosomes
         c1 = cp.deepcopy(self.chromosomes)
@@ -609,7 +612,7 @@ class Individual(object):
         """ alter a random node in chromosomes"""
 
         # randomly select node to mutate
-        mpoint = r.randint(0, self.node_num - 1)
+        mpoint = r.randint(0, self.size - 1)
         node = self.chromosomes.get_node(mpoint)
 
         # determine how node can mutate based on node type
@@ -657,8 +660,10 @@ def par_fit(tup):
 
 class Population(object):
     """Defines Population of Individuals with ability to create generations and evaluate fitness"""
-
-    def __init__(self, init_population_size=1000, objective_function=None, init_tree_size=3, min_fitness=0.0, max_generations=10000, stagnation_factor=20, rank_pressure=2.0, mutate_probability=0.05, parallel=False):
+    # pylint: disable=too-many-arguments
+    def __init__(self, init_population_size=1000, objective_function=None, max_generations=10000, \
+        init_tree_size=3, min_fitness=0.0, stagnation_factor=20, rank_pressure=2.0, \
+        mutate_probability=0.05, parallel=False):
         # parameters
         self.init_population_size = init_population_size
         self.init_tree_size = init_tree_size
@@ -677,6 +682,7 @@ class Population(object):
         self.fitness_record = list(np.zeros(max_generations))
         # cached values
         self._fitness = np.array([])
+    # pylint: enable=too-many-arguments
 
     @property
     def size(self):

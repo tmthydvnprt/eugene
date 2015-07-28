@@ -1,21 +1,18 @@
 eugene
 ************* Module eugene.eugene
 I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
-I:149, 0: Locally disabling invalid-name (C0103) (locally-disabled)
-I:204, 0: Locally enabling invalid-name (C0103) (locally-enabled)
-C:609, 0: Line too long (197/160) (line-too-long)
-E:175, 8: Module 'scipy.special' has no 'erf' member (no-member)
-E:176, 9: Module 'scipy.special' has no 'erfc' member (no-member)
-R:301, 0: Too few public methods (0/2) (too-few-public-methods)
-W:345, 8: No exception type(s) specified (bare-except)
-R:436, 0: Too many branches (17/16) (too-many-branches)
-R:606, 0: Too many instance attributes (14/8) (too-many-instance-attributes)
-R:609, 4: Too many arguments (9/8) (too-many-arguments)
+I:  1, 0: Locally disabling bare-except (W0702) (locally-disabled)
+I:151, 0: Locally disabling invalid-name (C0103) (locally-disabled)
+I:206, 0: Locally enabling invalid-name (C0103) (locally-enabled)
+I:311, 0: Locally disabling too-many-branches (R0912) (locally-disabled)
+I:387, 0: Locally enabling too-many-branches (R0912) (locally-enabled)
+I:663, 0: Locally disabling too-many-arguments (R0913) (locally-disabled)
+I:685, 0: Locally enabling too-many-arguments (R0913) (locally-enabled)
 
 
 Report
 ======
-420 statements analysed.
+451 statements analysed.
 
 Statistics by type
 ------------------
@@ -25,11 +22,11 @@ Statistics by type
 +=========+=======+===========+===========+============+=========+
 |module   |2      |2          |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
-|class    |5      |4          |+1.00      |100.00      |0.00     |
+|class    |5      |5          |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
-|method   |40     |33         |+7.00      |100.00      |0.00     |
+|method   |47     |47         |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
-|function |16     |16         |=          |100.00      |0.00     |
+|function |17     |17         |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
 
 
@@ -53,13 +50,13 @@ Raw metrics
 +----------+-------+------+---------+-----------+
 |type      |number |%     |previous |difference |
 +==========+=======+======+=========+===========+
-|code      |486    |63.86 |423      |+63.00     |
+|code      |526    |64.07 |526      |=          |
 +----------+-------+------+---------+-----------+
-|docstring |184    |24.18 |168      |+16.00     |
+|docstring |192    |23.39 |192      |=          |
 +----------+-------+------+---------+-----------+
-|comment   |34     |4.47  |34       |=          |
+|comment   |45     |5.48  |45       |=          |
 +----------+-------+------+---------+-----------+
-|empty     |57     |7.49  |50       |+7.00      |
+|empty     |58     |7.06  |58       |=          |
 +----------+-------+------+---------+-----------+
 
 
@@ -83,13 +80,13 @@ Messages by category
 +-----------+-------+---------+-----------+
 |type       |number |previous |difference |
 +===========+=======+=========+===========+
-|convention |1      |0        |+1.00      |
+|convention |0      |0        |=          |
 +-----------+-------+---------+-----------+
-|refactor   |4      |3        |+1.00      |
+|refactor   |0      |0        |=          |
 +-----------+-------+---------+-----------+
-|warning    |1      |1        |=          |
+|warning    |0      |1        |-1.00      |
 +-----------+-------+---------+-----------+
-|error      |2      |2        |=          |
+|error      |0      |1        |-1.00      |
 +-----------+-------+---------+-----------+
 
 
@@ -97,31 +94,17 @@ Messages by category
 Messages
 --------
 
-+-----------------------------+------------+
-|message id                   |occurrences |
-+=============================+============+
-|no-member                    |2           |
-+-----------------------------+------------+
-|locally-disabled             |2           |
-+-----------------------------+------------+
-|too-many-instance-attributes |1           |
-+-----------------------------+------------+
-|too-many-branches            |1           |
-+-----------------------------+------------+
-|too-many-arguments           |1           |
-+-----------------------------+------------+
-|too-few-public-methods       |1           |
-+-----------------------------+------------+
-|locally-enabled              |1           |
-+-----------------------------+------------+
-|line-too-long                |1           |
-+-----------------------------+------------+
-|bare-except                  |1           |
-+-----------------------------+------------+
++-----------------+------------+
+|message id       |occurrences |
++=================+============+
+|locally-disabled |5           |
++-----------------+------------+
+|locally-enabled  |3           |
++-----------------+------------+
 
 
 
 Global evaluation
 -----------------
-Your code has been rated at 9.62/10 (previous run: 9.62/10, -0.00)
+Your code has been rated at 10.00/10 (previous run: 9.87/10, +0.13)
 
