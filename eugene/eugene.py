@@ -122,6 +122,7 @@ import copy as cp
 import scipy.special as sp
 import scipy.misc as sm
 import tabulate
+from multiprocessing import Pool
 
 VARIABLES = ['x']
 x = np.zeros(100)
@@ -386,21 +387,6 @@ class Tree(object):
         self.size = self.nodes.total + 1
         return self.nodes
 
-    def display(self, level=0, level_list=None):
-        """display helper"""
-        level_list = level_list if level_list else []
-
-        if level == 0:
-            node_str = '[0:' + str(self.nodes.num) + '] ' + str(self.nodes.value)
-        else:
-            if level_list[-1] == '      ':
-                node_str = '    ' + ''.join(level_list[:-1]) + r'\-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
-            else:
-                node_str = '    ' + ''.join(level_list[:-1]) + r'|-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
-        print node_str
-        for i, child in enumerate(self.nodes.children):
-            Tree(child, subtree=True).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
-
     def list_edges(self):
         """get edges of tree"""
 
@@ -424,6 +410,21 @@ class Tree(object):
         node_list.extend([node for grand_child in grand_children for node in grand_child])
 
         return node_list
+
+    def display(self, level=0, level_list=None):
+        """display helper"""
+        level_list = level_list if level_list else []
+
+        if level == 0:
+            node_str = '[0:' + str(self.nodes.num) + '] ' + str(self.nodes.value)
+        else:
+            if level_list[-1] == '      ':
+                node_str = '    ' + ''.join(level_list[:-1]) + r'\-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
+            else:
+                node_str = '    ' + ''.join(level_list[:-1]) + r'|-[' + str(level) +':'+ str(self.nodes.num) +'] '+ str(self.nodes.value)
+        print node_str
+        for i, child in enumerate(self.nodes.children):
+            Tree(child, subtree=True).display(level+1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
 
 def random_tree(max_level=20, min_level=1, current_level=0):
     """generate a random tree"""
@@ -599,10 +600,15 @@ class Individual(object):
 
         return (child1, child2)
 
+def par_fit(tup):
+    """create function to run fitness in parallel"""
+    individual, objective_function = tup
+    return individual.fitness(objective_function)
+
 class Population(object):
     """Defines Population of Individuals with ability to create generations and evaluate fitness"""
 
-    def __init__(self, init_population_size=1000, objective_function=None, init_tree_size=3, min_fitness=0.0, max_generations=10000, stagnation_factor=20, rank_pressure=2.0, mutate_probability=0.05):
+    def __init__(self, init_population_size=1000, objective_function=None, init_tree_size=3, min_fitness=0.0, max_generations=10000, stagnation_factor=20, rank_pressure=2.0, mutate_probability=0.05, parallel=False):
         # parameters
         self.init_population_size = init_population_size
         self.init_tree_size = init_tree_size
@@ -612,6 +618,7 @@ class Population(object):
         self.rank_pressure = rank_pressure
         self.mutate_probability = mutate_probability
         self.objective_function = objective_function
+        self.parallel = parallel
         # initialize variables
         self.created = False
         self.individuals = []
@@ -630,9 +637,20 @@ class Population(object):
     def fitness(self):
         """return the fitness of each individual in population"""
         if self._fitness.shape == (0,):
-            self._fitness = np.array([i.fitness(self.objective_function) for i in self.individuals])
-            self._fitness[np.isnan(self._fitness)] = 0.0
-            self._fitness[np.isinf(self._fitness)] = 0.0
+
+            if self.parallel:
+
+                pool = Pool()
+                fitness = pool.map(par_fit, [(i, self.objective_function) for i in self.individuals])
+                pool.close()
+                pool.join()
+                self._fitness = np.array(fitness)
+
+            else:
+                self._fitness = np.array([i.fitness(self.objective_function) for i in self.individuals])
+                # remove NaNs and Infs
+            # self._fitness[np.isnan(self._fitness)] = 0.0
+            # self._fitness[np.isinf(self._fitness)] = 0.0
         return self._fitness
 
     @property
@@ -835,9 +853,10 @@ class Population(object):
         """run algorithm"""
 
         number_of_generations = number_of_generations if number_of_generations else self.max_generations
-        pb = ProgressBar(self.init_population_size)
+        pb = ProgressBar(number_of_generations)
         while self.generation < number_of_generations or not self.stagnate:
             self.create_generation()
+            pb.animate(self.generation)
 
     def most_fit(self):
         """return the most fit individual"""
