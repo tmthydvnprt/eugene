@@ -113,7 +113,9 @@ o.not_() - can't operate on array, but o.inv() can & produces the same result
 
 # dependancies
 import sys
+import time
 import bisect
+import tabulate
 import operator as o
 import random as r
 import numpy as np
@@ -121,7 +123,6 @@ import pandas as pd
 import copy as cp
 import scipy.special as sp
 import scipy.misc as sm
-import tabulate
 from multiprocessing import Pool
 
 VARIABLES = ['x']
@@ -576,16 +577,37 @@ class Individual(object):
     def __str__(self):
         return str(self.chromosomes)
 
-    def fitness(self, objective_function=None):
+    def sum_of_square_error(self, x_test):
+        x_truth = TRUTH
+        if x_test.shape == x_truth.shape:
+            return np.sqrt(((x_test - x_truth) ** 2).mean())
+        else:
+            return np.inf
+
+    def gene_expression(self):
+        """compute gene expression by evaluating function stored in tree, and keep track of time"""
+
+        # evaluate function and time to compute
+        t0 = time.time()
+        output = self.chromosomes.evaluate()
+        t1 = time.time()
+
+        # remove NaNs and Infs
+        output[np.isnan(output)] = 0.0
+        output[np.isinf(output)] = 0.0
+
+        # calculate error of result and time complexity
+        error = self.sum_of_square_error(output)
+        time_complexity = t1 - t0
+
+        self.gene_expression = np.array([error, time_complexity, self.chromosomes.height, self.chromosomes.node_num, self.chromosomes.leaf_num])
+        return self.gene_expression
+
+    def fitness(self, objective_function=None, scale=None):
         """return the fitness of an Individual based on the objective_function"""
         objective_function = objective_function if objective_function else DEFAULT_OBJECTIVE
-        # compute gene expression by evaluate function stored in tree
-        gene_expression = self.chromosomes.evaluate()
-        # remove NaNs and Infs
-        gene_expression[np.isnan(gene_expression)] = 0.0
-        gene_expression[np.isinf(gene_expression)] = 0.0
         # objectively determine fitness
-        return objective_function(gene_expression)
+        return objective_function(self.gene_expression, scale)
 
     def crossover(self, spouse=None):
         """randomly crossover two chromosomes"""
@@ -679,7 +701,15 @@ class Population(object):
         self.individuals = []
         self.ranking = []
         self.generation = 0
-        self.fitness_record = list(np.zeros(max_generations))
+        self.history = {
+            'fitness' : list(np.zeros(max_generations)),
+            'error' : list(np.zeros(max_generations)),
+            'time' : list(np.zeros(max_generations)),
+            'height' : list(np.zeros(max_generations)),
+            'nodes' : list(np.zeros(max_generations)),
+            'edges' : list(np.zeros(max_generations)),
+            'leaves' : list(np.zeros(max_generations))
+        }
         # cached values
         self._fitness = np.array([])
     # pylint: enable=too-many-arguments
@@ -692,7 +722,7 @@ class Population(object):
     @property
     def fitness(self):
         """return the fitness of each individual in population"""
-        if self._fitness.shape == (0,):
+        if self._fitness.shape == (0, ):
 
             if self.parallel:
 
@@ -703,10 +733,18 @@ class Population(object):
                 self._fitness = np.array(fitness)
 
             else:
-                self._fitness = np.array([i.fitness(self.objective_function) for i in self.individuals])
-                # remove NaNs and Infs
-            # self._fitness[np.isnan(self._fitness)] = 0.0
-            # self._fitness[np.isinf(self._fitness)] = 0.0
+                expression = np.array([i.gene_expression() for i in self.individuals])
+                # remove infinity before calculating max
+                expression[np.isinf(expression)] = 0.0
+                expression_scale = expression.max(axis=0)
+                self._fitness = np.array([i.fitness(self.objective_function, expression_scale) for i in self.individuals])
+                average_expression = expression.mean(axis=0)
+                self.history['error'] = average_expression[0]
+                self.history['time'] = average_expression[1]
+                self.history['height'] = average_expression[2]
+                self.history['nodes'] = average_expression[3]
+                self.history['leaves'] = average_expression[4]
+
         return self._fitness
 
     @property
@@ -715,11 +753,11 @@ class Population(object):
         determine if the population has stagnated and reached local min
         where average fitness over last n generations has not changed
         """
-        if self.size <= self.stagnation_factor:
+        if self.generation <= self.stagnation_factor:
             return False
         else:
-            last_gen2 = self.fitness_record[(self.generation - 2 - self.stagnation_factor):(self.generation - 2)]
-            last_gen1 = self.fitness_record[(self.generation - 1 - self.stagnation_factor):(self.generation - 1)]
+            last_gen2 = self.history['fitness'][(self.generation - 2 - self.stagnation_factor):(self.generation - 2)]
+            last_gen1 = self.history['fitness'][(self.generation - 1 - self.stagnation_factor):(self.generation - 1)]
             return last_gen2 == last_gen1
 
     def describe(self):
@@ -882,7 +920,7 @@ class Population(object):
         """create the next generations, this is main function that loops"""
 
         # determine fitness of current generations and log average fitness
-        self.fitness_record[self.generation] = self.fitness.mean()
+        self.history['fitness'][self.generation] = self.fitness.mean()
 
         # rank individuals by fitness
         self.rank()
@@ -910,7 +948,7 @@ class Population(object):
 
         number_of_generations = number_of_generations if number_of_generations else self.max_generations
         pb = ProgressBar(number_of_generations)
-        while self.generation < number_of_generations or not self.stagnate:
+        while self.generation < number_of_generations and not self.stagnate:
             self.create_generation()
             pb.animate(self.generation)
 
