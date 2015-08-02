@@ -403,6 +403,8 @@ class Node(object):
         self.node_num = None
         self.leaf_num = None
         self.edge_num = None
+        # sum of subtrees
+        self.complexity = None
 
     @property
     def is_leaf(self):
@@ -428,13 +430,15 @@ class Node(object):
             else:
                 return str(self.value) + '(' + ','.join([str(c) for c in self.children]) + ')'
 
-    def set_nums(self, node_count=-1, level_count=0, leaf_count=-1, edge_count=-1):
+    def set_nums(self, node_counter=-1, level_count=0, leaf_count=-1, edge_count=-1):
         """set node numbers (depth first)"""
 
         # count this node
-        node_count += 1
-        self.num = node_count
+        node_counter += 1
+        self.num = node_counter
         self.level = level_count
+        complexity = 0
+        node_count = 1
 
         # traverse children if present or count as leaf node
         if len(self.children) > 0:
@@ -442,19 +446,24 @@ class Node(object):
             edge_count += len(self.children)
             height_count = 1
             for c in self.children:
-                node_count, child_height, leaf_count, edge_count = c.set_nums(node_count, level_count, leaf_count, edge_count)
+                node_counter, child_node_count, child_height, leaf_count, edge_count, child_complexity = c.set_nums(node_counter, level_count, leaf_count, edge_count)
                 height_count = max(height_count, child_height)
+                complexity += child_complexity
+                node_count += child_node_count
         else:
             leaf_count += 1
             height_count = 0
+            edge_count = 0
 
         # store counts of children below
         self.height = height_count
         self.node_num = node_count
         self.leaf_num = leaf_count
         self.edge_num = edge_count
+        complexity += node_count
+        self.complexity = complexity
 
-        return (node_count, height_count + 1, leaf_count, edge_count)
+        return (node_counter, node_count, height_count + 1, leaf_count, edge_count, complexity)
 
 class Tree(object):
     """
@@ -474,7 +483,7 @@ class Tree(object):
     @property
     def node_num(self):
         """return the number of nodes in the tree"""
-        return self.nodes.node_num + 1
+        return self.nodes.node_num
 
     @property
     def leaf_num(self):
@@ -485,6 +494,11 @@ class Tree(object):
     def edge_num(self):
         """return the number of edges in the tree"""
         return self.nodes.edge_num + 1
+
+    @property
+    def complexity(self):
+        """return the complexity of the tree (sum of nodes in tree and each subtree)"""
+        return self.nodes.complexity
 
     def __repr__(self):
         return self.__str__()
@@ -555,11 +569,11 @@ class Tree(object):
         level_list = level_list if level_list else []
 
         if level == 0:
-            node_str = '[%s:%s] %s (%s)' % (self.nodes.level, self.nodes.num, self.nodes.value, self.nodes.height)
+            node_str = '[%s:%s] %s (%s) - {%s|%s}' % (self.nodes.level, self.nodes.num, self.nodes.value, self.nodes.height, self.nodes.node_num, self.nodes.complexity)
         else:
             branching = '\\' if level_list[-1] == '      ' else '|'
             indent = ''.join(level_list[:-1])
-            node_str = '    %s%s-[%s:%s] %s (%s)' % (indent, branching, self.nodes.level, self.nodes.num, self.nodes.value, self.nodes.height)
+            node_str = '    %s%s-[%s:%s] %s (%s) - {%s|%s}' % (indent, branching, self.nodes.level, self.nodes.num, self.nodes.value, self.nodes.height, self.nodes.node_num, self.nodes.complexity)
         print node_str
         for i, child in enumerate(self.nodes.children):
             Tree(child, subtree=True).display(level + 1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
