@@ -743,29 +743,31 @@ class Population(object):
     def fitness(self):
         """return the fitness of each individual in population"""
         if self._fitness.shape == (0, ):
-
-            if self.parallel:
-
-                pool = Pool()
-                fitness = pool.map(par_fit, [(i, self.objective_function) for i in self.individuals])
-                pool.close()
-                pool.join()
-                self._fitness = np.array(fitness)
-
-            else:
-                expression = np.array([i.compute_gene_expression() for i in self.individuals])
-                # remove infinity before calculating max
-                self.expression = expression
-                self.expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
-                self._fitness = np.array([i.fitness(self.objective_function, self.expression_scale) for i in self.individuals])
-                average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / self.expression_scale
-
-                self.history['fitness'].append(np.ma.masked_invalid(self._fitness).mean())
-                self.history['error'].append(average_expression[0])
-                self.history['time'].append(average_expression[1])
-                self.history['complexity'].append(average_expression[2])
-
+            self.calc_fitness()
         return self._fitness
+
+    def calc_fitness(self):
+        if self.parallel:
+
+            pool = Pool()
+            fitness = pool.map(par_fit, [(i, self.objective_function) for i in self.individuals])
+            pool.close()
+            pool.join()
+            self._fitness = np.array(fitness)
+
+        else:
+            expression = np.array([i.compute_gene_expression() for i in self.individuals])
+            # remove infinity before calculating max
+            self.expression = expression
+            self.expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
+            self._fitness = np.array([i.fitness(self.objective_function, self.expression_scale) for i in self.individuals])
+
+            average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / self.expression_scale
+
+            self.history['fitness'].append(np.ma.masked_invalid(self._fitness).mean())
+            self.history['error'].append(average_expression[0])
+            self.history['time'].append(average_expression[1])
+            self.history['complexity'].append(average_expression[2])
 
     @property
     def stagnate(self):
@@ -943,7 +945,7 @@ class Population(object):
         """create the next generations, this is main function that loops"""
 
         # determine fitness of current generations and log average fitness
-        self.fitness
+        self.calc_fitness()
 
         # rank individuals by fitness
         self.rank()
