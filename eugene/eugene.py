@@ -509,9 +509,10 @@ class Tree(object):
     def evaluate(self):
         """evaluate expression stored in tree"""
         try:
-            return np.array(eval(compile(self.__str__(), '', 'eval')))
+            result = np.array(eval(compile(self.__str__(), '', 'eval')))
         except:
-            return np.zeros(x.shape)
+            result = np.nan
+        return result
 
     def get_node(self, n=0):
         """return a node"""
@@ -593,12 +594,9 @@ class Individual(object):
 
     def sum_of_square_error(self, x_test):
         x_truth = TRUTH
-        if x_test.shape == x_truth.shape:
-            return np.sqrt(((x_test - x_truth) ** 2).mean())
-        else:
-            return np.inf
+        return np.inf if np.isnan(x_test).any() else np.sqrt(((x_test - x_truth) ** 2).mean())
 
-    def gene_expression(self):
+    def compute_gene_expression(self):
         """compute gene expression by evaluating function stored in tree, and keep track of time"""
 
         # evaluate function and time to compute
@@ -606,23 +604,18 @@ class Individual(object):
         output = self.chromosomes.evaluate()
         t1 = time.time()
 
-        # remove NaNs and Infs
-        output[np.isnan(output)] = 0.0
-        output[np.isinf(output)] = 0.0
-
         # calculate error of result and time complexity
         error = self.sum_of_square_error(output)
         time_complexity = t1 - t0
         physical_complexity = self.chromosomes.complexity
 
-        self.gene_expression = np.array([error, time_complexity, physical_complexity])
-        return self.gene_expression
+        return np.array([error, time_complexity, physical_complexity])
 
     def fitness(self, objective_function=None, scale=None):
         """return the fitness of an Individual based on the objective_function"""
         objective_function = objective_function if objective_function else DEFAULT_OBJECTIVE
         # objectively determine fitness
-        return objective_function(self.gene_expression, scale)
+        return objective_function(self.compute_gene_expression(), scale)
 
     def crossover(self, spouse=None):
         """randomly crossover two chromosomes"""
@@ -700,13 +693,14 @@ class Population(object):
     # pylint: disable=too-many-arguments
     def __init__(self, init_population_size=1000, objective_function=None, max_generations=10000, \
         init_tree_size=3, min_fitness=0.0, stagnation_factor=20, rank_pressure=2.0, \
-        mutate_probability=0.05, parallel=False):
+        mutate_probability=0.05, parallel=False, selection_percents={'roulette':0.25, 'stochastic':0.25, 'tournament':0.25, 'rank_roulette':0.25}):
         # parameters
         self.init_population_size = init_population_size
         self.init_tree_size = init_tree_size
         self.min_fitness = min_fitness
         self.max_generations = max_generations
         self.stagnation_factor = stagnation_factor
+        self.selections = selection_percents
         self.rank_pressure = rank_pressure
         self.mutate_probability = mutate_probability
         self.objective_function = objective_function
@@ -716,14 +710,12 @@ class Population(object):
         self.individuals = []
         self.ranking = []
         self.generation = 0
+        self.expression_scale = np.array([1.0, 1.0, 1.0])
         self.history = {
-            'fitness' : list(np.zeros(max_generations)),
-            'error' : list(np.zeros(max_generations)),
-            'time' : list(np.zeros(max_generations)),
-            'height' : list(np.zeros(max_generations)),
-            'nodes' : list(np.zeros(max_generations)),
-            'edges' : list(np.zeros(max_generations)),
-            'leaves' : list(np.zeros(max_generations))
+            'fitness' : [],
+            'error' : [],
+            'time' : [],
+            'complexity' : []
         }
         # cached values
         self._fitness = np.array([])
@@ -748,17 +740,17 @@ class Population(object):
                 self._fitness = np.array(fitness)
 
             else:
-                expression = np.array([i.gene_expression() for i in self.individuals])
+                expression = np.array([i.compute_gene_expression() for i in self.individuals])
                 # remove infinity before calculating max
-                expression[np.isinf(expression)] = 0.0
-                expression_scale = expression.max(axis=0)
-                self._fitness = np.array([i.fitness(self.objective_function, expression_scale) for i in self.individuals])
-                average_expression = expression.mean(axis=0)
-                self.history['error'] = average_expression[0]
-                self.history['time'] = average_expression[1]
-                self.history['height'] = average_expression[2]
-                self.history['nodes'] = average_expression[3]
-                self.history['leaves'] = average_expression[4]
+                self.expression = expression
+                self.expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
+                self._fitness = np.array([i.fitness(self.objective_function, self.expression_scale) for i in self.individuals])
+                average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / self.expression_scale
+
+                self.history['fitness'].append(self._fitness.mean())
+                self.history['error'].append(average_expression[0])
+                self.history['time'].append(average_expression[1])
+                self.history['complexity'].append(average_expression[2])
 
         return self._fitness
 
@@ -835,8 +827,9 @@ class Population(object):
             pb = ProgressBar(self.init_population_size)
             while len(self.individuals) < self.init_population_size:
                 individual = Individual(random_tree(self.init_tree_size))
-                self.individuals.append(individual)
-                pb.animate(self.size)
+                if individual.fitness:
+                    self.individuals.append(individual)
+                    pb.animate(self.size)
         print '\n'
         self.describe_current()
 
@@ -850,13 +843,15 @@ class Population(object):
         ranked_fitness = np.array(ranked_fitness)
 
         # calculate weighted probability proportial to fitness
-        fitness_probability = ranked_fitness / float(ranked_fitness.sum())
-        cum_prob_dist = fitness_probability.cumsum()
+        fitness_probability = ranked_fitness / np.ma.masked_invalid(ranked_fitness).sum()
+        cum_prob_dist = np.array(np.ma.masked_invalid(fitness_probability).cumsum())
 
         for _ in xrange(number):
             # randomly select two individuals with weighted probability proportial to fitness
-            p1 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
-            p2 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
+            r1 = bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])
+            r2 = bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])
+            p1 = ranked_individuals[r1]
+            p2 = ranked_individuals[r2]
             selections.append((p1, p2))
         return selections
 
@@ -870,8 +865,8 @@ class Population(object):
         ranked_fitness = np.array(ranked_fitness)
 
         # calculate weighted probability proportial to fitness
-        fitness_probability = ranked_fitness / float(ranked_fitness.sum())
-        cum_prob_dist = fitness_probability.cumsum()
+        fitness_probability = ranked_fitness / np.ma.masked_invalid(ranked_fitness).sum()
+        cum_prob_dist = np.array(np.ma.masked_invalid(fitness_probability).cumsum())
 
         # determine uniform points
         p_dist = 1 / float(number)
@@ -916,8 +911,8 @@ class Population(object):
         scaled_rank = 2.0 - pressure + (2.0 * (pressure - 1) * (np.array(rank) - 1) / (n - 1))
 
         # calculate weighted probability proportial to scaled rank
-        scaled_rank_probability = scaled_rank / float(scaled_rank.sum())
-        cum_prob_dist = scaled_rank_probability.cumsum()
+        scaled_rank_probability = scaled_rank / np.ma.masked_invalid(scaled_rank).sum()
+        cum_prob_dist = np.array(np.ma.masked_invalid(scaled_rank_probability).cumsum())
 
         for _ in xrange(number):
             # randomly select two individuals with weighted probability proportial to scaled rank
@@ -935,22 +930,25 @@ class Population(object):
         """create the next generations, this is main function that loops"""
 
         # determine fitness of current generations and log average fitness
-        self.history['fitness'][self.generation] = self.fitness.mean()
+        self.fitness
 
         # rank individuals by fitness
         self.rank()
 
         # selection parent chromosome pairs
-        parent_pairs = self.roulette(int(self.size/8.0)) \
-            + self.stochastic(int(self.size/8.0)) \
-            + self.tournament(int(self.size/8.0)) \
-            + self.rank_roulette(int(self.size/8.0), self.rank_pressure)
+        half_size = int(self.size/2.0)
+        quarter_size = int(self.size/4.0)
+        parent_pairs = []
+        parent_pairs.extend(self.roulette(min(int(round(quarter_size * self.selections['roulette'])), half_size - len(parent_pairs))))
+        parent_pairs.extend(self.stochastic(min(int(round(quarter_size * self.selections['stochastic'])), half_size - len(parent_pairs))))
+        parent_pairs.extend(self.tournament(min(int(round(quarter_size* self.selections['tournament'])), half_size - len(parent_pairs))))
+        parent_pairs.extend(self.rank_roulette(min(int(round(quarter_size * self.selections['rank_roulette'])), half_size - len(parent_pairs)), self.rank_pressure))
 
         # mate next generation
         children = [p1.mate(p2, self.mutate_probability) for p1, p2 in parent_pairs]
 
         # create new population
-        self.individuals = [child for pair in children for child in pair]
+        self.individuals = [child for pair in children for child in pair] + [i[1] for i in self.ranking[2*len(children):]]
 
         # clear cached values
         self._fitness = np.array([])
