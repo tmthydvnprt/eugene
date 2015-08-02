@@ -584,7 +584,11 @@ class Individual(object):
 
     def __init__(self, chromosomes=None):
         self.chromosomes = chromosomes
-        self.size = self.chromosomes.node_num
+
+    @property
+    def size(self):
+        """return size of individual"""
+        return self.chromosomes.node_num
 
     def __repr__(self):
         return self.__str__()
@@ -593,6 +597,7 @@ class Individual(object):
         return str(self.chromosomes)
 
     def sum_of_square_error(self, x_test):
+        """return the mean square error"""
         x_truth = TRUTH
         return np.inf if np.isnan(x_test).any() else np.sqrt(((x_test - x_truth) ** 2).mean())
 
@@ -643,33 +648,41 @@ class Individual(object):
 
         # randomly select node to mutate
         mpoint = r.randint(0, self.size - 1)
-        node = self.chromosomes.get_node(mpoint)
 
-        # determine how node can mutate based on node type
-        # constant
-        if node.value in CONSTS:
-            mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
-        # variable
-        elif node.value in VARIABLES:
-            mutated_value = VARIABLES[r.randint(0, len(VARIABLES) - 1)]
-        # a unary operator
-        elif node.value in UNARIES:
-            mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]
-        # a binary operator
-        elif node.value in BINARIES:
-            mutated_value = BINARIES[r.randint(0, len(BINARIES) - 1)]
-        # a n-ary operator
-        elif node.value in NARIES:
-            mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
-        # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+        # mutate whole node by replacing children with random subtree
+        if r.random() >= 0.5:
+            rand_tree = random_tree(2)
+            x2 = r.randint(0, rand_tree.node_num - 1)
+            node = rand_tree.get_node(x2)
+
+        # or just mutate node value based on current type
         else:
-            mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]
+            node = self.chromosomes.get_node(mpoint)
+            # constant
+            if node.value in CONSTS:
+                mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
+            # variable
+            elif node.value in VARIABLES:
+                mutated_value = VARIABLES[r.randint(0, len(VARIABLES) - 1)]
+            # a unary operator
+            elif node.value in UNARIES:
+                mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]
+            # a binary operator
+            elif node.value in BINARIES:
+                mutated_value = BINARIES[r.randint(0, len(BINARIES) - 1)]
+            # a n-ary operator
+            elif node.value in NARIES:
+                mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
+            # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+            else:
+                mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]
 
-        # mutate node value (keeps children, if applicable)
-        node.value = mutated_value
+            # mutate node value (keeps children, if applicable)
+            node.value = mutated_value
+
         self.chromosomes.set_node(mpoint, node)
 
-    def mate(self, spouse=None, mutate_probability=0.05):
+    def mate(self, spouse=None, mutate_probability=0.15):
         """mate this Individual with a spouse"""
 
         # perform genetic exchange
@@ -747,7 +760,7 @@ class Population(object):
                 self._fitness = np.array([i.fitness(self.objective_function, self.expression_scale) for i in self.individuals])
                 average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / self.expression_scale
 
-                self.history['fitness'].append(self._fitness.mean())
+                self.history['fitness'].append(np.ma.masked_invalid(self._fitness).mean())
                 self.history['error'].append(average_expression[0])
                 self.history['time'].append(average_expression[1])
                 self.history['complexity'].append(average_expression[2])
@@ -765,7 +778,7 @@ class Population(object):
         else:
             last_gen2 = self.history['fitness'][(self.generation - 2 - self.stagnation_factor):(self.generation - 2)]
             last_gen1 = self.history['fitness'][(self.generation - 1 - self.stagnation_factor):(self.generation - 1)]
-            return last_gen2 == last_gen1
+            return (last_gen2 == last_gen1) and not np.isinf(last_gen1).all()
 
     def describe(self):
         """print out all data"""
@@ -939,10 +952,12 @@ class Population(object):
         half_size = int(self.size/2.0)
         quarter_size = int(self.size/4.0)
         parent_pairs = []
-        parent_pairs.extend(self.roulette(min(int(round(quarter_size * self.selections['roulette'])), half_size - len(parent_pairs))))
-        parent_pairs.extend(self.stochastic(min(int(round(quarter_size * self.selections['stochastic'])), half_size - len(parent_pairs))))
-        parent_pairs.extend(self.tournament(min(int(round(quarter_size* self.selections['tournament'])), half_size - len(parent_pairs))))
-        parent_pairs.extend(self.rank_roulette(min(int(round(quarter_size * self.selections['rank_roulette'])), half_size - len(parent_pairs)), self.rank_pressure))
+        parent_pairs.extend(self.roulette(min(int(round(quarter_size * self.selections['roulette'])), quarter_size - len(parent_pairs))))
+
+        # parent_pairs.extend(self.stochastic(min(int(round(quarter_size * self.selections['stochastic'])), quarter_size - len(parent_pairs))))
+        # parent_pairs.extend(self.tournament(min(int(round(quarter_size* self.selections['tournament'])), quarter_size - len(parent_pairs))))
+        # parent_pairs.extend(self.rank_roulette(min(int(round(quarter_size * self.selections['rank_roulette'])), quarter_size - len(parent_pairs)), self.rank_pressure))
+
 
         # mate next generation
         children = [p1.mate(p2, self.mutate_probability) for p1, p2 in parent_pairs]
@@ -961,9 +976,14 @@ class Population(object):
 
         number_of_generations = number_of_generations if number_of_generations else self.max_generations
         pb = ProgressBar(number_of_generations)
+
         while self.generation < number_of_generations and not self.stagnate:
             self.create_generation()
             pb.animate(self.generation)
+
+        if self.stagnate:
+            print 'population became stagnate'
+        print self.generation, 'generations'
 
     def most_fit(self):
         """return the most fit individual"""
