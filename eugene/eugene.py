@@ -692,8 +692,7 @@ class Individual(object):
 
 def par_fit(tup):
     """create function to run fitness in parallel"""
-    individual, objective_function = tup
-    return individual.fitness(objective_function)
+    pass
 
 class Population(object):
     """Defines Population of Individuals with ability to create generations and evaluate fitness"""
@@ -831,12 +830,10 @@ class Population(object):
 
         else:
             expression = np.array([i.compute_gene_expression() for i in self.individuals])
-            # remove infinity before calculating max
-            self.expression = expression
-            self.expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
-            self._fitness = self.objective_function(self.expression, self.expression_scale)
+            expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
+            average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / expression_scale
 
-            average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / self.expression_scale
+            self._fitness = self.objective_function(expression, expression_scale)
 
             self.history['fitness'].append(np.ma.masked_invalid(self._fitness).mean())
             self.history['error'].append(average_expression[0])
