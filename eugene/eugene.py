@@ -831,14 +831,17 @@ class Population(object):
         else:
             expression = np.array([i.compute_gene_expression() for i in self.individuals])
             expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
-            average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / expression_scale
+            max_expr = np.array(np.ma.masked_invalid(expression).max(axis=0)) / expression_scale
+            mean_expr = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / expression_scale
+            min_expr = np.array(np.ma.masked_invalid(expression).min(axis=0)) / expression_scale
 
             self._fitness = self.objective_function(expression, expression_scale)
-
-            self.history['fitness'].append(np.ma.masked_invalid(self._fitness).mean())
-            self.history['error'].append(average_expression[0])
-            self.history['time'].append(average_expression[1])
-            self.history['complexity'].append(average_expression[2])
+            mfit = np.ma.masked_invalid(self._fitness)
+            
+            self.history['fitness'].append((mfit.max(), mfit.mean(), mfit.min()))
+            self.history['error'].append((max_expr[0], mean_expr[0], min_expr[0]))
+            self.history['time'].append((max_expr[1], mean_expr[1], min_expr[1]))
+            self.history['complexity'].append((max_expr[2], mean_expr[2], min_expr[2]))
 
     def roulette(self, number=None):
         """select parent pairs based on roulette method (probability proportional to fitness)"""
