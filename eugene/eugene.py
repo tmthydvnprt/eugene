@@ -613,8 +613,9 @@ class Individual(object):
         # calculate error of result and time complexity
         error = self.sum_of_square_error(output)
         time_complexity = t1 - t0
+        physical_complexity = self.chromosomes.complexity
 
-        self.gene_expression = np.array([error, time_complexity, self.chromosomes.height, self.chromosomes.node_num, self.chromosomes.leaf_num])
+        self.gene_expression = np.array([error, time_complexity, physical_complexity])
         return self.gene_expression
 
     def fitness(self, objective_function=None, scale=None):
