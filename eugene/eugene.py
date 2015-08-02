@@ -616,12 +616,6 @@ class Individual(object):
 
         return np.array([error, time_complexity, physical_complexity])
 
-    def fitness(self, objective_function=None, scale=None):
-        """return the fitness of an Individual based on the objective_function"""
-        objective_function = objective_function if objective_function else DEFAULT_OBJECTIVE
-        # objectively determine fitness
-        return objective_function(self.compute_gene_expression(), scale)
-
     def crossover(self, spouse=None):
         """randomly crossover two chromosomes"""
 
@@ -746,29 +740,6 @@ class Population(object):
             self.calc_fitness()
         return self._fitness
 
-    def calc_fitness(self):
-        if self.parallel:
-
-            pool = Pool()
-            fitness = pool.map(par_fit, [(i, self.objective_function) for i in self.individuals])
-            pool.close()
-            pool.join()
-            self._fitness = np.array(fitness)
-
-        else:
-            expression = np.array([i.compute_gene_expression() for i in self.individuals])
-            # remove infinity before calculating max
-            self.expression = expression
-            self.expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
-            self._fitness = np.array([i.fitness(self.objective_function, self.expression_scale) for i in self.individuals])
-
-            average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / self.expression_scale
-
-            self.history['fitness'].append(np.ma.masked_invalid(self._fitness).mean())
-            self.history['error'].append(average_expression[0])
-            self.history['time'].append(average_expression[1])
-            self.history['complexity'].append(average_expression[2])
-
     @property
     def stagnate(self):
         """
@@ -842,11 +813,35 @@ class Population(object):
             pb = ProgressBar(self.init_population_size)
             while len(self.individuals) < self.init_population_size:
                 individual = Individual(random_tree(self.init_tree_size))
-                if individual.fitness:
+                gene_expression = individual.compute_gene_expression()
+                if not np.isinf(gene_expression[0]):
                     self.individuals.append(individual)
                     pb.animate(self.size)
         print '\n'
         self.describe_current()
+
+    def calc_fitness(self):
+        if self.parallel:
+
+            pool = Pool()
+            fitness = pool.map(par_fit, [(i, self.objective_function) for i in self.individuals])
+            pool.close()
+            pool.join()
+            self._fitness = np.array(fitness)
+
+        else:
+            expression = np.array([i.compute_gene_expression() for i in self.individuals])
+            # remove infinity before calculating max
+            self.expression = expression
+            self.expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
+            self._fitness = self.objective_function(self.expression, self.expression_scale)
+
+            average_expression = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / self.expression_scale
+
+            self.history['fitness'].append(np.ma.masked_invalid(self._fitness).mean())
+            self.history['error'].append(average_expression[0])
+            self.history['time'].append(average_expression[1])
+            self.history['complexity'].append(average_expression[2])
 
     def roulette(self, number=None):
         """select parent pairs based on roulette method (probability proportional to fitness)"""
