@@ -676,20 +676,6 @@ class Individual(object):
 
         self.chromosomes.set_node(mpoint, node)
 
-    def mate(self, spouse=None, mutate_probability=0.15):
-        """mate this Individual with a spouse"""
-
-        # perform genetic exchange
-        child1, child2 = self.crossover(spouse)
-
-        # probabilistically mutate
-        if r.random() >= mutate_probability:
-            child1.mutate()
-        if r.random() >= mutate_probability:
-            child2.mutate()
-
-        return (child1, child2)
-
 def par_fit(tup):
     """create function to run fitness in parallel"""
     pass
@@ -837,7 +823,7 @@ class Population(object):
 
             self._fitness = self.objective_function(expression, expression_scale)
             mfit = np.ma.masked_invalid(self._fitness)
-            
+
             self.history['fitness'].append((mfit.max(), mfit.mean(), mfit.min()))
             self.history['error'].append((max_expr[0], mean_expr[0], min_expr[0]))
             self.history['time'].append((max_expr[1], mean_expr[1], min_expr[1]))
@@ -856,19 +842,13 @@ class Population(object):
         fitness_probability = ranked_fitness / np.ma.masked_invalid(ranked_fitness).sum()
         cum_prob_dist = np.array(np.ma.masked_invalid(fitness_probability).cumsum())
 
-        for _ in xrange(number):
-            # randomly select two individuals with weighted probability proportial to fitness
-            r1 = bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])
-            r2 = bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])
-            p1 = ranked_individuals[r1]
-            p2 = ranked_individuals[r2]
-            selections.append((p1, p2))
+        # randomly select two individuals with weighted probability proportial to fitness
+        selections = [ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])] for _ in xrange(number)]
         return selections
 
     def stochastic(self, number=None):
         """select parent pairs based on stochastic method (probability uniform across fitness)"""
         number = number if number else self.size
-        selections = []
 
         # unpack
         ranked_fitness, ranked_individuals = (list(i) for i in zip(*self.ranking))
@@ -883,11 +863,8 @@ class Population(object):
         p0 = p_dist * r.random()
         points = p0 + p_dist * np.array(range(0, number))
 
-        for p in points:
-            # randomly select two individuals with weighted probability proportial to fitness
-            p1 = ranked_individuals[bisect.bisect(cum_prob_dist, p * cum_prob_dist[-1])]
-            p2 = ranked_individuals[bisect.bisect(cum_prob_dist, p * cum_prob_dist[-1])]
-            selections.append((p1, p2))
+        # randomly select individuals with weighted probability proportial to fitness
+        selections = [ranked_individuals[bisect.bisect(cum_prob_dist, p * cum_prob_dist[-1])] for p in points]
         return selections
 
     def tournament(self, number=None, tournaments=4):
@@ -895,16 +872,13 @@ class Population(object):
         number = number if number else self.size
         selections = []
         for _ in xrange(number):
-            # select two groups of random competitors
-            competitors1 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, tournaments))]
-            competitors2 = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, tournaments))]
-            # groups compete in fitness tournament (local group sorting)
-            competitors1.sort()
-            competitors2.sort()
+            # select group of random competitors
+            competitors = [self.ranking[i] for i in list(np.random.random_integers(0, self.size-1, tournaments))]
+            # group compete in fitness tournament (local group sorting)
+            competitors.sort()
             # select most fit from each group
-            winner1 = competitors1[-1]
-            winner2 = competitors2[-1]
-            selections.append((winner1[1], winner2[1]))
+            winner = competitors[-1]
+            selections.append(winner[1])
         return selections
 
     def rank_roulette(self, number=None, pressure=2):
@@ -925,10 +899,14 @@ class Population(object):
         cum_prob_dist = np.array(np.ma.masked_invalid(scaled_rank_probability).cumsum())
 
         for _ in xrange(number):
-            # randomly select two individuals with weighted probability proportial to scaled rank
+            # randomly select individuals with weighted probability proportial to scaled rank
             p1 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
-            p2 = ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])]
-            selections.append((p1, p2))
+            selections.append(p1)
+        return selections
+
+    def select(self, number=None):
+        """select individuals thru various methods"""
+        selections = self.tournament(number)
         return selections
 
     def rank(self):
@@ -945,22 +923,27 @@ class Population(object):
         # rank individuals by fitness
         self.rank()
 
-        # selection parent chromosome pairs
-        half_size = int(self.size/2.0)
-        quarter_size = int(self.size/4.0)
-        parent_pairs = []
-        parent_pairs.extend(self.roulette(min(int(round(quarter_size * self.selections['roulette'])), quarter_size - len(parent_pairs))))
+        # create next generation
+        random_numbers = np.random.rand(3)
+        random_percents = random_numbers / random_numbers.sum()
+        replicate_num, crossover_num, mutate_num = (int(round(self.size * s)) for s in random_percents)
+        next_generation = []
 
-        # parent_pairs.extend(self.stochastic(min(int(round(quarter_size * self.selections['stochastic'])), quarter_size - len(parent_pairs))))
-        # parent_pairs.extend(self.tournament(min(int(round(quarter_size* self.selections['tournament'])), quarter_size - len(parent_pairs))))
-        # parent_pairs.extend(self.rank_roulette(min(int(round(quarter_size * self.selections['rank_roulette'])), quarter_size - len(parent_pairs)), self.rank_pressure))
+        # replicate
+        next_generation.extend(self.select(replicate_num))
 
+        # crossover
+        parent_pairs = zip(self.select(int(crossover_num/2.0)), self.select(int(crossover_num/2.0)))
+        children = [p1.crossover(p2) for p1, p2 in parent_pairs]
+        next_generation.extend([child for pair in children for child in pair])
 
-        # mate next generation
-        children = [p1.mate(p2, self.mutate_probability) for p1, p2 in parent_pairs]
+        # mutate
+        mutants = self.select(mutate_num)
+        for m in mutants:
+            m.mutate()
+        next_generation.extend(mutants)
 
-        # create new population
-        self.individuals = [child for pair in children for child in pair] + [i[1] for i in self.ranking[2*len(children):]]
+        self.individuals = next_generation
 
         # clear cached values
         self._fitness = np.array([])
