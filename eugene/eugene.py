@@ -599,7 +599,12 @@ class Individual(object):
     def sum_of_square_error(self, x_test):
         """return the mean square error"""
         x_truth = TRUTH
-        return np.inf if np.isnan(x_test).any() else np.sqrt(((x_test - x_truth) ** 2).mean())
+        if np.isnan(x_test).any() or x_test.shape != x_truth.shape:
+            result = np.inf
+        else:
+            result = np.sqrt(((x_test - x_truth) ** 2).mean())
+
+        return result
 
     def compute_gene_expression(self):
         """compute gene expression by evaluating function stored in tree, and keep track of time"""
@@ -685,16 +690,15 @@ class Population(object):
     # pylint: disable=too-many-arguments
     def __init__(self, init_population_size=1000, objective_function=None, max_generations=10000, \
         init_tree_size=3, min_fitness=0.0, stagnation_factor=20, rank_pressure=2.0, \
-        mutate_probability=0.05, parallel=False, selection_percents={'roulette':0.25, 'stochastic':0.25, 'tournament':0.25, 'rank_roulette':0.25}):
+        selection_probability=(0.3, 0.6, 0.1), parallel=False):
         # parameters
         self.init_population_size = init_population_size
         self.init_tree_size = init_tree_size
         self.min_fitness = min_fitness
         self.max_generations = max_generations
         self.stagnation_factor = stagnation_factor
-        self.selections = selection_percents
         self.rank_pressure = rank_pressure
-        self.mutate_probability = mutate_probability
+        self.selection_probability = selection_probability
         self.objective_function = objective_function
         self.parallel = parallel
         # initialize variables
@@ -753,7 +757,7 @@ class Population(object):
             ['Min. fitness to survive:', self.min_fitness],
             ['Max. number of generations:', self.max_generations],
             ['Stagnation factor:', self.stagnation_factor],
-            ['Mutate probability:', self.mutate_probability],
+            ['Selection probability:', self.selection_probability],
             ['Selective pressure:', self.rank_pressure]
         ]
         print tabulate.tabulate(data)
@@ -828,6 +832,11 @@ class Population(object):
             self.history['error'].append((max_expr[0], mean_expr[0], min_expr[0]))
             self.history['time'].append((max_expr[1], mean_expr[1], min_expr[1]))
             self.history['complexity'].append((max_expr[2], mean_expr[2], min_expr[2]))
+
+    def rank(self):
+        """create ranking of individuals"""
+        self.ranking = zip(self.fitness, self.individuals)
+        self.ranking.sort()
 
     def roulette(self, number=None):
         """select parent pairs based on roulette method (probability proportional to fitness)"""
@@ -906,13 +915,8 @@ class Population(object):
 
     def select(self, number=None):
         """select individuals thru various methods"""
-        selections = self.tournament(number)
+        selections = self.roulette(number)
         return selections
-
-    def rank(self):
-        """create ranking of individuals"""
-        self.ranking = zip(self.fitness, self.individuals)
-        self.ranking.sort()
 
     def create_generation(self):
         """create the next generations, this is main function that loops"""
@@ -924,16 +928,16 @@ class Population(object):
         self.rank()
 
         # create next generation
-        random_numbers = np.random.rand(3)
-        random_percents = random_numbers / random_numbers.sum()
-        replicate_num, crossover_num, mutate_num = (int(round(self.size * s)) for s in random_percents)
+        replicate_num, crossover_num, mutate_num = (int(round(self.size * s)) for s in self.selection_probability)
+        # split crossover_num in half_size
+        crossover_num = int(round(crossover_num/2.0))
         next_generation = []
 
         # replicate
         next_generation.extend(self.select(replicate_num))
 
         # crossover
-        parent_pairs = zip(self.select(int(crossover_num/2.0)), self.select(int(crossover_num/2.0)))
+        parent_pairs = zip(self.select(crossover_num), self.select(crossover_num))
         children = [p1.crossover(p2) for p1, p2 in parent_pairs]
         next_generation.extend([child for pair in children for child in pair])
 
@@ -950,6 +954,8 @@ class Population(object):
 
         # log generation
         self.generation += 1
+
+        return None
 
     def run(self, number_of_generations=None):
         """run algorithm"""
