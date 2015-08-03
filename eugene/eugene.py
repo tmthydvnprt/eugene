@@ -690,7 +690,7 @@ class Population(object):
     # pylint: disable=too-many-arguments
     def __init__(self, init_population_size=1000, objective_function=None, max_generations=10000, \
         init_tree_size=3, min_fitness=0.0, stagnation_factor=20, rank_pressure=2.0, \
-        selection_probability=(0.3, 0.6, 0.1), parallel=False):
+        selection_probability=(0.3, 0.6, 0.1), elitism=0.02, parallel=False):
         # parameters
         self.init_population_size = init_population_size
         self.init_tree_size = init_tree_size
@@ -699,6 +699,7 @@ class Population(object):
         self.stagnation_factor = stagnation_factor
         self.rank_pressure = rank_pressure
         self.selection_probability = selection_probability
+        self.elitism = elitism
         self.objective_function = objective_function
         self.parallel = parallel
         # initialize variables
@@ -928,10 +929,13 @@ class Population(object):
         self.rank()
 
         # create next generation
-        replicate_num, crossover_num, mutate_num = (int(round(self.size * s)) for s in self.selection_probability)
+        elite_num = int(round(self.size * self.elitism))
+        replicate_num, crossover_num, mutate_num = (int(round((self.size - elite_num) * s)) for s in self.selection_probability)
         # split crossover_num in half_size
         crossover_num = int(round(crossover_num/2.0))
-        next_generation = []
+
+        # elite continue
+        next_generation = [i[1] for i in self.ranking[-elite_num:]]
 
         # replicate
         next_generation.extend(self.select(replicate_num))
@@ -947,7 +951,7 @@ class Population(object):
             m.mutate()
         next_generation.extend(mutants)
 
-        self.individuals = next_generation
+        self.individuals = next_generation[:self.size]
 
         # clear cached values
         self._fitness = np.array([])
