@@ -125,9 +125,9 @@ import scipy.special as sp
 import scipy.misc as sm
 from multiprocessing import Pool
 
+DEFAULT_OBJECTIVE = lambda x: 1.0
+DISPLAY_NODE_STR = '%s%s[%s:%s] %s (%s) - {%s|%s}'
 VARIABLES = ['x']
-x = np.zeros(100)
-
 UNARIES = [
     'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \
     'n_cosh', 'n_degrees', 'n_exp', 'n_expm1', 'n_fabs', 'n_factorial', 'n_floor', 'n_gamma', 'n_isinf', \
@@ -148,6 +148,8 @@ EPHEMERAL = {
     2: r.uniform(-500, 500),
     3: r.normalvariate(0, 100)
 }
+
+x = np.array(range(100))
 
 # pylint: disable=invalid-name
 n_abs = o.abs
@@ -301,7 +303,17 @@ class ProgressBar(object):
         """string representation"""
         return str(self.prog_bar)
 
-DEFAULT_OBJECTIVE = lambda x: 1.0
+def par_fit():
+    """create function to run fitness in parallel"""
+    pass
+
+def rmse(predicted, truth):
+    """return the mean square error"""
+    if np.isnan(predicted).any() or predicted.shape != truth.shape:
+        result = np.inf
+    else:
+        result = np.sqrt(((predicted - truth) ** 2).mean())
+    return result
 
 def random_tree(max_level=20, min_level=1, current_level=0):
     """generate a random tree"""
@@ -446,7 +458,8 @@ class Node(object):
             edge_count += len(self.children)
             height_count = 1
             for c in self.children:
-                node_counter, child_node_count, child_height, leaf_count, edge_count, child_complexity = c.set_nums(node_counter, level_count, leaf_count, edge_count)
+                child_numbers = c.set_nums(node_counter, level_count, leaf_count, edge_count)
+                node_counter, child_node_count, child_height, leaf_count, edge_count, child_complexity = child_numbers
                 height_count = max(height_count, child_height)
                 complexity += child_complexity
                 node_count += child_node_count
@@ -570,11 +583,29 @@ class Tree(object):
         level_list = level_list if level_list else []
 
         if level == 0:
-            node_str = '[%s:%s] %s (%s) - {%s|%s}' % (self.nodes.level, self.nodes.num, self.nodes.value, self.nodes.height, self.nodes.node_num, self.nodes.complexity)
+            node_str = DISPLAY_NODE_STR % (
+                '',
+                '',
+                self.nodes.level,
+                self.nodes.num,
+                self.nodes.value,
+                self.nodes.height,
+                self.nodes.node_num,
+                self.nodes.complexity
+            )
         else:
-            branching = '\\' if level_list[-1] == '      ' else '|'
-            indent = ''.join(level_list[:-1])
-            node_str = '    %s%s-[%s:%s] %s (%s) - {%s|%s}' % (indent, branching, self.nodes.level, self.nodes.num, self.nodes.value, self.nodes.height, self.nodes.node_num, self.nodes.complexity)
+            branching = '\\-' if level_list[-1] == '      ' else '|-'
+            indent = '    ' + ''.join(level_list[:-1])
+            node_str = DISPLAY_NODE_STR % (
+                indent,
+                branching,
+                self.nodes.level,
+                self.nodes.num,
+                self.nodes.value,
+                self.nodes.height,
+                self.nodes.node_num,
+                self.nodes.complexity
+            )
         print node_str
         for i, child in enumerate(self.nodes.children):
             Tree(child, subtree=True).display(level + 1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
@@ -600,17 +631,7 @@ class Individual(object):
         """display helper"""
         self.chromosomes.display()
 
-    def sum_of_square_error(self, x_test):
-        """return the mean square error"""
-        x_truth = TRUTH
-        if np.isnan(x_test).any() or x_test.shape != x_truth.shape:
-            result = np.inf
-        else:
-            result = np.sqrt(((x_test - x_truth) ** 2).mean())
-
-        return result
-
-    def compute_gene_expression(self):
+    def compute_gene_expression(self, error_function=None, target=None):
         """compute gene expression by evaluating function stored in tree, and keep track of time"""
 
         # evaluate function and time to compute
@@ -619,7 +640,7 @@ class Individual(object):
         t1 = time.time()
 
         # calculate error of result and time complexity
-        error = self.sum_of_square_error(output)
+        error = error_function(output, target)
         time_complexity = t1 - t0
         physical_complexity = self.chromosomes.complexity
 
@@ -685,26 +706,38 @@ class Individual(object):
 
         self.chromosomes.set_node(mpoint, node)
 
-def par_fit(tup):
-    """create function to run fitness in parallel"""
-    pass
-
 class Population(object):
     """Defines Population of Individuals with ability to create generations and evaluate fitness"""
-    # pylint: disable=too-many-arguments
-    def __init__(self, init_population_size=1000, objective_function=None, max_generations=10000, \
-        init_tree_size=3, min_fitness=0.0, stagnation_factor=20, rank_pressure=2.0, \
-        selection_probability=(0.3, 0.6, 0.1), elitism=0.02, parallel=False):
+    # pylint: disable=too-many-arguments,too-many-instance-attributes,too-many-public-methods
+    def __init__(
+            self,
+            init_population_size=1000,
+            objective_function=None,
+            error_function=None,
+            target=None,
+            max_generations=1000,
+            init_tree_size=3,
+            stagnation_timeout=20,
+            rank_pressure=2.0,
+            elitism=0.02,
+            replication=0.28,
+            mating=0.6,
+            mutation=0.1,
+            parallel=False
+        ):
         # parameters
         self.init_population_size = init_population_size
-        self.init_tree_size = init_tree_size
-        self.min_fitness = min_fitness
-        self.max_generations = max_generations
-        self.stagnation_factor = stagnation_factor
-        self.rank_pressure = rank_pressure
-        self.selection_probability = selection_probability
-        self.elitism = elitism
         self.objective_function = objective_function
+        self.error_function = error_function
+        self.target = target
+        self.max_generations = max_generations
+        self.init_tree_size = init_tree_size
+        self.stagnation_timeout = stagnation_timeout
+        self.rank_pressure = rank_pressure
+        self.elitism = elitism
+        self.replication = replication
+        self.mating = mating
+        self.mutation = mutation
         self.parallel = parallel
         # initialize variables
         self.created = False
@@ -720,7 +753,7 @@ class Population(object):
         }
         # cached values
         self._fitness = np.array([])
-    # pylint: enable=too-many-arguments
+    # pylint: enable=too-many-arguments,too-many-instance-attributes,too-many-public-methods
 
     @property
     def size(self):
@@ -740,11 +773,11 @@ class Population(object):
         determine if the population has stagnated and reached local min
         where average fitness over last n generations has not changed
         """
-        if self.generation <= self.stagnation_factor:
+        if self.generation <= self.stagnation_timeout:
             return False
         else:
-            last_gen2 = self.history['fitness'][(self.generation - 2 - self.stagnation_factor):(self.generation - 2)]
-            last_gen1 = self.history['fitness'][(self.generation - 1 - self.stagnation_factor):(self.generation - 1)]
+            last_gen2 = self.history['fitness'][(self.generation - 2 - self.stagnation_timeout):(self.generation - 2)]
+            last_gen1 = self.history['fitness'][(self.generation - 1 - self.stagnation_timeout):(self.generation - 1)]
             return (last_gen2 == last_gen1) and not np.isinf(last_gen1).all()
 
     def describe(self):
@@ -759,10 +792,13 @@ class Population(object):
         data = [
             ['Initial number of individuals:', self.init_population_size],
             ['Initial size of individuals:', self.init_tree_size],
-            ['Min. fitness to survive:', self.min_fitness],
             ['Max. number of generations:', self.max_generations],
-            ['Stagnation factor:', self.stagnation_factor],
-            ['Selection probability:', self.selection_probability],
+            ['Parallel fitness turned on:', self.parallel],
+            ['Stagnation factor:', self.stagnation_timeout],
+            ['Percent of Elitism:', self.elitism],
+            ['Percent of replication:', self.replication],
+            ['Percent of mating:', self.mating],
+            ['Percent of mutation:', self.mutation],
             ['Selective pressure:', self.rank_pressure]
         ]
         print tabulate.tabulate(data)
@@ -807,7 +843,7 @@ class Population(object):
             pb = ProgressBar(self.init_population_size)
             while len(self.individuals) < self.init_population_size:
                 individual = Individual(random_tree(self.init_tree_size))
-                gene_expression = individual.compute_gene_expression()
+                gene_expression = individual.compute_gene_expression(self.error_function, self.target)
                 if not np.isinf(gene_expression[0]):
                     self.individuals.append(individual)
                     pb.animate(self.size)
@@ -815,8 +851,9 @@ class Population(object):
         self.describe_current()
 
     def calc_fitness(self):
-        if self.parallel:
+        """calculate the fitness of each individual."""
 
+        if self.parallel:
             pool = Pool()
             fitness = pool.map(par_fit, [(i, self.objective_function) for i in self.individuals])
             pool.close()
@@ -934,18 +971,20 @@ class Population(object):
 
         # create next generation
         elite_num = int(round(self.size * self.elitism))
-        replicate_num, crossover_num, mutate_num = (int(round((self.size - elite_num) * s)) for s in self.selection_probability)
-        # split crossover_num in half_size
-        crossover_num = int(round(crossover_num/2.0))
+        replicate_num = int(round(self.size * self.replication))
+        mate_num = int(round(self.size * self.mating))
+        mutate_num = int(round(self.size * self.mutation))
+        # split mate_num in half_size (2 parents = 2 children)
+        mate_num = int(round(mate_num/2.0))
 
-        # elite continue
+        # propogate elite
         next_generation = [i[1] for i in self.ranking[-elite_num:]]
 
         # replicate
         next_generation.extend(self.select(replicate_num))
 
-        # crossover
-        parent_pairs = zip(self.select(crossover_num), self.select(crossover_num))
+        # crossover mate
+        parent_pairs = zip(self.select(mate_num), self.select(mate_num))
         children = [p1.crossover(p2) for p1, p2 in parent_pairs]
         next_generation.extend([child for pair in children for child in pair])
 
