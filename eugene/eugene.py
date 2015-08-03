@@ -422,13 +422,13 @@ class Node(object):
     def __str__(self):
         # node is a variable or constant
         if len(self.children) == 0:
-            return str(self.value)
+            return ' %s ' % self.value
         # node is a unary, binary or n-ary function
         else:
             if self.value in NARIES:
-                return str(self.value) + '([' + ','.join([str(c) for c in self.children]) + '])'
+                return ' %s([%s]) ' % (self.value, ', '.join([str(c) for c in self.children]))
             else:
-                return str(self.value) + '(' + ','.join([str(c) for c in self.children]) + ')'
+                return ' %s(%s) ' % (self.value, ', '.join([str(c) for c in self.children]))
 
     def set_nums(self, node_counter=-1, level_count=0, leaf_count=-1, edge_count=-1):
         """set node numbers (depth first)"""
@@ -515,7 +515,7 @@ class Tree(object):
         return result
 
     def get_node(self, n=0):
-        """return a node"""
+        """return a node from the tree"""
 
         # search tree until node number is found and take sub tree
         if self.nodes.num == n:
@@ -595,6 +595,10 @@ class Individual(object):
 
     def __str__(self):
         return str(self.chromosomes)
+
+    def display(self):
+        """display helper"""
+        self.chromosomes.display()
 
     def sum_of_square_error(self, x_test):
         """return the mean square error"""
