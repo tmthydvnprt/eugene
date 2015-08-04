@@ -231,15 +231,15 @@ def n_xor(a, b):
 
 def n_mod(a, b):
     """safe mod"""
-    return pd.Series(np.where(b != 0, o.mod(a, b), 1))
+    return np.where(b != 0, o.mod(a, b), 1)
 
 def n_div(a, b):
     """safe div"""
-    return pd.Series(np.where(b != 0, o.div(a, b), 1))
+    return np.where(b != 0, o.div(a, b), 1)
 
 def n_floordiv(a, b):
     """safe floordiv"""
-    return pd.Series(np.where(b != 0, o.floordiv(a, b), 1))
+    return np.where(b != 0, o.floordiv(a, b), 1)
 
 def n_round(a, b):
     """safe round"""
