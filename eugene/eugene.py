@@ -558,7 +558,7 @@ class Tree(object):
         """get edges of tree"""
 
         # get list of tuple edges between nodes e.g. [(n1,n2),(n1,n3)...]
-        edges = [(self.nodes.value + str(self.nodes.num), c.value + str(c.num) if len(c.children) > 0 else c.value) for c in self.nodes.children]
+        edges = [(self.nodes.value, c.value if len(c.children) > 0 else c.value) for c in self.nodes.children]
         children_nodes = [Tree(c, subtree=True).list_edges() for c in self.nodes.children if len(c.children) > 0]
         for i in xrange(len(children_nodes)):
             edges += children_nodes[i]
@@ -569,9 +569,9 @@ class Tree(object):
 
         # get list of nodes
         node_list = []
-        node_list.append('[%s]%s' % (self.nodes.num, self.nodes.value))
+        node_list.append(self.nodes.value)
         # add children
-        node_list.extend(['[%s]%s' % (c.num, c.value) for c in self.nodes.children if len(c.children) == 0])
+        node_list.extend([c.value for c in self.nodes.children if len(c.children) == 0])
         # add children's children
         grand_children = [Tree(c, subtree=True).list_nodes() for c in self.nodes.children if len(c.children) > 0]
         node_list.extend([node for grand_child in grand_children for node in grand_child])
