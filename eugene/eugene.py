@@ -434,13 +434,13 @@ class Node(object):
     def __str__(self):
         # node is a variable or constant
         if len(self.children) == 0:
-            return ' %s ' % self.value
+            return '%s' % self.value
         # node is a unary, binary or n-ary function
         else:
             if self.value in NARIES:
-                return ' %s([%s]) ' % (self.value, ', '.join([str(c) for c in self.children]))
+                return '%s([%s])' % (self.value, ', '.join([str(c) for c in self.children]))
             else:
-                return ' %s(%s) ' % (self.value, ', '.join([str(c) for c in self.children]))
+                return '%s(%s)' % (self.value, ', '.join([str(c) for c in self.children]))
 
     def set_nums(self, node_counter=-1, level_count=0, leaf_count=-1, edge_count=-1):
         """set node numbers (depth first)"""
@@ -713,7 +713,7 @@ class Population(object):
             self,
             init_population_size=1000,
             objective_function=None,
-            error_function=None,
+            error_function=rmse,
             target=None,
             max_generations=1000,
             init_tree_size=3,
@@ -861,7 +861,7 @@ class Population(object):
             self._fitness = np.array(fitness)
 
         else:
-            expression = np.array([i.compute_gene_expression() for i in self.individuals])
+            expression = np.array([i.compute_gene_expression(self.error_function, self.target) for i in self.individuals])
             expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
             max_expr = np.array(np.ma.masked_invalid(expression).max(axis=0)) / expression_scale
             mean_expr = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / expression_scale
