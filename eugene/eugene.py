@@ -1015,8 +1015,8 @@ class Population(object):
 
         # crossover mate
         parent_pairs = zip(self.select(mate_num), self.select(mate_num))
-        children_pairs = [p1.crossover(p2) for p1, p2 in parent_pairs]
-        children = [child for pair in children for child in pair]
+        child_pairs = [p1.crossover(p2) for p1, p2 in parent_pairs]
+        children = [child for pair in child_pairs for child in pair]
         next_generation.extend(children)
 
         # mutate
