@@ -698,6 +698,9 @@ class Individual(object):
             rand_tree = random_tree(2)
             x2 = r.randint(0, rand_tree.node_num - 1)
             node = rand_tree.get_node(x2)
+            self.chromosomes.set_node(mpoint, node)
+            # check and prune tree with new subtree for inefficiencies
+            self.chromosomes.prune()
 
         # or just mutate node value based on current type
         else:
@@ -723,8 +726,8 @@ class Individual(object):
 
             # mutate node value (keeps children, if applicable)
             node.value = mutated_value
+            self.chromosomes.set_node(mpoint, node)
 
-        self.chromosomes.set_node(mpoint, node)
 
 class Population(object):
     """Defines Population of Individuals with ability to create generations and evaluate fitness"""
@@ -862,8 +865,15 @@ class Population(object):
             print '\nInitializing Population with Individuals composed of random Trees:'
             pb = ProgressBar(self.init_population_size)
             while len(self.individuals) < self.init_population_size:
-                individual = Individual(random_tree(self.init_tree_size))
+                # generate a random expression tree
+                tree = random_tree(self.init_tree_size)
+                # prune inefficiencies from the tree
+                tree.prune()
+                # create an individual from this expression
+                individual = Individual(tree)
+                # check for genes
                 gene_expression = individual.compute_gene_expression(self.error_function, self.target)
+                # if there is some non-infinite error, add to the population
                 if not np.isinf(gene_expression[0]):
                     self.individuals.append(individual)
                     pb.animate(self.size)
@@ -1005,8 +1015,9 @@ class Population(object):
 
         # crossover mate
         parent_pairs = zip(self.select(mate_num), self.select(mate_num))
-        children = [p1.crossover(p2) for p1, p2 in parent_pairs]
-        next_generation.extend([child for pair in children for child in pair])
+        children_pairs = [p1.crossover(p2) for p1, p2 in parent_pairs]
+        children = [child for pair in children for child in pair]
+        next_generation.extend(children)
 
         # mutate
         mutants = self.select(mutate_num)
