@@ -578,6 +578,26 @@ class Tree(object):
 
         return node_list
 
+    def prune(self):
+        """go thru nodes and remove or replace dead / constant branches (subtrees)"""
+
+        sub_tree = Tree(self.nodes, subtree=True)
+        contains_variable = any([n in VARIABLES for n in sub_tree.list_nodes()])
+
+        if not contains_variable:
+            sub_eval = sub_tree.evaluate()
+            # node properties
+            self.nodes.value = sub_eval
+            self.nodes.children = ()
+
+        else:
+            for child in self.nodes.children:
+                Tree(child, subtree=True).prune()
+
+        # rebase the numbers of the Tree
+        self.nodes.set_nums()
+        return self.nodes
+
     def display(self, level=0, level_list=None):
         """display helper"""
         level_list = level_list if level_list else []
