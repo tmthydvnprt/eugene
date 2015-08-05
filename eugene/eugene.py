@@ -442,23 +442,23 @@ class Node(object):
             else:
                 return '%s(%s)' % (self.value, ', '.join([str(c) for c in self.children]))
 
-    def set_nums(self, node_counter=-1, level_count=0, leaf_count=-1, edge_count=-1):
+    def set_nums(self, node_counter=-1, level_counter=0, leaf_count=-1, edge_count=-1):
         """set node numbers (depth first)"""
 
         # count this node
         node_counter += 1
         self.num = node_counter
-        self.level = level_count
+        self.level = level_counter
         complexity = 0
         node_count = 1
 
         # traverse children if present or count as leaf node
         if len(self.children) > 0:
-            level_count += 1
+            level_counter += 1
             edge_count += len(self.children)
             height_count = 1
             for c in self.children:
-                child_numbers = c.set_nums(node_counter, level_count, leaf_count, edge_count)
+                child_numbers = c.set_nums(node_counter, level_counter, leaf_count, edge_count)
                 node_counter, child_node_count, child_height, leaf_count, edge_count, child_complexity = child_numbers
                 height_count = max(height_count, child_height)
                 complexity += child_complexity
