@@ -581,15 +581,24 @@ class Tree(object):
     def prune(self):
         """go thru nodes and remove or replace dead / constant branches (subtrees)"""
 
+        # create subtree
         sub_tree = Tree(self.nodes, subtree=True)
+        # check if the tree contains a variable
         contains_variable = any([n in VARIABLES for n in sub_tree.list_nodes()])
+        # evaluate subtree for inefficiencies
+        sub_eval = sub_tree.evaluate()
+        # check is evaluation exactly equals variable
+        equals_variable = [v for v in VARIABLES if (Tree(Node(v)).evaluate() == sub_eval).all()]
 
+        # if subtree of node does not contain variable, it must be constant
         if not contains_variable:
-            sub_eval = sub_tree.evaluate()
-            # node properties
             self.nodes.value = sub_eval
             self.nodes.children = ()
-
+        # if subtree contains a variable, but evaluates to exactly the variable, replace with variable
+        elif equals_variable:
+            self.nodes.value = equals_variable[0]
+            self.nodes.children = ()
+        # can't make more effiecient
         else:
             for child in self.nodes.children:
                 Tree(child, subtree=True).prune()
