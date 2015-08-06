@@ -119,7 +119,6 @@ import tabulate
 import operator as o
 import random as r
 import numpy as np
-import pandas as pd
 import copy as cp
 import scipy.special as sp
 import scipy.misc as sm
@@ -127,6 +126,7 @@ from multiprocessing import Pool
 
 DEFAULT_OBJECTIVE = lambda x: 1.0
 DISPLAY_NODE_STR = '%s%s[%s:%s] %s (%s) - {%s|%s}'
+
 VARIABLES = ['x']
 UNARIES = [
     'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \
