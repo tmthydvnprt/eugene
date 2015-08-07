@@ -781,7 +781,8 @@ class Population(object):
             'fitness' : [],
             'error' : [],
             'time' : [],
-            'complexity' : []
+            'complexity' : [],
+            'most_fit': []
         }
         # cached values
         self._fitness = np.array([])
@@ -909,10 +910,12 @@ class Population(object):
             self._fitness = self.objective_function(expression, expression_scale)
             mfit = np.ma.masked_invalid(self._fitness)
 
+            self.rank()
             self.history['fitness'].append((mfit.max(), mfit.mean(), mfit.min()))
             self.history['error'].append((max_expr[0], mean_expr[0], min_expr[0]))
             self.history['time'].append((max_expr[1], mean_expr[1], min_expr[1]))
             self.history['complexity'].append((max_expr[2], mean_expr[2], min_expr[2]))
+            self.history['most_fit'].append(self.most_fit())
 
     def rank(self):
         """create ranking of individuals"""
