@@ -6,7 +6,7 @@ Tree.py
 import copy as cp
 import numpy as np
 
-from eugene.Primatives import VARIABLES
+from eugene.Primatives import *
 from eugene.Node import Node, random_node
 
 DISPLAY_NODE_STR = '%s%s[%s:%s] %s (%s) - {%s|%s}'

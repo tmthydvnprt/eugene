@@ -7,10 +7,13 @@ import numpy as np
 
 def rmse(predicted, truth):
     """return the mean square error"""
-    if np.isnan(predicted).any() or predicted.shape != truth.shape:
+    try:
+        if np.isnan(predicted).any() or predicted.shape != truth.shape:
+            result = np.inf
+        else:
+            result = np.sqrt(((predicted - truth) ** 2).mean())
+    except TypeError:
         result = np.inf
-    else:
-        result = np.sqrt(((predicted - truth) ** 2).mean())
     return result
 
 class ProgressBar(object):

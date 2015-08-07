@@ -3,11 +3,16 @@
 Primatives.py
 """
 
+from __future__ import division
+
 import numpy as np
 import random as r
 import operator as o
 import scipy.misc as sm
 import scipy.special as sp
+
+x = np.array(range(10)) # np.linspace(0, 8.0 * np.pi, 1024)
+TRUTH = np.array(range(10)) # x * np.sin(x) + x/2.0 + 1.61
 
 VARIABLES = ['x']
 UNARIES = [
@@ -41,6 +46,7 @@ n_le = o.le
 n_lt = o.lt
 n_mul = o.mul
 n_ne = o.ne
+n_add = o.add
 n_sub = o.sub
 n_acos = np.arccos
 n_acosh = np.arccosh
@@ -83,9 +89,14 @@ n_pow = np.power
 # n_round = np.around
 
 # safe functions, graceful error fallbacks
-def intify(_):
+def intify(a):
     """safe intify"""
-    return 1 if np.isnan(_) or not np.isfinite(_) else int(_) if not isinstance(_, 'pd.core.series.Series') else _.fillna(0).astype(int)
+    # check if a = 3.14, np.array(3.14), or np.array([3.14])
+    if np.isscalar(a) or a.shape == () or a.shape == (1,):
+        return int(a) if not np.isnan(a) and np.isfinite(a) else 1
+    # must be a 'real' array
+    else:
+        return np.array([int(_) if not np.isnan(_) and np.isfinite(_) else 1 for _ in a])
 
 def n_inv(a):
     """safe inv"""

@@ -1,11 +1,11 @@
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches,wildcard-import,unused-wildcard-import
 """
 Node.py
 """
 
 import random as r
 
-from eugene.Primatives import VARIABLES, UNARIES, BINARIES, NARIES, CONSTS, EPHEMERAL
+from eugene.Primatives import *
 
 def random_node(max_level=20, min_level=1, current_level=0):
     """create a random node that may contain random subnodes"""
