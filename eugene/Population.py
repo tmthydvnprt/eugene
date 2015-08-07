@@ -36,7 +36,8 @@ class Population(object):
             replication=0.28,
             mating=0.6,
             mutation=0.1,
-            parallel=False
+            parallel=False,
+            pruning=False
         ):
         # parameters
         self.init_population_size = init_population_size
@@ -52,6 +53,7 @@ class Population(object):
         self.mating = mating
         self.mutation = mutation
         self.parallel = parallel
+        self.pruning = pruning
         # initialize variables
         self.created = False
         self.individuals = []
@@ -158,7 +160,8 @@ class Population(object):
                 # generate a random expression tree
                 tree = random_tree(self.init_tree_size)
                 # prune inefficiencies from the tree
-                tree.prune()
+                if self.pruning:
+                    tree.prune()
                 # create an individual from this expression
                 individual = Individual(tree)
                 # check for genes
@@ -314,7 +317,7 @@ class Population(object):
         # mutate
         mutants = self.select(mutate_num)
         for m in mutants:
-            m.mutate()
+            m.mutate(self.pruning)
         next_generation.extend(mutants)
 
         self.individuals = next_generation[:self.size]

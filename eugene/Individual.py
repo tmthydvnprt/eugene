@@ -69,7 +69,7 @@ class Individual(object):
 
         return (Individual(c1), Individual(c2))
 
-    def mutate(self):
+    def mutate(self, pruning=False):
         """ alter a random node in chromosomes"""
 
         # randomly select node to mutate
@@ -82,7 +82,8 @@ class Individual(object):
             node = rand_tree.get_node(x2)
             self.chromosomes.set_node(mpoint, node)
             # check and prune tree with new subtree for inefficiencies
-            self.chromosomes.prune()
+            if pruning:
+                self.chromosomes.prune()
 
         # or just mutate node value based on current type
         else:

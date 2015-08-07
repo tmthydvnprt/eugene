@@ -61,7 +61,7 @@ class Tree(object):
         try:
             result = np.array(eval(compile(self.__str__(), '', 'eval')))
         except:
-            result = np.nan
+            result = np.array(np.nan)
         return result
 
     def get_node(self, n=0):
