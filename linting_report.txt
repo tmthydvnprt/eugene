@@ -1,24 +1,24 @@
-eugene
-************* Module eugene.eugene
+
+Eugene Linting Report
+2015-08-07 06:49:27 -0700
+=========================================
+
+************* Module eugene.Node
+I:  1, 0: Locally disabling too-many-branches (R0912) (locally-disabled)
+************* Module eugene.Population
+I:  1, 0: Locally disabling too-many-arguments (R0913) (locally-disabled)
+I:  1, 0: Locally disabling too-many-instance-attributes (R0902) (locally-disabled)
+I:  1, 0: Locally disabling too-many-public-methods (R0904) (locally-disabled)
+************* Module eugene.Primatives
+I:  1, 0: Locally disabling invalid-name (C0103) (locally-disabled)
+************* Module eugene.Tree
 I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
 I:  1, 0: Locally disabling bare-except (W0702) (locally-disabled)
-I:153, 0: Locally disabling invalid-name (C0103) (locally-disabled)
-I:208, 0: Locally enabling invalid-name (C0103) (locally-enabled)
-I:323, 0: Locally disabling too-many-branches (R0912) (locally-disabled)
-I:399, 0: Locally enabling too-many-branches (R0912) (locally-enabled)
-I:742, 0: Locally disabling too-many-arguments (R0913) (locally-disabled)
-I:742, 0: Locally disabling too-many-instance-attributes (R0902) (locally-disabled)
-I:742, 0: Locally disabling too-many-public-methods (R0904) (locally-disabled)
-I:787, 0: Locally enabling too-many-arguments (R0913) (locally-enabled)
-I:787, 0: Locally enabling too-many-instance-attributes (R0902) (locally-enabled)
-I:787, 0: Locally enabling too-many-public-methods (R0904) (locally-enabled)
-R:740, 0: Too many instance attributes (20/16) (too-many-instance-attributes)
-R:740, 0: Too many public methods (17/16) (too-many-public-methods)
 
 
 Report
 ======
-517 statements analysed.
+544 statements analysed.
 
 Statistics by type
 ------------------
@@ -26,7 +26,7 @@ Statistics by type
 +---------+-------+-----------+-----------+------------+---------+
 |type     |number |old number |difference |%documented |%badname |
 +=========+=======+===========+===========+============+=========+
-|module   |2      |2          |=          |100.00      |0.00     |
+|module   |7      |7          |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
 |class    |5      |5          |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
@@ -41,11 +41,16 @@ External dependencies
 ---------------------
 ::
 
-    numpy (eugene.eugene)
+    eugene 
+      \-Individual (eugene.Population)
+      \-Node (eugene.Tree)
+      \-Primatives (eugene.Individual,eugene.Tree,eugene.Node)
+      \-Tree (eugene.Individual,eugene.Population)
+    numpy (eugene.Individual,eugene.Tree,eugene.Util,eugene.Primatives,eugene.Population)
     scipy 
-      \-misc (eugene.eugene)
-      \-special (eugene.eugene)
-    tabulate (eugene.eugene)
+      \-misc (eugene.Primatives)
+      \-special (eugene.Primatives)
+    tabulate (eugene.Population)
 
 
 
@@ -55,13 +60,13 @@ Raw metrics
 +----------+-------+------+---------+-----------+
 |type      |number |%     |previous |difference |
 +==========+=======+======+=========+===========+
-|code      |626    |65.96 |627      |-1.00      |
+|code      |656    |64.95 |656      |=          |
 +----------+-------+------+---------+-----------+
-|docstring |204    |21.50 |204      |=          |
+|docstring |227    |22.48 |227      |=          |
 +----------+-------+------+---------+-----------+
-|comment   |50     |5.27  |50       |=          |
+|comment   |48     |4.75  |49       |-1.00      |
 +----------+-------+------+---------+-----------+
-|empty     |69     |7.27  |69       |=          |
+|empty     |79     |7.82  |79       |=          |
 +----------+-------+------+---------+-----------+
 
 
@@ -87,9 +92,9 @@ Messages by category
 +===========+=======+=========+===========+
 |convention |0      |0        |=          |
 +-----------+-------+---------+-----------+
-|refactor   |2      |2        |=          |
+|refactor   |0      |0        |=          |
 +-----------+-------+---------+-----------+
-|warning    |0      |1        |-1.00      |
+|warning    |0      |0        |=          |
 +-----------+-------+---------+-----------+
 |error      |0      |0        |=          |
 +-----------+-------+---------+-----------+
@@ -99,21 +104,15 @@ Messages by category
 Messages
 --------
 
-+-----------------------------+------------+
-|message id                   |occurrences |
-+=============================+============+
-|locally-disabled             |7           |
-+-----------------------------+------------+
-|locally-enabled              |5           |
-+-----------------------------+------------+
-|too-many-public-methods      |1           |
-+-----------------------------+------------+
-|too-many-instance-attributes |1           |
-+-----------------------------+------------+
++-----------------+------------+
+|message id       |occurrences |
++=================+============+
+|locally-disabled |7           |
++-----------------+------------+
 
 
 
 Global evaluation
 -----------------
-Your code has been rated at 9.96/10 (previous run: 9.94/10, +0.02)
+Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
 
