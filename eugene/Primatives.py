@@ -14,27 +14,34 @@ import scipy.special as sp
 x = np.array(range(10)) # np.linspace(0, 8.0 * np.pi, 1024)
 TRUTH = np.array(range(10)) # x * np.sin(x) + x/2.0 + 1.61
 
+# x
 VARIABLES = ['x']
-UNARIES = [
-    'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \
-    'n_cosh', 'n_degrees', 'n_exp', 'n_expm1', 'n_fabs', 'n_factorial', 'n_floor', 'n_gamma', 'n_isinf', \
-    'n_isnan', 'n_gammaln', 'n_log10', 'n_log2', 'n_log1p', 'n_log', 'n_radians', 'n_sin', 'n_sinh', 'n_sqrt', 'n_tan', \
-    'n_tanh', 'n_trunc'
-]
-# 'n_erf', 'n_erfc',
-BINARIES = [
-    'n_or', 'n_add', 'n_and', 'n_div', 'n_eq', 'n_floordiv', 'n_ge', 'n_gt', 'n_le', 'n_lt', 'n_mod', 'n_mul', \
-    'n_ne', 'n_sub', 'n_xor', 'n_atan2', 'n_copysign', 'n_fmod', 'n_hypot', 'n_ldexp', 'n_pow', 'n_round'
-]
-NARIES = ['n_max', 'n_min', 'n_sum', 'n_prod']
+# + - * / %
+BINARIES = ['n_add', 'n_sub', 'n_mul', 'n_div', 'n_mod', 'n_pow']
+# asb, sqtr, log, exp, sin, cos, tan, min, max,
+UNARIES = ['n_abs', 'n_sqrt', 'n_log', 'n_exp', 'n_sin', 'n_cos', 'n_tan', 'n_min', 'n_max']
+# none
+NARIES = ['']
+# 3.14..., 2.71...
 CONSTS = ['np.pi', 'np.e']
-
+# random constants
 EPHEMERAL = {
     0: r.randint(-500, 500),
     1: r.random(),
     2: r.uniform(-500, 500),
     3: r.normalvariate(0, 100)
 }
+# UNARIES = [
+#     'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \
+#     'n_cosh', 'n_degrees', 'n_exp', 'n_expm1', 'n_fabs', 'n_factorial', 'n_floor', 'n_gamma', 'n_isinf', \
+#     'n_isnan', 'n_gammaln', 'n_log10', 'n_log2', 'n_log1p', 'n_log', 'n_radians', 'n_sin', 'n_sinh', 'n_sqrt', 'n_tan', \
+#     'n_tanh', 'n_trunc'
+# ]
+# BINARIES = [
+#     'n_or', 'n_add', 'n_and', 'n_div', 'n_eq', 'n_floordiv', 'n_ge', 'n_gt', 'n_le', 'n_lt', 'n_mod', 'n_mul', \
+#     'n_ne', 'n_sub', 'n_xor', 'n_atan2', 'n_copysign', 'n_fmod', 'n_hypot', 'n_ldexp', 'n_pow', 'n_round'
+# ]
+# NARIES = ['n_max', 'n_min', 'n_sum', 'n_prod']
 
 n_abs = o.abs
 n_neg = o.neg
@@ -58,8 +65,6 @@ n_ceil = np.ceil
 n_cos = np.cos
 n_cosh = np.cosh
 n_degrees = np.degrees
-# n_erf = sp.erf
-# n_erfc = sp.erfc
 n_exp = np.exp
 n_expm1 = np.expm1
 n_fabs = np.fabs
