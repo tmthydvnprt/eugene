@@ -11,6 +11,7 @@ from eugene.Node import Node, random_node
 
 DISPLAY_NODE_STR = '%s%s[%s:%s] %s (%s) - {%s|%s}'
 
+# @profile
 def random_tree(max_level=20, min_level=1, current_level=0):
     """generate a random tree of random nodes"""
     return Tree(random_node(max_level, min_level, current_level))
@@ -56,6 +57,7 @@ class Tree(object):
     def __str__(self):
         return str(self.nodes)
 
+    # @profile
     def evaluate(self):
         """evaluate expression stored in tree"""
         try:
@@ -64,6 +66,7 @@ class Tree(object):
             result = np.array(np.nan)
         return result
 
+    # @profile
     def get_node(self, n=0):
         """return a node from the tree"""
 
@@ -78,6 +81,7 @@ class Tree(object):
         else:
             return None
 
+    # @profile
     def set_node(self, n=0, node=None):
         """set a node in the tree"""
 
@@ -88,9 +92,11 @@ class Tree(object):
             self.nodes.children = tuple([Tree(c, subtree=True).set_node(n, node) for c in self.nodes.children])
 
         # rebase the numbers of the Tree
-        self.nodes.set_nums()
+        if n == 0 :
+            self.nodes.set_nums()
         return self.nodes
 
+    # @profile
     def list_edges(self):
         """get edges of tree"""
 
@@ -101,6 +107,7 @@ class Tree(object):
             edges += children_nodes[i]
         return edges
 
+    # @profile
     def list_nodes(self):
         """return nodes of tree"""
 
@@ -115,6 +122,7 @@ class Tree(object):
 
         return node_list
 
+    # @profile
     def prune(self):
         """go thru nodes and remove or replace dead / constant branches (subtrees)"""
 

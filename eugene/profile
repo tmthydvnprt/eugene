@@ -1,0 +1,111 @@
+otal time: 55.2102 s
+Function: compute_gene_expression at line 36
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    42     57594     52483053    911.3     95.1          output = self.chromosomes.evaluate()
+    46     57594      2231178     38.7      4.0          error = error_function(output, target)
+
+Total time: 367.137 s
+Function: crossover at line 52
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    61     15000     49372197   3291.5     13.4          c1 = cp.deepcopy(self.chromosomes)
+    62     15000     49561602   3304.1     13.5          c2 = cp.deepcopy(spouse.chromosomes)
+    69     15000    120987352   8065.8     33.0          c1.set_node(x1, c2n)
+    70     15000    122270886   8151.4     33.3          c2.set_node(x2, c1n)
+
+Total time: 43.0822 s
+Function: mutate at line 74
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    86      2439     18046137   7399.0     41.9              self.chromosomes.set_node(mpoint, node)
+    93      2561      2078889    811.7      4.8              node = self.chromosomes.get_node(mpoint)
+   115      2561     20889626   8156.8     48.5              self.chromosomes.set_node(mpoint, node)
+
+Total time: 1.30891 s
+Function: random_node at line 10
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   15     36697       193055      5.3     14.7          rand_node = r.randint(0, 3)
+   21      9291        83761      9.0      6.4              node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+   27      9055        79984      8.8      6.1              node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
+   29     33061       193445      5.9     14.8          rand_node = r.randint(4, 6) if current_level < min_level else r.randint(0, 6)
+   45      9296        52010      5.6      4.0                  UNARIES[r.randint(0, len(UNARIES) - 1)],
+   51      9358        52237      5.6      4.0                  BINARIES[r.randint(0, len(BINARIES) - 1)],
+   57      9361        48750      5.2      3.7              nary_node_num = r.randint(2, 5)
+
+Total time: 135.472 s
+Function: set_nums at line 134
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+  150  13535768      8411504      0.6      6.2              for c in self.children:
+  151   8529714     13978182      1.6     10.3                  child_numbers = c.set_nums(node_counter, level_counter, leaf_count, edge_count)
+  152   8529714      5520393      0.6      4.1                  node_counter, child_node_count, child_height, leaf_count, edge_count, child_complexity = child_numbers
+  153   8529714      7037516      0.8      5.2                  height_count = max(height_count, child_height)
+
+Total time: 39.0693 s
+Function: initialize at line 148
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+  169      6594     35784991   5426.9     91.6                  gene_expression = individual.compute_gene_expression(self.error_function, self.target)
+
+Total time: 22.055 s
+Function: calc_fitness at line 177
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+  189     51051     21401058    419.2     97.0              expression = np.array([i.compute_gene_expression(self.error_function, self.target) for i in self.individuals])
+
+Total time: 0.607102 s
+Function: rank at line 205
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+  208       152       502151   3303.6     82.7          self.ranking = zip(self.fitness, self.individuals)
+  209       152       104951    690.5     17.3          self.ranking.sort()
+
+Total time: 0.362354 s
+Function: roulette at line 211
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+  218       200       180898    904.5     49.9          ranked_fitness, ranked_individuals = (list(i) for i in zip(*self.ranking))
+  222       200        22986    114.9      6.3          fitness_probability = ranked_fitness / np.ma.masked_invalid(ranked_fitness).sum()
+  223       200        25621    128.1      7.1          cum_prob_dist = np.array(np.ma.masked_invalid(fitness_probability).cumsum())  224
+  226     49200       114594      2.3     31.6          selections = [ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])] for _ in xrange(number)]
+
+Total time: 432.944 s
+Function: create_generation at line 293
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+  298        50     21967429 439348.6      5.1          self.calc_fitness()
+  319     15050    367330554  24407.3     84.8          child_pairs = [p1.crossover(p2) for p1, p2 in parent_pairs]
+  326      5000     43149318   8629.9     10.0              m.mutate(self.pruning)
+
+Total time: 52.1438 s
+Function: evaluate at line 60
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   64     57594     52061494    903.9     99.8              result = np.array(eval(compile(self.__str__(), '', 'eval')))
+
+
+Total time: 25.0918 s
+Function: get_node at line 69
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   74    498880       393687      0.8      1.6          if self.nodes.num == n:
+   75     35000     22020193    629.1     87.8              return cp.deepcopy(self.nodes)
+   76    463880       349065      0.8      1.4          elif len(self.nodes.children) > 0:
+   77    629246       617983      1.0      2.5              for c in self.nodes.children:
+   78    463880      1309325      2.8      5.2                  cn = Tree(c, subtree=True).get_node(n)
+
+Total time: 278.922 s
+Function: set_node at line 84
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   95    858678    274443455    319.6     98.4          self.nodes.set_nums()
+
+Total time: 0.002627 s
+Function: error_and_complexity at line 21
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+   25        51          221      4.3      8.4      weights = np.array([0.95, 0.025, 0.025])
+   26        51         1918     37.6     73.0      scaled_gene_expression = 1.0 / (gene_expression / scale)   27
+   28        51          488      9.6     18.6      return np.dot(scaled_gene_expression, weights)

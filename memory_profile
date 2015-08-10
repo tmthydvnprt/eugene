@@ -1,0 +1,515 @@
+Population Initialized w/ Parameters:
+------------------------------  -------
+Initial number of individuals:  1000
+Initial size of individuals:       2
+Max. number of generations:      100
+Parallel fitness turned on:        0
+Stagnation factor:                20
+Percent of Elitism:                0.02
+Percent of replication:            0.28
+Percent of mating:                 0.6
+Percent of mutation:               0.1
+Selective pressure:                2
+------------------------------  -------
+
+Initializing Population with Individuals composed of random Trees:
+[****************100%******************]  1000 of 1000 complete
+
+
+Current Population Status:
+----------------------  ---------------
+Current generation:        0
+Number of individuals:  1000
+Max fitness:               4.93487e+102
+Average fitness:           2.19014e+102
+Min fitness:               1.18551
+----------------------  ---------------
+[****************100%******************]  50 of 50 complete 50 generations
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Individual.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    74  116.668 MiB    0.000 MiB       @profile
+    75  116.668 MiB    0.000 MiB       def mutate(self, pruning=False):
+    76                                     """ alter a random node in chromosomes"""
+    77
+    78                                     # randomly select node to mutate
+    79  116.668 MiB    0.000 MiB           mpoint = r.randint(0, self.size - 1)
+    80  116.668 MiB    0.000 MiB
+    81                                     # mutate whole node by replacing children with random subtree
+    82  116.668 MiB    0.000 MiB           if r.random() >= 0.5:
+    83                                         rand_tree = random_tree(2)
+    84  116.668 MiB    0.000 MiB               x2 = r.randint(0, rand_tree.node_num - 1)
+    85                                         node = rand_tree.get_node(x2)
+    86                                         self.chromosomes.set_node(mpoint, node)
+    87                                         # check and prune tree with new subtree for inefficiencies
+    88  116.668 MiB    0.000 MiB               if pruning:
+    89                                             self.chromosomes.prune()
+    90
+    91                                     # or just mutate node value based on current type
+    92                                     else:
+    93                                         node = self.chromosomes.get_node(mpoint)
+    94                                         # constant
+    95  116.668 MiB    0.000 MiB               if node.value in CONSTS:
+    96  116.668 MiB    0.000 MiB                   mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
+    97                                         # variable
+    98  116.668 MiB    0.000 MiB               elif node.value in VARIABLES:
+    99  116.668 MiB    0.000 MiB                   mutated_value = VARIABLES[r.randint(0, len(VARIABLES) - 1)]
+   100                                         # a unary operator
+   101  116.668 MiB    0.000 MiB               elif node.value in UNARIES:
+   102  116.668 MiB    0.000 MiB                   mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]
+   103                                         # a binary operator
+   104  116.668 MiB    0.000 MiB               elif node.value in BINARIES:
+   105  116.668 MiB    0.000 MiB                   mutated_value = BINARIES[r.randint(0, len(BINARIES) - 1)]
+   106                                         # a n-ary operator
+   107  116.668 MiB    0.000 MiB               elif node.value in NARIES:
+   108   66.812 MiB  -49.855 MiB                   mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
+   109                                         # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+   110                                         else:
+   111  116.668 MiB   49.855 MiB                   mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]
+   112
+   113                                         # mutate node value (keeps children, if applicable)
+   114  116.668 MiB    0.000 MiB               node.value = mutated_value
+   115                                         self.chromosomes.set_node(mpoint, node)
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Node.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   134  116.668 MiB    0.000 MiB       @profile
+   135                                 def set_nums(self, node_counter=-1, level_counter=0, leaf_count=-1, edge_count=-1):
+   136                                     """set node numbers (depth first)"""
+   137
+   138                                     # count this node
+   139  116.668 MiB    0.000 MiB           node_counter += 1
+   140  116.668 MiB    0.000 MiB           self.num = node_counter
+   141  116.668 MiB    0.000 MiB           self.level = level_counter
+   142  116.668 MiB    0.000 MiB           complexity = 0
+   143  116.668 MiB    0.000 MiB           node_count = 1
+   144
+   145                                     # traverse children if present or count as leaf node
+   146  116.668 MiB    0.000 MiB           if len(self.children) > 0:
+   147  116.668 MiB    0.000 MiB               level_counter += 1
+   148  116.668 MiB    0.000 MiB               edge_count += len(self.children)
+   149  116.668 MiB    0.000 MiB               height_count = 1
+   150  116.668 MiB    0.000 MiB               for c in self.children:
+   151                                             child_numbers = c.set_nums(node_counter, level_counter, leaf_count, edge_count)
+   152  116.668 MiB    0.000 MiB                   node_counter, child_node_count, child_height, leaf_count, edge_count, child_complexity = child_numbers
+   153  116.668 MiB    0.000 MiB                   height_count = max(height_count, child_height)
+   154  116.668 MiB    0.000 MiB                   complexity += child_complexity
+   155  116.668 MiB    0.000 MiB                   node_count += child_node_count
+   156                                     else:
+   157  116.668 MiB    0.000 MiB               leaf_count += 1
+   158  116.668 MiB    0.000 MiB               height_count = 0
+   159  116.668 MiB    0.000 MiB               edge_count = 0
+   160
+   161                                     # store counts of children below
+   162  116.668 MiB    0.000 MiB           self.height = height_count
+   163  116.668 MiB    0.000 MiB           self.node_num = node_count
+   164  116.668 MiB    0.000 MiB           self.leaf_num = leaf_count
+   165  116.668 MiB    0.000 MiB           self.edge_num = edge_count
+   166  116.668 MiB    0.000 MiB           complexity += node_count
+   167  116.668 MiB    0.000 MiB           self.complexity = complexity
+   168
+   169  116.668 MiB    0.000 MiB           return (node_counter, node_count, height_count + 1, leaf_count, edge_count, complexity)
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Tree.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    69  116.668 MiB    0.000 MiB       @profile
+    70                                 def get_node(self, n=0):
+    71                                     """return a node from the tree"""
+    72
+    73                                     # search tree until node number is found and take sub tree
+    74  116.668 MiB    0.000 MiB           if self.nodes.num == n:
+    75  116.668 MiB    0.000 MiB               return cp.deepcopy(self.nodes)
+    76  116.668 MiB    0.000 MiB           elif len(self.nodes.children) > 0:
+    77  116.668 MiB    0.000 MiB               for c in self.nodes.children:
+    78                                             cn = Tree(c, subtree=True).get_node(n)
+    79  116.668 MiB    0.000 MiB                   if cn:
+    80  116.668 MiB    0.000 MiB                       return cn
+    81                                     else:
+    82  116.668 MiB    0.000 MiB               return None
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Node.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    10  116.668 MiB    0.000 MiB   @profile
+    11                             def random_node(max_level=20, min_level=1, current_level=0):
+    12                                 """create a random node that may contain random subnodes"""
+    13
+    14  116.668 MiB    0.000 MiB       if current_level == max_level:
+    15  116.668 MiB    0.000 MiB           rand_node = r.randint(0, 3)
+    16                                     # node = a constant
+    17  116.668 MiB    0.000 MiB           if rand_node == 0:
+    18  116.668 MiB    0.000 MiB               node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
+    19                                     # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+    20  116.668 MiB    0.000 MiB           elif rand_node == 1:
+    21  116.668 MiB    0.000 MiB               node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+    22                                     # node = EPHEMERAL constant random integer
+    23  116.668 MiB    0.000 MiB           elif rand_node == 2:
+    24  116.668 MiB    0.000 MiB               node = Node(EPHEMERAL[0])
+    25                                     # node = variable
+    26  116.668 MiB    0.000 MiB           elif rand_node == 3:
+    27  116.668 MiB    0.000 MiB               node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
+    28                                 else:
+    29  116.668 MiB    0.000 MiB           rand_node = r.randint(4, 6) if current_level < min_level else r.randint(0, 6)
+    30                                     # node = a constant
+    31  116.668 MiB    0.000 MiB           if rand_node == 0:
+    32  116.668 MiB    0.000 MiB               node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
+    33                                     # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+    34  116.668 MiB    0.000 MiB           elif rand_node == 1:
+    35  116.668 MiB    0.000 MiB               node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+    36                                     # node = EPHEMERAL constant random integer
+    37  116.668 MiB    0.000 MiB           elif rand_node == 2:
+    38  116.668 MiB    0.000 MiB               node = Node(EPHEMERAL[0])
+    39                                     # node = variable
+    40  116.668 MiB    0.000 MiB           elif rand_node == 3:
+    41  116.668 MiB    0.000 MiB               node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
+    42                                     # node = a unary operator
+    43  116.668 MiB    0.000 MiB           elif rand_node == 4:
+    44  116.668 MiB    0.000 MiB               node = Node(
+    45  116.668 MiB    0.000 MiB                   UNARIES[r.randint(0, len(UNARIES) - 1)],
+    46                                             random_node(max_level, min_level, current_level + 1)
+    47                                         )
+    48                                     # node = a binary operator
+    49  116.668 MiB    0.000 MiB           elif rand_node == 5:
+    50  116.668 MiB    0.000 MiB               node = Node(
+    51  116.668 MiB    0.000 MiB                   BINARIES[r.randint(0, len(BINARIES) - 1)],
+    52                                             random_node(max_level, min_level, current_level + 1),
+    53                                             random_node(max_level, min_level, current_level + 1)
+    54                                         )
+    55                                     # node = a n-ary operator
+    56  116.668 MiB    0.000 MiB           elif rand_node == 6:
+    57  116.668 MiB    0.000 MiB               nary_node_num = r.randint(2, 5)
+    58  116.668 MiB    0.000 MiB               if nary_node_num == 2:
+    59  116.668 MiB    0.000 MiB                   node = Node(
+    60  116.668 MiB    0.000 MiB                       NARIES[r.randint(0, len(NARIES) - 1)],
+    61                                                 random_node(max_level - 1, current_level + 1),
+    62                                                 random_node(max_level - 1, current_level + 1)
+    63                                             )
+    64  116.668 MiB    0.000 MiB               elif nary_node_num == 3:
+    65  116.668 MiB    0.000 MiB                   node = Node(
+    66  116.668 MiB    0.000 MiB                       NARIES[r.randint(0, len(NARIES) - 1)],
+    67                                                 random_node(max_level - 1, current_level + 1),
+    68                                                 random_node(max_level - 1, current_level + 1),
+    69                                                 random_node(max_level - 1, current_level + 1)
+    70                                             )
+    71  116.668 MiB    0.000 MiB               elif nary_node_num == 4:
+    72  116.668 MiB    0.000 MiB                   node = Node(
+    73  116.668 MiB    0.000 MiB                       NARIES[r.randint(0, len(NARIES) - 1)],
+    74                                                 random_node(max_level - 1, current_level + 1),
+    75                                                 random_node(max_level - 1, current_level + 1),
+    76                                                 random_node(max_level - 1, current_level + 1),
+    77                                                 random_node(max_level - 1, current_level + 1)
+    78                                             )
+    79  116.668 MiB    0.000 MiB               elif nary_node_num == 5:
+    80  116.668 MiB    0.000 MiB                   node = Node(
+    81  116.668 MiB    0.000 MiB                       NARIES[r.randint(0, len(NARIES) - 1)],
+    82                                                 random_node(max_level - 1, current_level + 1),
+    83                                                 random_node(max_level - 1, current_level + 1),
+    84                                                 random_node(max_level - 1, current_level + 1),
+    85                                                 random_node(max_level - 1, current_level + 1),
+    86                                                 random_node(max_level - 1, current_level + 1)
+    87                                             )
+    88  116.668 MiB    0.000 MiB       return node
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Population.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   211  116.570 MiB    0.000 MiB       @profile
+   212                                 def roulette(self, number=None):
+   213                                     """select parent pairs based on roulette method (probability proportional to fitness)"""
+   214  116.570 MiB    0.000 MiB           number = number if number else self.size
+   215  116.570 MiB    0.000 MiB           selections = []
+   216
+   217                                     # unpack
+   218  116.629 MiB    0.059 MiB           ranked_fitness, ranked_individuals = (list(i) for i in zip(*self.ranking))
+   219  116.629 MiB    0.000 MiB           ranked_fitness = np.array(ranked_fitness)
+   220
+   221                                     # calculate weighted probability proportial to fitness
+   222  116.629 MiB    0.000 MiB           fitness_probability = ranked_fitness / np.ma.masked_invalid(ranked_fitness).sum()
+   223  116.629 MiB    0.000 MiB           cum_prob_dist = np.array(np.ma.masked_invalid(fitness_probability).cumsum())
+   224
+   225                                     # randomly select two individuals with weighted probability proportial to fitness
+   226  116.629 MiB    0.000 MiB           selections = [ranked_individuals[bisect.bisect(cum_prob_dist, r.random() * cum_prob_dist[-1])] for _ in xrange(number)]
+   227  116.629 MiB    0.000 MiB           return selections
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Population.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   148   56.828 MiB   -5.523 MiB       @profile
+   149                                 def initialize(self, seed=None):
+   150                                     """initialize a population based on seed or randomly"""
+   151
+   152   56.852 MiB    0.023 MiB           self.describe_init()
+   153   56.852 MiB    0.000 MiB           self.created = True
+   154   56.852 MiB    0.000 MiB           if seed:
+   155                                         print '\nUsing seed for inital population'
+   156                                         self.individuals = seed
+   157                                     else:
+   158   56.852 MiB    0.000 MiB               print '\nInitializing Population with Individuals composed of random Trees:'
+   159   56.852 MiB    0.000 MiB               pb = ProgressBar(self.init_population_size)
+   160   62.352 MiB    5.500 MiB               while len(self.individuals) < self.init_population_size:
+   161                                             # generate a random expression tree
+   162                                             tree = random_tree(self.init_tree_size)
+   163                                             # prune inefficiencies from the tree
+   164   62.352 MiB    0.000 MiB                   if self.pruning:
+   165                                                 tree.prune()
+   166                                             # create an individual from this expression
+   167   62.352 MiB    0.000 MiB                   individual = Individual(tree)
+   168                                             # check for genes
+   169                                             gene_expression = individual.compute_gene_expression(self.error_function, self.target)
+   170                                             # if there is some non-infinite error, add to the population
+   171   62.352 MiB    0.000 MiB                   if not np.isinf(gene_expression[0]):
+   172   62.352 MiB    0.000 MiB                       self.individuals.append(individual)
+   173   62.352 MiB    0.000 MiB                       pb.animate(self.size)
+   174   62.352 MiB    0.000 MiB           print '\n'
+   175                                     self.describe_current()
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Population.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   287  116.570 MiB   -0.059 MiB       @profile
+   288                                 def select(self, number=None):
+   289                                     """select individuals thru various methods"""
+   290                                     selections = self.roulette(number)
+   291  116.629 MiB    0.059 MiB           return selections
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Individual.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    52  116.566 MiB    0.000 MiB       @profile
+    53                                 def crossover(self, spouse=None):
+    54                                     """randomly crossover two chromosomes"""
+    55
+    56                                     # create random crossover points
+    57  116.566 MiB    0.000 MiB           x1 = r.randint(0, self.size - 1)
+    58  116.566 MiB    0.000 MiB           x2 = r.randint(0, spouse.size - 1)
+    59
+    60                                     # clone parent chromosomes
+    61  116.566 MiB    0.000 MiB           c1 = cp.deepcopy(self.chromosomes)
+    62  116.570 MiB    0.004 MiB           c2 = cp.deepcopy(spouse.chromosomes)
+    63
+    64                                     # get nodes to cross
+    65                                     c1n = c1.get_node(x1)
+    66                                     c2n = c2.get_node(x2)
+    67
+    68                                     # transfer nodes
+    69                                     c1.set_node(x1, c2n)
+    70                                     c2.set_node(x2, c1n)
+    71
+    72  116.570 MiB    0.000 MiB           return (Individual(c1), Individual(c2))
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/tests/eguene_test.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    20  115.191 MiB    0.000 MiB   @profile
+    21                             def error_and_complexity(gene_expression, scale):
+    22                                 """user fitness function, weighted combination of error and complexity"""
+    23
+    24  115.191 MiB    0.000 MiB       weights = np.array([0.95, 0.025, 0.025])
+    25  115.191 MiB    0.000 MiB       scaled_gene_expression = 1.0 / (gene_expression / scale)
+    26
+    27  115.191 MiB    0.000 MiB       return np.dot(scaled_gene_expression, weights)
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Tree.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    14  116.668 MiB    0.000 MiB   @profile
+    15                             def random_tree(max_level=20, min_level=1, current_level=0):
+    16                                 """generate a random tree of random nodes"""
+    17                                 return Tree(random_node(max_level, min_level, current_level))
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Tree.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    84  116.668 MiB    0.000 MiB       @profile
+    85                                 def set_node(self, n=0, node=None):
+    86                                     """set a node in the tree"""
+    87
+    88                                     # search tree until node number is found, and store sub tree
+    89  116.668 MiB    0.000 MiB           if self.nodes.num == n:
+    90  116.668 MiB    0.000 MiB               self.nodes = node
+    91                                     else:
+    92  116.668 MiB    0.000 MiB               self.nodes.children = tuple([Tree(c, subtree=True).set_node(n, node) for c in self.nodes.children])
+    93
+    94                                     # rebase the numbers of the Tree
+    95                                     self.nodes.set_nums()
+    96  116.668 MiB    0.000 MiB           return self.nodes
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Population.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   293  115.090 MiB   -1.480 MiB       @profile
+   294                                 def create_generation(self):
+   295                                     """create the next generations, this is main function that loops"""
+   296
+   297                                     # determine fitness of current generations and log average fitness
+   298                                     self.calc_fitness()
+   299
+   300                                     # rank individuals by fitness
+   301                                     self.rank()
+   302
+   303                                     # create next generation
+   304  115.191 MiB    0.102 MiB           elite_num = int(round(self.size * self.elitism))
+   305  115.191 MiB    0.000 MiB           replicate_num = int(round(self.size * self.replication))
+   306  115.191 MiB    0.000 MiB           mate_num = int(round(self.size * self.mating))
+   307  115.191 MiB    0.000 MiB           mutate_num = int(round(self.size * self.mutation))
+   308                                     # split mate_num in half_size (2 parents = 2 children)
+   309  115.191 MiB    0.000 MiB           mate_num = int(round(mate_num/2.0))
+   310
+   311                                     # propogate elite
+   312  115.191 MiB    0.000 MiB           next_generation = [i[1] for i in self.ranking[-elite_num:]]
+   313
+   314                                     # replicate
+   315                                     next_generation.extend(self.select(replicate_num))
+   316
+   317                                     # crossover mate
+   318                                     parent_pairs = zip(self.select(mate_num), self.select(mate_num))
+   319  116.570 MiB    1.379 MiB           child_pairs = [p1.crossover(p2) for p1, p2 in parent_pairs]
+   320  116.570 MiB    0.000 MiB           children = [child for pair in child_pairs for child in pair]
+   321  116.570 MiB    0.000 MiB           next_generation.extend(children)
+   322
+   323                                     # mutate
+   324                                     mutants = self.select(mutate_num)
+   325  116.668 MiB    0.098 MiB           for m in mutants:
+   326                                         m.mutate(self.pruning)
+   327  116.668 MiB    0.000 MiB           next_generation.extend(mutants)
+   328
+   329  116.668 MiB    0.000 MiB           self.individuals = next_generation[:self.size]
+   330
+   331                                     # clear cached values
+   332  116.668 MiB    0.000 MiB           self._fitness = np.array([])
+   333
+   334                                     # log generation
+   335  116.668 MiB    0.000 MiB           self.generation += 1
+   336
+   337  116.668 MiB    0.000 MiB           return None
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Population.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   205  115.191 MiB    0.000 MiB       @profile
+   206                                 def rank(self):
+   207                                     """create ranking of individuals"""
+   208  115.191 MiB    0.000 MiB           self.ranking = zip(self.fitness, self.individuals)
+   209  115.191 MiB    0.000 MiB           self.ranking.sort()
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Population.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   177  115.090 MiB   -0.102 MiB       @profile
+   178                                 def calc_fitness(self):
+   179                                     """calculate the fitness of each individual."""
+   180
+   181  115.090 MiB    0.000 MiB           if self.parallel:
+   182                                         pool = Pool()
+   183                                         fitness = pool.map(par_fit, [(i, self.objective_function) for i in self.individuals])
+   184                                         pool.close()
+   185                                         pool.join()
+   186                                         self._fitness = np.array(fitness)
+   187
+   188                                     else:
+   189  115.191 MiB    0.102 MiB               expression = np.array([i.compute_gene_expression(self.error_function, self.target) for i in self.individuals])
+   190  115.191 MiB    0.000 MiB               expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
+   191  115.191 MiB    0.000 MiB               max_expr = np.array(np.ma.masked_invalid(expression).max(axis=0)) / expression_scale
+   192  115.191 MiB    0.000 MiB               mean_expr = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / expression_scale
+   193  115.191 MiB    0.000 MiB               min_expr = np.array(np.ma.masked_invalid(expression).min(axis=0)) / expression_scale
+   194
+   195                                         self._fitness = self.objective_function(expression, expression_scale)
+   196  115.191 MiB    0.000 MiB               mfit = np.ma.masked_invalid(self._fitness)
+   197
+   198                                         self.rank()
+   199  115.191 MiB    0.000 MiB               self.history['fitness'].append((mfit.max(), mfit.mean(), mfit.min()))
+   200  115.191 MiB    0.000 MiB               self.history['error'].append((max_expr[0], mean_expr[0], min_expr[0]))
+   201  115.191 MiB    0.000 MiB               self.history['time'].append((max_expr[1], mean_expr[1], min_expr[1]))
+   202  115.191 MiB    0.000 MiB               self.history['complexity'].append((max_expr[2], mean_expr[2], min_expr[2]))
+   203                                         self.history['most_fit'].append(self.most_fit())
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Tree.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    60  115.191 MiB    0.000 MiB       @profile
+    61                                 def evaluate(self):
+    62                                     """evaluate expression stored in tree"""
+    63  115.191 MiB    0.000 MiB           try:
+    64  115.191 MiB    0.000 MiB               result = np.array(eval(compile(self.__str__(), '', 'eval')))
+    65  115.191 MiB    0.000 MiB           except:
+    66  115.191 MiB    0.000 MiB               result = np.array(np.nan)
+    67  115.191 MiB    0.000 MiB           return result
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Population.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   339   62.555 MiB  -54.113 MiB       @profile
+   340                                 def run(self, number_of_generations=None):
+   341                                     """run algorithm"""
+   342
+   343   62.555 MiB    0.000 MiB           number_of_generations = number_of_generations if number_of_generations else self.max_generations
+   344   62.555 MiB    0.000 MiB           pb = ProgressBar(number_of_generations)
+   345
+   346  116.668 MiB   54.113 MiB           while self.generation < number_of_generations and not self.stagnate:
+   347                                         self.create_generation()
+   348  116.668 MiB    0.000 MiB               pb.animate(self.generation)
+   349
+   350  116.668 MiB    0.000 MiB           if self.stagnate:
+   351                                         print 'population became stagnate'
+   352  116.668 MiB    0.000 MiB           print self.generation, 'generations'
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Population.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+   218  116.629 MiB    0.000 MiB           ranked_fitness, ranked_individuals = (list(i) for i in zip(*self.ranking))
+
+
+Filename: /Users/timothydavenport/GitHub/eugene/eugene/Individual.py
+
+Line #    Mem usage    Increment   Line Contents
+================================================
+    36  115.191 MiB    0.000 MiB       @profile
+    37                                 def compute_gene_expression(self, error_function=None, target=None):
+    38                                     """compute gene expression by evaluating function stored in tree, and keep track of time"""
+    39
+    40                                     # evaluate function and time to compute
+    41  115.191 MiB    0.000 MiB           t0 = time.time()
+    42                                     output = self.chromosomes.evaluate()
+    43  115.191 MiB    0.000 MiB           t1 = time.time()
+    44
+    45                                     # calculate error of result and time complexity
+    46  115.191 MiB    0.000 MiB           error = error_function(output, target)
+    47  115.191 MiB    0.000 MiB           time_complexity = t1 - t0
+    48  115.191 MiB    0.000 MiB           physical_complexity = self.chromosomes.complexity
+    49
+    50  115.191 MiB    0.000 MiB           return np.array([error, time_complexity, physical_complexity])

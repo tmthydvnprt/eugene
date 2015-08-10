@@ -7,6 +7,7 @@ import random as r
 
 from eugene.Primatives import *
 
+# @profile
 def random_node(max_level=20, min_level=1, current_level=0):
     """create a random node that may contain random subnodes"""
 
@@ -25,7 +26,8 @@ def random_node(max_level=20, min_level=1, current_level=0):
         elif rand_node == 3:
             node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
     else:
-        rand_node = r.randint(4, 6) if current_level < min_level else r.randint(0, 6)
+        # rand_node = r.randint(4, 6) if current_level < min_level else r.randint(0, 6)
+        rand_node = r.randint(4, 5) if current_level < min_level else r.randint(0, 5)
         # node = a constant
         if rand_node == 0:
             node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
@@ -51,39 +53,39 @@ def random_node(max_level=20, min_level=1, current_level=0):
                 random_node(max_level, min_level, current_level + 1),
                 random_node(max_level, min_level, current_level + 1)
             )
-        # node = a n-ary operator
-        elif rand_node == 6:
-            nary_node_num = r.randint(2, 5)
-            if nary_node_num == 2:
-                node = Node(
-                    NARIES[r.randint(0, len(NARIES) - 1)],
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1)
-                )
-            elif nary_node_num == 3:
-                node = Node(
-                    NARIES[r.randint(0, len(NARIES) - 1)],
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1)
-                )
-            elif nary_node_num == 4:
-                node = Node(
-                    NARIES[r.randint(0, len(NARIES) - 1)],
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1)
-                )
-            elif nary_node_num == 5:
-                node = Node(
-                    NARIES[r.randint(0, len(NARIES) - 1)],
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1),
-                    random_node(max_level - 1, current_level + 1)
-                )
+        # # node = a n-ary operator
+        # elif rand_node == 6:
+        #     nary_node_num = r.randint(2, 5)
+        #     if nary_node_num == 2:
+        #         node = Node(
+        #             NARIES[r.randint(0, len(NARIES) - 1)],
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1)
+        #         )
+        #     elif nary_node_num == 3:
+        #         node = Node(
+        #             NARIES[r.randint(0, len(NARIES) - 1)],
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1)
+        #         )
+        #     elif nary_node_num == 4:
+        #         node = Node(
+        #             NARIES[r.randint(0, len(NARIES) - 1)],
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1)
+        #         )
+        #     elif nary_node_num == 5:
+        #         node = Node(
+        #             NARIES[r.randint(0, len(NARIES) - 1)],
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1),
+        #             random_node(max_level - 1, current_level + 1)
+        #         )
     return node
 
 class Node(object):
@@ -130,6 +132,7 @@ class Node(object):
             else:
                 return '%s(%s)' % (self.value, ', '.join([str(c) for c in self.children]))
 
+    # @profile
     def set_nums(self, node_counter=-1, level_counter=0, leaf_count=-1, edge_count=-1):
         """set node numbers (depth first)"""
 

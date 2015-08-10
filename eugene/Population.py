@@ -145,6 +145,7 @@ class Population(object):
             print 'Constant Fitness: It looks like the template objective functions is being used!'
             print '                  Please add your own with '
 
+    # @profile
     def initialize(self, seed=None):
         """initialize a population based on seed or randomly"""
 
@@ -173,6 +174,7 @@ class Population(object):
         print '\n'
         self.describe_current()
 
+    # @profile
     def calc_fitness(self):
         """calculate the fitness of each individual."""
 
@@ -200,11 +202,13 @@ class Population(object):
             self.history['complexity'].append((max_expr[2], mean_expr[2], min_expr[2]))
             self.history['most_fit'].append(self.most_fit())
 
+    # @profile
     def rank(self):
         """create ranking of individuals"""
         self.ranking = zip(self.fitness, self.individuals)
         self.ranking.sort()
 
+    # @profile
     def roulette(self, number=None):
         """select parent pairs based on roulette method (probability proportional to fitness)"""
         number = number if number else self.size
@@ -280,11 +284,13 @@ class Population(object):
             selections.append(p1)
         return selections
 
+    # @profile
     def select(self, number=None):
         """select individuals thru various methods"""
         selections = self.roulette(number)
         return selections
 
+    # @profile
     def create_generation(self):
         """create the next generations, this is main function that loops"""
 
@@ -330,6 +336,7 @@ class Population(object):
 
         return None
 
+    # @profile
     def run(self, number_of_generations=None):
         """run algorithm"""
 

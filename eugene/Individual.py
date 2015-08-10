@@ -33,6 +33,7 @@ class Individual(object):
         """display helper"""
         self.chromosomes.display()
 
+    # @profile
     def compute_gene_expression(self, error_function=None, target=None):
         """compute gene expression by evaluating function stored in tree, and keep track of time"""
 
@@ -48,6 +49,7 @@ class Individual(object):
 
         return np.array([error, time_complexity, physical_complexity])
 
+    # @profile
     def crossover(self, spouse=None):
         """randomly crossover two chromosomes"""
 
@@ -64,11 +66,14 @@ class Individual(object):
         c2n = c2.get_node(x2)
 
         # transfer nodes
-        c1.set_node(x1, c2n)
-        c2.set_node(x2, c1n)
+        if c2n:
+            c1.set_node(x1, c2n)
+        if c1n:
+            c2.set_node(x2, c1n)
 
         return (Individual(c1), Individual(c2))
 
+    # @profile
     def mutate(self, pruning=False):
         """ alter a random node in chromosomes"""
 
@@ -101,8 +106,8 @@ class Individual(object):
             elif node.value in BINARIES:
                 mutated_value = BINARIES[r.randint(0, len(BINARIES) - 1)]
             # a n-ary operator
-            elif node.value in NARIES:
-                mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
+            # elif node.value in NARIES:
+            #     mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
             # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
             else:
                 mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]

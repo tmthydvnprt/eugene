@@ -1,9 +1,12 @@
 """
 eugene_test.py
 """
-
+import os
+import sys
 import numpy as np
 import pandas as pd
+
+sys.path.append('/Users/timothydavenport/GitHub/eugene')
 
 import eugene.Primatives
 
@@ -14,6 +17,7 @@ from eugene.Population import Population
 import numpy as np
 import scipy.signal
 
+@profile
 def error_and_complexity(gene_expression, scale):
     """user fitness function, weighted combination of error and complexity"""
 
