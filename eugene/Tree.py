@@ -9,6 +9,7 @@ import numpy as np
 from eugene.Primatives import *
 from eugene.Node import Node, random_node
 
+# indent branching [level:num] value (height) - {node_num|complexity}
 DISPLAY_NODE_STR = '%s%s[%s:%s] %s (%s) - {%s|%s}'
 
 # @profile
@@ -92,8 +93,7 @@ class Tree(object):
             self.nodes.children = tuple([Tree(c, subtree=True).set_node(n, node) for c in self.nodes.children])
 
         # rebase the numbers of the Tree
-        if n == 0 :
-            self.nodes.set_nums()
+        self.nodes.set_nums()
         return self.nodes
 
     # @profile
@@ -132,8 +132,8 @@ class Tree(object):
         contains_variable = any([n in VARIABLES for n in sub_tree.list_nodes()])
         # evaluate subtree for inefficiencies
         sub_eval = sub_tree.evaluate()
-        # check is evaluation exactly equals variable
-        equals_variable = [v for v in VARIABLES if (Tree(Node(v)).evaluate() == sub_eval).all()]
+        # check is evaluation exactly equals one of the variables
+        equals_variable = [v for v in VARIABLES if np.array(Tree(Node(v)).evaluate() == sub_eval).all()]
 
         # if subtree of node does not contain variable, it must be constant
         if not contains_variable:
