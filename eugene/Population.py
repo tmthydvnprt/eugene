@@ -24,6 +24,7 @@ class Population(object):
 
     def __init__(
             self,
+            individual_type='tree', # data structure of individual: tree, list, string, defaults to tree
             init_population_size=1000,
             objective_function=None,
             error_function=rmse,
@@ -40,6 +41,7 @@ class Population(object):
             pruning=False
         ):
         # parameters
+        self.individual_type = individual_type
         self.init_population_size = init_population_size
         self.objective_function = objective_function
         self.error_function = error_function
