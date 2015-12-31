@@ -326,6 +326,7 @@ class Population(object):
             m.mutate(self.pruning)
         next_generation.extend(mutants)
 
+        # Keep population the same size
         self.individuals = next_generation[:self.size]
 
         # clear cached values
