@@ -11,6 +11,8 @@ from multiprocessing import Pool
 
 from eugene.Util import ProgressBar, rmse
 from eugene.Tree import random_tree
+from eugene.List import random_list
+from eugene.String import random_string
 from eugene.Individual import Individual
 
 def par_fit():
@@ -157,22 +159,40 @@ class Population(object):
             print '\nUsing seed for inital population'
             self.individuals = seed
         else:
-            print '\nInitializing Population with Individuals composed of random Trees:'
+            print '\nInitializing Population with Individuals composed of random Trees, Lists, or Strings:'
             pb = ProgressBar(self.init_population_size)
             while len(self.individuals) < self.init_population_size:
-                # generate a random expression tree
-                tree = random_tree(self.init_tree_size)
-                # prune inefficiencies from the tree
-                if self.pruning:
-                    tree.prune()
-                # create an individual from this expression
-                individual = Individual(tree)
+                if self.individual_type == 'tree':
+                    # generate a random expression tree
+                    tree = random_tree(self.init_tree_size)
+                    # prune inefficiencies from the tree
+                    if self.pruning:
+                        tree.prune()
+                    # create an individual from this expression tree
+                    individual = Individual(tree)
+
+                elif self.individual_type == 'list':
+                    # generate a random list
+                    l = random_list(self.init_tree_size)
+                    # create an individual from this list
+                    individual = Individual(l)
+
+                elif self.individual_type == 'string':
+                    # generate a random string
+                    s = random_string(self.init_tree_size)
+                    # create an individual from this string
+                    individual = Individual(s)
+
+                else:
+                    print '\nWarning: individual not defined'
+
                 # check for genes
                 gene_expression = individual.compute_gene_expression(self.error_function, self.target)
                 # if there is some non-infinite error, add to the population
                 if not np.isinf(gene_expression[0]):
                     self.individuals.append(individual)
                     pb.animate(self.size)
+
         print '\n'
         self.describe_current()
 

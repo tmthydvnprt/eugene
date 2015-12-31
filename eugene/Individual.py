@@ -17,11 +17,12 @@ class Individual(object):
 
     def __init__(self, chromosomes=None):
         self.chromosomes = chromosomes
+        self.type = type(chromosomes)
 
     @property
     def size(self):
         """return size of individual"""
-        return self.chromosomes.node_num
+        return self.chromosomes.node_num if self.type == 'eugene.Tree.Tree' else len(self.chromosomes)
 
     def __repr__(self):
         return self.__str__()
@@ -61,57 +62,68 @@ class Individual(object):
         c1 = cp.deepcopy(self.chromosomes)
         c2 = cp.deepcopy(spouse.chromosomes)
 
-        # get nodes to cross
-        c1n = c1.get_node(x1)
-        c2n = c2.get_node(x2)
+        if self.type == 'eugene.Tree.Tree':
+            # get nodes to cross
+            c1n = c1.get_node(x1)
+            c2n = c2.get_node(x2)
 
-        # transfer nodes
-        if c2n:
-            c1.set_node(x1, c2n)
-        if c1n:
-            c2.set_node(x2, c1n)
+            # transfer nodes
+            if c2n:
+                c1.set_node(x1, c2n)
+            if c1n:
+                c2.set_node(x2, c1n)
+        elif self.type == 'eugene.List.List' or self.type == 'eugene.String.String':
+            c1 = c1[:x1] + c2n[x2:]
+            c2 = c2[:x2] + c1n[x1:]
 
         return (Individual(c1), Individual(c2))
 
     # @profile
     def mutate(self, pruning=False):
-        """ alter a random node in chromosomes"""
+        """ alter a random point or node in chromosomes"""
 
         # randomly select node to mutate
         mpoint = r.randint(0, self.size - 1)
 
-        # mutate whole node by replacing children with random subtree
-        if r.random() >= 0.5:
-            rand_tree = random_tree(2)
-            x2 = r.randint(0, rand_tree.node_num - 1)
-            node = rand_tree.get_node(x2)
-            self.chromosomes.set_node(mpoint, node)
-            # check and prune tree with new subtree for inefficiencies
-            if pruning:
-                self.chromosomes.prune()
+        if self.type == 'eugene.Tree.Tree':
+            # mutate whole node by replacing children with random subtree
+            if r.random() >= 0.5:
+                rand_tree = random_tree(2)
+                x2 = r.randint(0, rand_tree.node_num - 1)
+                node = rand_tree.get_node(x2)
+                self.chromosomes.set_node(mpoint, node)
+                # check and prune tree with new subtree for inefficiencies
+                if pruning:
+                    self.chromosomes.prune()
 
-        # or just mutate node value based on current type
-        else:
-            node = self.chromosomes.get_node(mpoint)
-            # constant
-            if node.value in CONSTS:
-                mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
-            # variable
-            elif node.value in VARIABLES:
-                mutated_value = VARIABLES[r.randint(0, len(VARIABLES) - 1)]
-            # a unary operator
-            elif node.value in UNARIES:
-                mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]
-            # a binary operator
-            elif node.value in BINARIES:
-                mutated_value = BINARIES[r.randint(0, len(BINARIES) - 1)]
-            # a n-ary operator
-            # elif node.value in NARIES:
-            #     mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
-            # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+            # or just mutate node value based on current type
             else:
-                mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]
+                node = self.chromosomes.get_node(mpoint)
+                # constant
+                if node.value in CONSTS:
+                    mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
+                # variable
+                elif node.value in VARIABLES:
+                    mutated_value = VARIABLES[r.randint(0, len(VARIABLES) - 1)]
+                # a unary operator
+                elif node.value in UNARIES:
+                    mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]
+                # a binary operator
+                elif node.value in BINARIES:
+                    mutated_value = BINARIES[r.randint(0, len(BINARIES) - 1)]
+                # a n-ary operator
+                # elif node.value in NARIES:
+                #     mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
+                # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
+                else:
+                    mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]
 
-            # mutate node value (keeps children, if applicable)
-            node.value = mutated_value
-            self.chromosomes.set_node(mpoint, node)
+                # mutate node value (keeps children, if applicable)
+                node.value = mutated_value
+                self.chromosomes.set_node(mpoint, node)
+
+        elif self.type == 'eugene.List.List':
+            self.chromosomes[mpoint] = random_list(1)
+
+        elif self.type == 'eugene.String.String':
+            self.chromosomes[mpoint] = random_string(1)
