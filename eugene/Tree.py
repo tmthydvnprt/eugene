@@ -22,6 +22,7 @@ class Tree(object):
     """
 
     def __init__(self, nodes=None, subtree=False):
+        self.type = 'Tree'
         self.nodes = nodes
         if not subtree:
             self.nodes.set_nums()

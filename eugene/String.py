@@ -19,6 +19,7 @@ class String(str):
         """
         """
         super(List, self).__init__(items)
+        self.type = 'String'
         self.eval_function = eval_function
 
     @property

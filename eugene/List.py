@@ -19,6 +19,7 @@ class List(list):
         """
         """
         super(List, self).__init__(items)
+        self.type = 'List'
         self.eval_function = eval_function
 
     @property
