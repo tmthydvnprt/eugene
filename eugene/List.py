@@ -7,9 +7,9 @@ import copy as cp
 import numpy as np
 
 # @profile
-def random_list(max_length=0, itemfactory=None):
+def random_list(max_length=0, itemfactory=None, evaluate=None):
     """generate a random list"""
-    return List([itemfactory() for _ in xrange(max_length)])
+    return List([itemfactory() for _ in xrange(max_length)], evaluate)
 
 class List(list):
     """

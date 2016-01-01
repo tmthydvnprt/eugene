@@ -73,8 +73,8 @@ class Individual(object):
             if c1n:
                 c2.set_node(x2, c1n)
         elif self.type == 'List' or self.type == 'String':
-            c1 = c1[:x1] + c2n[x2:]
-            c2 = c2[:x2] + c1n[x1:]
+            c1 = c1[:x1] + c2[x2:]
+            c2 = c2[:x2] + c1[x1:]
 
         return (Individual(c1), Individual(c2))
 

@@ -28,6 +28,8 @@ class Population(object):
             self,
             individual_type='tree', # data structure of individual: tree, list, string, defaults to tree
             init_population_size=1000,
+            itemfactory=None,
+            eval_function=None,
             objective_function=None,
             error_function=rmse,
             target=None,
@@ -45,6 +47,8 @@ class Population(object):
         # parameters
         self.individual_type = individual_type
         self.init_population_size = init_population_size
+        self.itemfactory = itemfactory
+        self.eval_function = eval_function
         self.objective_function = objective_function
         self.error_function = error_function
         self.target = target
@@ -173,7 +177,7 @@ class Population(object):
 
                 elif self.individual_type == 'list':
                     # generate a random list
-                    l = random_list(self.init_tree_size)
+                    l = random_list(self.init_tree_size, self.itemfactory, self.eval_function)
                     # create an individual from this list
                     individual = Individual(l)
 
