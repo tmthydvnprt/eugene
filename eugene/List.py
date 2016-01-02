@@ -9,18 +9,19 @@ import numpy as np
 # @profile
 def random_list(max_length=0, itemfactory=None, evaluate=None):
     """generate a random list"""
-    return List([itemfactory() for _ in xrange(max_length)], evaluate)
+    return List([itemfactory() for _ in xrange(max_length)], itemfactory, evaluate)
 
 class List(list):
     """
     Defines an extention of general list with functions to operate on items specific to eugene
     """
-    def __init__(self, items, eval_function=None):
+    def __init__(self, items, itemfactory=None, eval_function=None):
         """
         """
         super(List, self).__init__(items)
         self.type = 'List'
         self.eval_function = eval_function
+        self.itemfactory = itemfactory
 
     @property
     def height(self):

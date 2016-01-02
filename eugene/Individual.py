@@ -8,6 +8,8 @@ import numpy as np
 import random as r
 
 from eugene.Tree import random_tree
+from eugene.List import random_list, List
+from eugene.String import random_string, String
 from eugene.Primatives import VARIABLES, UNARIES, BINARIES, NARIES, CONSTS, EPHEMERAL
 
 class Individual(object):
@@ -73,8 +75,8 @@ class Individual(object):
             if c1n:
                 c2.set_node(x2, c1n)
         elif self.type == 'List':
-            c1 = List(c1[:x1] + c2[x2:], c1.eval_function)
-            c2 = List(c2[:x2] + c1[x1:], c2.eval_function)
+            c1 = List(c1[:x1] + c2[x2:], c1.itemfactory, c1.eval_function)
+            c2 = List(c2[:x2] + c1[x1:], c2.itemfactory, c2.eval_function)
         elif self.type == 'String':
             pass
 
@@ -127,7 +129,7 @@ class Individual(object):
                     self.chromosomes.set_node(mpoint, node)
 
         elif self.type == 'List':
-            self.chromosomes[mpoint] = random_list(1)
+            self.chromosomes[mpoint] = random_list(1, self.chromosomes.itemfactory, self.chromosomes.eval_function)[0]
 
         elif self.type == 'String':
             self.chromosomes[mpoint] = random_string(1)
