@@ -1,8 +1,8 @@
 """
-eugene
+Eugene
 """
 
-__all__ = ["Primatives", "Node", "Tree", "Individual", "Population", "Util"]
+__all__ = ["Primatives", "Node", "Tree", "List", "String", "Individual", "Population", "Util"]
 __version__ = '0.1.1'
 __date__ = '2015-08-07 07:09:00 -0700'
 __author__ = 'tmthydvnprt'
