@@ -208,7 +208,7 @@ class Population(object):
 
                 elif self.individual_type == 'string':
                     # generate a random string
-                    s = random_string(self.init_tree_size)
+                    s = random_string(self.init_tree_size, self.item_factory, self.eval_function)
                     # create an individual from this string
                     individual = Individual(s)
 
