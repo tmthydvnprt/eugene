@@ -102,6 +102,7 @@ class Population(object):
         }
         # cached values
         self._fitness = np.array([])
+        self._ranked = False
 
     @property
     def size(self):
@@ -256,8 +257,10 @@ class Population(object):
     # @profile
     def rank(self):
         """Create ranking of individuals"""
-        self.ranking = zip(self.fitness, self.individuals)
-        self.ranking.sort()
+        if not self._ranked:
+            self.ranking = zip(self.fitness, self.individuals)
+            self.ranking.sort()
+            self._ranked = True
 
     # @profile
     def roulette(self, number=None):
@@ -382,6 +385,7 @@ class Population(object):
 
         # clear cached values
         self._fitness = np.array([])
+        self._ranked = False
 
         # log generation
         self.generation += 1
