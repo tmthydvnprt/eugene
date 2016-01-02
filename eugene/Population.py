@@ -189,7 +189,7 @@ class Population(object):
             print '\nUsing seed for inital population'
             self.individuals = seed
         else:
-            print '\nInitializing Population with Individuals composed of random {}:'.format(self.individual_type.title())
+            print '\nInitializing Population with Individuals composed of random {}s:'.format(self.individual_type.title())
             pb = ProgressBar(self.init_population_size)
             while len(self.individuals) < self.init_population_size:
                 if self.individual_type == 'tree':
