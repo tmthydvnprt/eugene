@@ -95,7 +95,7 @@ n_pow = np.power
 
 # safe functions, graceful error fallbacks
 def intify(a):
-    """safe intify"""
+    """Safe intify"""
     # check if a = 3.14, np.array(3.14), or np.array([3.14])
     if np.isscalar(a) or a.shape == () or a.shape == (1,):
         return int(a) if not np.isnan(a) and np.isfinite(a) else 1
@@ -104,52 +104,52 @@ def intify(a):
         return np.array([int(_) if not np.isnan(_) and np.isfinite(_) else 1 for _ in a])
 
 def n_inv(a):
-    """safe inv"""
+    """Safe inv"""
     return o.inv(intify(a))
 
 def n_and(a, b):
-    """safe and"""
+    """Safe and"""
     return o.and_(intify(a), intify(b))
 
 def n_or(a, b):
-    """safe or"""
+    """Safe or"""
     return o.or_(intify(a), intify(b))
 
 def n_xor(a, b):
-    """safe xor"""
+    """Safe xor"""
     return o.xor(intify(a), intify(b))
 
 def n_mod(a, b):
-    """safe mod"""
+    """Safe mod"""
     return np.where(b != 0, o.mod(a, b), 1)
 
 def n_div(a, b):
-    """safe div"""
+    """Safe div"""
     return np.where(b != 0, o.div(a, b), 1)
 
 def n_floordiv(a, b):
-    """safe floordiv"""
+    """Safe floordiv"""
     return np.where(b != 0, o.floordiv(a, b), 1)
 
 def n_round(a, b):
-    """safe round"""
+    """Safe round"""
     element_round = np.vectorize(np.round)
     return element_round(a, intify(b))
 
 def n_ldexp(a, b):
-    """safe ldexp"""
+    """Safe ldexp"""
     return np.ldexp(a, intify(b))
 
 # n-ary custom functions
 def n_max(_):
-    """max reduction"""
+    """Max reduction"""
     return reduce(np.maximum, _)
 def n_min(_):
-    """min reduction"""
+    """Min reduction"""
     return reduce(np.minimum, _)
 def n_sum(_):
-    """sum reduction"""
+    """Sum reduction"""
     return reduce(np.add, _)
 def n_prod(_):
-    """product reduction"""
+    """Product reduction"""
     return reduce(np.multiply, _)

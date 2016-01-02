@@ -6,7 +6,7 @@ import sys
 import numpy as np
 
 def rmse(predicted, truth):
-    """return the mean square error"""
+    """Return the root mean squared error between a predicted and truth values"""
     try:
         if np.isnan(predicted).any() or predicted.shape != truth.shape:
             result = np.inf
@@ -17,10 +17,10 @@ def rmse(predicted, truth):
     return result
 
 class ProgressBar(object):
-    """implements a comand-line progress bar"""
+    """Implements a command-line progress bar"""
 
     def __init__(self, iterations):
-        """create a progress bar"""
+        """Create a progress bar"""
         self.iterations = iterations
         self.prog_bar = '[]'
         self.fill_char = '*'
@@ -28,20 +28,20 @@ class ProgressBar(object):
         self.__update_amount(0)
 
     def animate(self, iterate):
-        """animate progress"""
+        """Animate progress"""
         print '\r', self,
         sys.stdout.flush()
         self.update_iteration(iterate + 1)
         return self
 
     def update_iteration(self, elapsed_iter):
-        """increment progress"""
+        """Increment progress"""
         self.__update_amount((elapsed_iter / float(self.iterations)) * 100.0)
         self.prog_bar = '%s  %s of %s complete' % (self.prog_bar, elapsed_iter, self.iterations)
         return self
 
     def __update_amount(self, new_amount):
-        """update amout of progress"""
+        """Update amout of progress"""
         percent_done = int(round((new_amount / 100.0) * 100.0))
         all_full = self.width - 2
         num_hashes = int(round((percent_done / 100.0) * all_full))
@@ -52,5 +52,5 @@ class ProgressBar(object):
         return self
 
     def __str__(self):
-        """string representation"""
+        """String representation"""
         return str(self.prog_bar)

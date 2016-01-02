@@ -9,7 +9,7 @@ from eugene.Primatives import *
 
 # @profile
 def random_node(max_level=20, min_level=1, current_level=0):
-    """create a random node that may contain random subnodes"""
+    """Create a random node that may contain random subnodes"""
 
     if current_level == max_level:
         rand_node = r.randint(0, 3)
@@ -110,12 +110,12 @@ class Node(object):
 
     @property
     def is_leaf(self):
-        """check if this node is a leaf"""
+        """Check if this node is a leaf"""
         return len(self.children) == 0
 
     @property
     def ary(self):
-        """return the arity of the node"""
+        """Return the arity of the node"""
         return len(self.children)
 
     def __repr__(self):
@@ -134,7 +134,7 @@ class Node(object):
 
     # @profile
     def set_nums(self, node_counter=-1, level_counter=0, leaf_count=-1, edge_count=-1):
-        """set node numbers (depth first)"""
+        """Set node numbers (depth first)"""
 
         # count this node
         node_counter += 1

@@ -14,7 +14,7 @@ DISPLAY_NODE_STR = '%s%s[%s:%s] %s (%s) - {%s|%s}'
 
 # @profile
 def random_tree(max_level=20, min_level=1, current_level=0):
-    """generate a random tree of random nodes"""
+    """Generate a random tree of random nodes"""
     return Tree(random_node(max_level, min_level, current_level))
 
 class Tree(object):
@@ -30,27 +30,27 @@ class Tree(object):
 
     @property
     def height(self):
-        """return the number of levels in the tree"""
+        """Return the number of levels in the tree"""
         return self.nodes.height + 1
 
     @property
     def node_num(self):
-        """return the number of nodes in the tree"""
+        """Return the number of nodes in the tree"""
         return self.nodes.node_num
 
     @property
     def leaf_num(self):
-        """return the number of leaves in the tree"""
+        """Return the number of leaves in the tree"""
         return self.nodes.leaf_num + 1
 
     @property
     def edge_num(self):
-        """return the number of edges in the tree"""
+        """Return the number of edges in the tree"""
         return self.nodes.edge_num + 1
 
     @property
     def complexity(self):
-        """return the complexity of the tree (sum of nodes in tree and each subtree)"""
+        """Return the complexity of the tree (sum of nodes in tree and each subtree)"""
         return self.nodes.complexity
 
     def __repr__(self):
@@ -61,7 +61,7 @@ class Tree(object):
 
     # @profile
     def evaluate(self):
-        """evaluate expression stored in tree"""
+        """Evaluate expression stored in tree"""
         try:
             result = np.array(eval(compile(self.__str__(), '', 'eval')))
         except:
@@ -70,7 +70,7 @@ class Tree(object):
 
     # @profile
     def get_node(self, n=0):
-        """return a node from the tree"""
+        """Return a node from the tree"""
 
         # search tree until node number is found and take sub tree
         if self.nodes.num == n:
@@ -85,7 +85,7 @@ class Tree(object):
 
     # @profile
     def set_node(self, n=0, node=None):
-        """set a node in the tree"""
+        """Set a node in the tree"""
 
         # search tree until node number is found, and store sub tree
         if self.nodes.num == n:
@@ -99,7 +99,7 @@ class Tree(object):
 
     # @profile
     def list_edges(self):
-        """get edges of tree"""
+        """Get edges of tree"""
 
         # get list of tuple edges between nodes e.g. [(n1,n2),(n1,n3)...]
         edges = [(self.nodes.value, c.value if len(c.children) > 0 else c.value) for c in self.nodes.children]
@@ -110,7 +110,7 @@ class Tree(object):
 
     # @profile
     def list_nodes(self):
-        """return nodes of tree"""
+        """Return nodes of tree"""
 
         # get list of nodes
         node_list = []
@@ -125,7 +125,7 @@ class Tree(object):
 
     # @profile
     def prune(self):
-        """go thru nodes and remove or replace dead / constant branches (subtrees)"""
+        """Go thru nodes and remove or replace dead / constant branches (subtrees)"""
 
         # create subtree
         sub_tree = Tree(self.nodes, subtree=True)
@@ -154,7 +154,7 @@ class Tree(object):
         return self.nodes
 
     def display(self, level=0, level_list=None):
-        """display helper"""
+        """Display helper"""
         level_list = level_list if level_list else []
 
         if level == 0:

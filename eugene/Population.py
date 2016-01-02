@@ -16,17 +16,42 @@ from eugene.String import random_string
 from eugene.Individual import Individual
 
 def par_fit():
-    """create function to run fitness in parallel"""
+    """Create function to run fitness in parallel"""
     pass
 
 class Population(object):
     """
-    Defines Population of Individuals with ability to create generations and evaluate fitness
+    Defines Population of Individuals with ability to create generations and evaluate fitness.
+
+    Parameters
+    individual_type      : Data structure of individual: 'tree', 'list', 'string', defaults to 'tree'
+    init_population_size : The number of Individuals to create in the initial population, defaults to 1000
+    item_factory         : Factory function to create new Individuals, assumed to be fully or semi random, defaults to None
+    eval_function        : Converts the encoding of an individual (tree of strings, list of instructions) into the actual
+                           solution or result, defaults to None
+    objective_function   : Calculates the fitness or performance of solution (e.g. weighted combination of error and
+                           complexity), defaults to None
+    error_function       : Calculates the error between an individual solution and the target, defaults to eugene.Util.rmse
+                           (Standard Root Mean Squared Error)
+    target               : The 'ideal' solution or the thing you are trying to evolve 'towards', used to calculate solution
+                           error, defaults to None
+    max_generations      : The maximum number of generations the population is allowed to evolve, defaults to 1000
+    init_tree_size       : Depth of tree allowed in random tree generation, defaults to 3
+    stagnation_timeout   : The number of generations the average fitness can remain the same before Population growth stagnates
+                           and the evolution ends, defaults to 20
+    rank_pressure        : Selective Pressure used rank_roulette selection process (currently not used), defaults to 2.0
+    elitism              : Percent of Top Ranked Population that passes to next generation, defaults to 0.02
+    replication          : Percent of Population that duplicates itself each generation, defaults to 0.28
+    mating               : Percent of Population that mates each generations, defaults to 0.6
+    mutation             : Percent of Population that will mutate, defaults to 0.1
+    parallel             : Perform evolution in parallel, defaults to False
+    pruning              : Removes inefficiencies in Tree based Individuals, defaults to False
+
     """
 
     def __init__(
             self,
-            individual_type='tree', # data structure of individual: tree, list, string, defaults to tree
+            individual_type='tree',
             init_population_size=1000,
             item_factory=None,
             eval_function=None,
@@ -80,12 +105,12 @@ class Population(object):
 
     @property
     def size(self):
-        """return the size of the population"""
+        """Return the size of the population"""
         return len(self.individuals)
 
     @property
     def fitness(self):
-        """return the fitness of each individual in population"""
+        """Return the fitness of each individual in population"""
         if self._fitness.shape == (0, ):
             self.calc_fitness()
         return self._fitness
@@ -93,8 +118,8 @@ class Population(object):
     @property
     def stagnate(self):
         """
-        determine if the population has stagnated and reached local min
-        where average fitness over last n generations has not changed
+        Determine if the population has stagnated and reached local min where average fitness over last n generations has
+        not changed.
         """
         if self.generation <= self.stagnation_timeout:
             return False
@@ -104,13 +129,13 @@ class Population(object):
             return (last_gen2 == last_gen1) and not np.isinf(last_gen1).all()
 
     def describe(self):
-        """print out all data"""
+        """Print out all data"""
         self.describe_init()
         print '\n'
         self.describe_current()
 
     def describe_init(self):
-        """print out parameters used to intialize population"""
+        """Print out parameters used to intialize population"""
         print '\nPopulation Initialized w/ Parameters:'
         data = [
             ['Initial number of individuals:', self.init_population_size],
@@ -127,7 +152,7 @@ class Population(object):
         print tabulate.tabulate(data)
 
     def describe_current(self):
-        """print out status about current population"""
+        """Print out status about current population"""
         print '\nCurrent Population Status:'
         # initialize VARIABLES
         data = [
@@ -155,7 +180,7 @@ class Population(object):
 
     # @profile
     def initialize(self, seed=None):
-        """initialize a population based on seed or randomly"""
+        """Initialize a population based on seed or random generation"""
 
         self.describe_init()
         self.created = True
@@ -202,7 +227,7 @@ class Population(object):
 
     # @profile
     def calc_fitness(self):
-        """calculate the fitness of each individual."""
+        """Calculate the fitness of each individual."""
 
         if self.parallel:
             pool = Pool()
@@ -230,13 +255,13 @@ class Population(object):
 
     # @profile
     def rank(self):
-        """create ranking of individuals"""
+        """Create ranking of individuals"""
         self.ranking = zip(self.fitness, self.individuals)
         self.ranking.sort()
 
     # @profile
     def roulette(self, number=None):
-        """select parent pairs based on roulette method (probability proportional to fitness)"""
+        """Select parent pairs based on roulette method (probability proportional to fitness)"""
         number = number if number else self.size
         selections = []
 
@@ -253,7 +278,7 @@ class Population(object):
         return selections
 
     def stochastic(self, number=None):
-        """select parent pairs based on stochastic method (probability uniform across fitness)"""
+        """Select parent pairs based on stochastic method (probability uniform across fitness)"""
         number = number if number else self.size
 
         # unpack
@@ -274,7 +299,7 @@ class Population(object):
         return selections
 
     def tournament(self, number=None, tournaments=4):
-        """select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins)"""
+        """Select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins)"""
         number = number if number else self.size
         selections = []
         for _ in xrange(number):
@@ -288,7 +313,7 @@ class Population(object):
         return selections
 
     def rank_roulette(self, number=None, pressure=2):
-        """select parent pairs based on rank roulette method (probability proportional to fitness rank)"""
+        """Select parent pairs based on rank roulette method (probability proportional to fitness rank)"""
         number = number if number else self.size
         selections = []
 
@@ -318,7 +343,7 @@ class Population(object):
 
     # @profile
     def create_generation(self):
-        """create the next generations, this is main function that loops"""
+        """Create the next generations, this is main function that loops"""
 
         # determine fitness of current generations and log average fitness
         self.calc_fitness()
@@ -364,8 +389,8 @@ class Population(object):
         return None
 
     # @profile
-    def run(self, number_of_generations=None):
-        """run algorithm"""
+    def evolve(self, number_of_generations=None):
+        """Evolve the Population (run the algorithm)"""
 
         number_of_generations = number_of_generations if number_of_generations else self.max_generations
         pb = ProgressBar(number_of_generations)
@@ -378,8 +403,12 @@ class Population(object):
             print 'population became stagnate'
         print self.generation, 'generations'
 
+    def run(self, number_of_generations=None):
+        """Alias for the evolve function"""
+        self.evolve(number_of_generations=number_of_generations)
+
     def most_fit(self):
-        """return the most fit individual"""
+        """Return the most fit individual"""
 
         # make sure the individuals have been ranked
         self.rank()
