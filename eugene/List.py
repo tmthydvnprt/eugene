@@ -7,21 +7,24 @@ import copy as cp
 import numpy as np
 
 # @profile
-def random_list(max_length=0, itemfactory=None, evaluate=None):
+def random_list(max_length=0, item_factory=None, eval_function=None):
     """generate a random list"""
-    return List([itemfactory() for _ in xrange(max_length)], itemfactory, evaluate)
+    return List([item_factory() for _ in xrange(max_length)], item_factory, eval_function)
 
 class List(list):
     """
-    Defines an extention of general list with functions to operate on items specific to eugene
+    Defines an extention of the general list with functions to operate on items specific to eugene.
+    items         : the elemnts of the list
+    item_factory  : the factory function used to generate new items (assumed randomly), user defined
+    eval_function : the function used to convert list into something else, user defined
     """
-    def __init__(self, items, itemfactory=None, eval_function=None):
+    def __init__(self, items=None, item_factory=None, eval_function=None):
         """
         """
         super(List, self).__init__(items)
         self.type = 'List'
         self.eval_function = eval_function
-        self.itemfactory = itemfactory
+        self.item_factory = item_factory
 
     @property
     def height(self):
