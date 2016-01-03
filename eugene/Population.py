@@ -36,7 +36,9 @@ class Population(object):
     target               : The 'ideal' solution or the thing you are trying to evolve 'towards', used to calculate solution
                            error, defaults to None
     max_generations      : The maximum number of generations the population is allowed to evolve, defaults to 1000
-    init_tree_size       : Depth of tree allowed in random tree generation, defaults to 3
+    init_ind_size        : Size limit of each individual, set number of times item_factory is called during creation.  This will
+                           set the max depth for tree type individuals and the max length for string and list type individuals,
+                            defaults to 3
     stagnation_timeout   : The number of generations the average fitness can remain the same before Population growth stagnates
                            and the evolution ends, defaults to 20
     rank_pressure        : Selective Pressure used rank_roulette selection process (currently not used), defaults to 2.0
@@ -59,7 +61,7 @@ class Population(object):
             error_function=rmse,
             target=None,
             max_generations=1000,
-            init_tree_size=3,
+            init_ind_size=3,
             stagnation_timeout=20,
             rank_pressure=2.0,
             elitism=0.02,
@@ -78,7 +80,7 @@ class Population(object):
         self.error_function = error_function
         self.target = target
         self.max_generations = max_generations
-        self.init_tree_size = init_tree_size
+        self.init_ind_size = init_ind_size
         self.stagnation_timeout = stagnation_timeout
         self.rank_pressure = rank_pressure
         self.elitism = elitism
@@ -140,7 +142,7 @@ class Population(object):
         print '\nPopulation Initialized w/ Parameters:'
         data = [
             ['Initial number of individuals:', self.init_population_size],
-            ['Initial size of individuals:', self.init_tree_size],
+            ['Initial size of individuals:', self.init_ind_size],
             ['Max. number of generations:', self.max_generations],
             ['Parallel fitness turned on:', self.parallel],
             ['Stagnation factor:', self.stagnation_timeout],
@@ -194,7 +196,7 @@ class Population(object):
             while len(self.individuals) < self.init_population_size:
                 if self.individual_type == 'tree':
                     # generate a random expression tree
-                    tree = random_tree(self.init_tree_size)
+                    tree = random_tree(self.init_ind_size)
                     # prune inefficiencies from the tree
                     if self.pruning:
                         tree.prune()
@@ -203,13 +205,13 @@ class Population(object):
 
                 elif self.individual_type == 'list':
                     # generate a random list
-                    l = random_list(self.init_tree_size, self.item_factory, self.eval_function)
+                    l = random_list(self.init_ind_size, self.item_factory, self.eval_function)
                     # create an individual from this list
                     individual = Individual(l)
 
                 elif self.individual_type == 'string':
                     # generate a random string
-                    s = random_string(self.init_tree_size, self.item_factory, self.eval_function)
+                    s = random_string(self.init_ind_size, self.item_factory, self.eval_function)
                     # create an individual from this string
                     individual = Individual(s)
 
