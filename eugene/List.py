@@ -7,9 +7,9 @@ import copy as cp
 import numpy as np
 
 # @profile
-def random_list(max_length=0, item_factory=None, eval_function=None):
+def random_list(max_length=0, item_factory=None, eval_function=None, uid=None):
     """Generate a random list using the item_factory function for each element"""
-    return List([item_factory() for _ in xrange(max_length)], item_factory, eval_function)
+    return List([item_factory() for _ in xrange(max_length)], item_factory, eval_function, uid=uid)
 
 class List(list):
     """
@@ -20,13 +20,15 @@ class List(list):
     eval_function : the function used to convert the list into something else
     """
 
-    def __init__(self, items=None, item_factory=None, eval_function=None):
+    def __init__(self, items=None, item_factory=None, eval_function=None, uid=None):
         """
         """
         super(List, self).__init__(items)
         self.type = 'List'
         self.eval_function = eval_function
         self.item_factory = item_factory
+        self.uid = uid
+        self.evaluated = False
 
     @property
     def height(self):
@@ -49,4 +51,7 @@ class List(list):
         return len(self)
 
     def evaluate(self):
-        return self.eval_function(self)
+        if not self.evaluated:
+            self._evaluation = self.eval_function(self)
+            self.evaluated = True
+        return self._evaluation

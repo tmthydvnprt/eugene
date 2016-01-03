@@ -193,6 +193,7 @@ class Population(object):
         else:
             print '\nInitializing Population with Individuals composed of random {}s:'.format(self.individual_type.title())
             pb = ProgressBar(self.init_population_size)
+            uid = 0
             while len(self.individuals) < self.init_population_size:
                 if self.individual_type == 'tree':
                     # generate a random expression tree
@@ -205,13 +206,13 @@ class Population(object):
 
                 elif self.individual_type == 'list':
                     # generate a random list
-                    l = random_list(self.init_ind_size, self.item_factory, self.eval_function)
+                    l = random_list(self.init_ind_size, self.item_factory, self.eval_function, uid)
                     # create an individual from this list
                     individual = Individual(l)
 
                 elif self.individual_type == 'string':
                     # generate a random string
-                    s = random_string(self.init_ind_size, self.item_factory, self.eval_function)
+                    s = random_string(self.init_ind_size, self.item_factory, self.eval_function, uid)
                     # create an individual from this string
                     individual = Individual(s)
 
@@ -222,6 +223,7 @@ class Population(object):
                 gene_expression = individual.compute_gene_expression(self.error_function, self.target)
                 # if there is some non-infinite error, add to the population
                 if not np.isinf(gene_expression[0]):
+                    uid += 1
                     self.individuals.append(individual)
                     pb.animate(self.size)
 
@@ -342,7 +344,7 @@ class Population(object):
 
     # @profile
     def select(self, number=None):
-        """select individuals thru various methods"""
+        """Select individuals thru various methods"""
         selections = self.roulette(number)
         return selections
 
@@ -384,6 +386,11 @@ class Population(object):
 
         # Keep population the same size
         self.individuals = next_generation[:self.size]
+
+        # Reset all individual UIDs and eval flag
+        for i, ind in enumerate(self.individuals):
+            ind.chromosomes.uid = i
+            ind.chromosomes.evaluated = False
 
         # clear cached values
         self._fitness = np.array([])
