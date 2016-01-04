@@ -15,9 +15,21 @@ from eugene.List import random_list
 from eugene.String import random_string
 from eugene.Individual import Individual
 
-def par_fit():
-    """Create function to run fitness in parallel"""
-    pass
+def par_gene_expression(par_input):
+    """Create function to run gene expression  in parallel"""
+    # Separate inputs
+    individual, error_function, target = par_input
+    # Calculate expression
+    gene_expression = individual.compute_gene_expression(error_function, target)
+    return gene_expression
+
+def par_obj_func(par_input):
+    """Create function to run objective functino in parallel"""
+    # Separate inputs
+    objective_function, expression, expression_scale = par_input
+    # Calculate expression
+    fitness = objective_function(expression, expression_scale)
+    return fitness
 
 class Population(object):
     """
@@ -235,28 +247,41 @@ class Population(object):
         """Calculate the fitness of each individual."""
 
         if self.parallel:
+            # Parallel gene expression
             pool = Pool()
-            fitness = pool.map(par_fit, [(i, self.objective_function) for i in self.individuals])
+            expression = pool.map(par_gene_expression, [(i, self.error_function, self.target) for i in self.individuals])
             pool.close()
             pool.join()
-            self._fitness = np.array(fitness)
+            expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
+            # Parallel objective fitness
+            pool = Pool()
+            fitness = pool.map(par_obj_func, [(self.objective_function, e, expression_scale) for e in expression])
+            pool.close()
+            pool.join()
 
         else:
+            # Parallel gene expression
             expression = np.array([i.compute_gene_expression(self.error_function, self.target) for i in self.individuals])
             expression_scale = np.array(np.ma.masked_invalid(expression).max(axis=0))
-            max_expr = np.array(np.ma.masked_invalid(expression).max(axis=0)) / expression_scale
-            mean_expr = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / expression_scale
-            min_expr = np.array(np.ma.masked_invalid(expression).min(axis=0)) / expression_scale
+            # Parallel objective fitness
+            fitness = self.objective_function(expression, expression_scale)
 
-            self._fitness = self.objective_function(expression, expression_scale)
-            mfit = np.ma.masked_invalid(self._fitness)
+        # Cache results
+        self._fitness = np.array(fitness)
 
-            self.rank()
-            self.history['fitness'].append((mfit.max(), mfit.mean(), mfit.min()))
-            self.history['error'].append((max_expr[0], mean_expr[0], min_expr[0]))
-            self.history['time'].append((max_expr[1], mean_expr[1], min_expr[1]))
-            self.history['complexity'].append((max_expr[2], mean_expr[2], min_expr[2]))
-            self.history['most_fit'].append(self.most_fit())
+        # Store history of results
+        max_expr = np.array(np.ma.masked_invalid(expression).max(axis=0)) / expression_scale
+        mean_expr = np.array(np.ma.masked_invalid(expression).mean(axis=0)) / expression_scale
+        min_expr = np.array(np.ma.masked_invalid(expression).min(axis=0)) / expression_scale
+        mfit = np.ma.masked_invalid(self._fitness)
+        self.history['fitness'].append((mfit.max(), mfit.mean(), mfit.min()))
+        self.history['error'].append((max_expr[0], mean_expr[0], min_expr[0]))
+        self.history['time'].append((max_expr[1], mean_expr[1], min_expr[1]))
+        self.history['complexity'].append((max_expr[2], mean_expr[2], min_expr[2]))
+        self.history['most_fit'].append(self.most_fit())
+
+        # Rank
+        self.rank()
 
     # @profile
     def rank(self):
