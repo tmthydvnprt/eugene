@@ -11,11 +11,8 @@ import numpy as np
 import scipy.misc as sm
 import scipy.special as sp
 
-x = np.array(range(10)) # np.linspace(0, 8.0 * np.pi, 1024)
-TRUTH = np.array(range(10)) # x * np.sin(x) + x/2.0 + 1.61
+import eugene.Config
 
-# x
-VARIABLES = ['x']
 # + - * / %
 BINARIES = ['n_add', 'n_sub', 'n_mul', 'n_div', 'n_mod', 'n_pow']
 # asb, sqtr, log, exp, sin, cos, tan, min, max,

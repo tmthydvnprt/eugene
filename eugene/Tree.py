@@ -5,7 +5,9 @@ Tree.py
 
 import copy as cp
 import numpy as np
+from numpy import array
 
+import eugene.Config
 from eugene.Primatives import *
 from eugene.Node import Node, random_node
 
@@ -73,7 +75,7 @@ class Tree(object):
         """evaluate expression stored in tree.
         """
         try:
-            result = np.array(eval(compile(self.__str__(), '', 'eval')))
+            result = np.array(eval(compile(str(self), '', 'eval')))
         except:
             result = np.array(np.nan)
         return result
@@ -150,11 +152,11 @@ class Tree(object):
         # Create subtree
         sub_tree = Tree(self.nodes, subtree=True)
         # Check if the tree contains a variable
-        contains_variable = any([n in VARIABLES for n in sub_tree.list_nodes()])
+        contains_variable = any([n in eugene.Config.var.keys() for n in sub_tree.list_nodes()])
         # Evaluate subtree for inefficiencies
         sub_eval = sub_tree.evaluate()
         # Check is evaluation exactly equals one of the variables
-        equals_variable = [v for v in VARIABLES if np.array(Tree(Node(v)).evaluate() == sub_eval).all()]
+        equals_variable = [v for v in eugene.Config.var.keys() if np.array(Tree(Node(v)).evaluate() == sub_eval).all()]
 
         # If subtree of node does not contain variable, it must be constant
         if not contains_variable:

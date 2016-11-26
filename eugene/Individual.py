@@ -7,8 +7,10 @@ import copy as cp
 import random as r
 import numpy as np
 
+import eugene.Config
+
 from eugene.Tree import random_tree
-from eugene.Primatives import VARIABLES, UNARIES, BINARIES, CONSTS, EPHEMERAL # NARIES,
+from eugene.Primatives import UNARIES, BINARIES, CONSTS, EPHEMERAL # NARIES,
 
 class Individual(object):
     """
@@ -107,8 +109,8 @@ class Individual(object):
             if node.value in CONSTS:
                 mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
             # variable
-            elif node.value in VARIABLES:
-                mutated_value = VARIABLES[r.randint(0, len(VARIABLES) - 1)]
+            elif node.value in eugene.Config.var.keys():
+                mutated_value = eugene.Config.var.keys()[r.randint(0, len(eugene.Config.var.keys()) - 1)]
             # a unary operator
             elif node.value in UNARIES:
                 mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]

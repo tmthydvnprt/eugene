@@ -1,38 +1,44 @@
 
 Eugene Testing Report
-Sat Nov 26 09:02:16 PST 2016
+Sat Nov 26 13:41:10 PST 2016
 =========================================
 
-Check node Arity ... ok
-Check node attributes ... ok
-Check node leafiness ... ok
+Check Individual size ... ok
+Evaluate Gene Expression ... ok
 Check node numbers ... ok
 Check node string printing ... ok
+Check node Arity ... ok
+Check node leafiness ... ok
+Check node attributes ... ok
 Generate 500 random nodes ... ok
 Generate 500 random trees ... ok
-Check tree edge list ... ok
-Check tree node list ... ok
-Check tree attributes ... ok
-Check tree get node ... ok
-Check tree pruning ... ok
-Check tree set node ... ok
 Check tree string ... ok
-Run the progress bar ... ok
+Check tree node list ... ok
+Check tree edge list ... ok
+Check tree attributes ... ok
+Evaluate Tree expression ... ok
+Check tree get node ... ok
+Check tree set node ... ok
+Check tree pruning ... ok
 Test that RMSE is calculated ... ok
-Test that RMSE fails when wrong data type is passed ... ok
-Test that RMSE fails when NaN is present ... ok
 Test that RMSE fails when shapes do not match ... ok
+Test that RMSE fails when NaN is present ... ok
+Test that RMSE fails when wrong data type is passed ... ok
+Run the progress bar ... ok
 
 Name                   Stmts   Miss Branch BrPart  Cover
 --------------------------------------------------------
-eugene/Node.py            78      2     30      4    94%
-eugene/Primatives.py      93     17      7      0    81%
-eugene/Tree.py            91      1     26      2    97%
+eugene/Config.py           3      0      0      0   100%
+eugene/Individual.py      59     41     16      0    24%
+eugene/Node.py            81      4     32      4    91%
+eugene/Population.py     187    157     34      0    14%
+eugene/Primatives.py      91     17      7      0    81%
+eugene/Tree.py            93      3     26      2    96%
 eugene/Util.py            37      0      2      0   100%
 eugene.py                 12      0      0      0   100%
 --------------------------------------------------------
-TOTAL                    311     20     65      6    93%
+TOTAL                    563    222    117      6    59%
 ----------------------------------------------------------------------
-Ran 19 tests in 0.077s
+Ran 22 tests in 0.074s
 
 OK

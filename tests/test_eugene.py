@@ -6,11 +6,15 @@ import unittest
 
 import numpy as np
 
+import eugene.Config
+
+from eugene.Util import rmse, ProgressBar
 from eugene.Primatives import *
 
-import eugene.Util as util
-import eugene.Tree as tree
-import eugene.Node as node
+from eugene.Node import Node, random_node
+from eugene.Tree import Tree, random_tree
+from eugene.Individual import Individual
+from eugene.Population import Population
 
 # Test cases
 class UtilTests(unittest.TestCase):
@@ -25,36 +29,36 @@ class UtilTests(unittest.TestCase):
         self.truth = np.array([7.0, 10.0, 12.0, 10.0, 10.0, 8.0, 7.0, 8.0, 11.0, 13.0, 10.0, 8.0])
         self.error = np.sqrt(np.array([1.0, 0.0, 4.0, 36.0, 9.0, 9.0, 4.0, 25.0, 1.0, 0.0, 4.0, 9.0]).mean())
 
-    def test_rmse(self):
+    def test_01_rmse(self):
         """Test that RMSE is calculated"""
 
-        error = util.rmse(self.predicted, self.truth)
+        error = rmse(self.predicted, self.truth)
         self.assertEqual(self.error, error)
 
-    def test_rmse_shape(self):
+    def test_02_rmse_shape(self):
         """Test that RMSE fails when shapes do not match"""
 
-        error = util.rmse(self.predicted[:-2], self.truth)
+        error = rmse(self.predicted[:-2], self.truth)
         self.assertEqual(np.inf, error)
 
-    def test_rmse_nan(self):
+    def test_03_rmse_nan(self):
         """Test that RMSE fails when NaN is present"""
 
         predicted = self.predicted
         predicted[4] = np.NaN
-        error = util.rmse(predicted, self.truth)
+        error = rmse(predicted, self.truth)
         self.assertEqual(np.inf, error)
 
-    def test_rmse_datatype(self):
+    def test_04_rmse_datatype(self):
         """Test that RMSE fails when wrong data type is passed"""
 
-        error = util.rmse(list(self.predicted), self.truth)
+        error = rmse(list(self.predicted), self.truth)
         self.assertEqual(np.inf, error)
 
-    def test_progress_bar(self):
+    def test_05_progress_bar(self):
         """Run the progress bar"""
 
-        p = util.ProgressBar(len(self.predicted))
+        p = ProgressBar(len(self.predicted))
 
         for i in xrange(len(self.predicted)):
             p.animate(i)
@@ -68,10 +72,10 @@ class RandomNodeTests(unittest.TestCase):
         """Setup Tests"""
         pass
 
-    def test_random_trees(self):
+    def test_06_random_trees(self):
         """Generate 500 random nodes"""
         NUM_NODES = 500
-        random_nodes = [node.random_node(10) for i in xrange(NUM_NODES)]
+        random_nodes = [random_node(10) for i in xrange(NUM_NODES)]
 
         self.assertEqual(len(random_nodes), NUM_NODES)
 
@@ -82,19 +86,17 @@ class NodeTests(unittest.TestCase):
 
     def setUp(self):
         """Setup Tests"""
-        self.variable_node = node.Node('x')
-        self.constant_node = node.Node(3)
-        self.ephemeral_node = node.Node(EPHEMERAL[0])
-        self.unary_node = node.Node(n_abs, node.Node(-3))
-        self.binary_node = node.Node(n_add, node.Node(-3), node.Node(10))
-        self.x = np.arange(0, 5)
-        self.TRUTH = self.x + (10 * abs(-4))
-        self.node = node.Node(n_add,
-            node.Node('x'),
-            node.Node(n_mul,
-                node.Node(10),
-                node.Node(n_abs,
-                    node.Node(-4)
+        self.variable_node = Node('x')
+        self.constant_node = Node(3)
+        self.ephemeral_node = Node(EPHEMERAL[0])
+        self.unary_node = Node('n_abs', Node(-3))
+        self.binary_node = Node('n_add', Node(-3), Node(10))
+        self.node = Node('n_add',
+            Node('x'),
+            Node('n_mul',
+                Node(10),
+                Node('n_abs',
+                    Node(-4)
                 )
             )
         )
@@ -106,18 +108,18 @@ class NodeTests(unittest.TestCase):
         self.binary_node.set_nums()
         self.node.set_nums()
 
-    def test_node_numbers(self):
+    def test_07_node_numbers(self):
         """Check node numbers"""
         node_nums = self.node.set_nums()
         self.assertEqual(node_nums, (5, 6, 4, 3, 5, 15))
 
-    def test_node_string(self):
+    def test_08_node_string(self):
         """Check node string printing"""
-        correct_str = '<built-in function add>(x, <built-in function mul>(10, <built-in function abs>(-4)))'
+        correct_str = 'n_add(eugene.Config.var[\'x\'], n_mul(10, n_abs(-4)))'
         node_str = self.node.__repr__()
         self.assertEqual(node_str, correct_str)
 
-    def test_node_arity(self):
+    def test_09_node_arity(self):
         """Check node Arity"""
 
         nodes = [
@@ -131,7 +133,7 @@ class NodeTests(unittest.TestCase):
         arities = [n.ary for n in nodes]
         self.assertEqual(arities, [0, 0, 0, 1, 2, 2])
 
-    def test_node_leafiness(self):
+    def test_10_node_leafiness(self):
         """Check node leafiness"""
 
         nodes = [
@@ -146,7 +148,7 @@ class NodeTests(unittest.TestCase):
         leafiness = [n.is_leaf for n in nodes]
         self.assertEqual(leafiness, [True, True, True, False, False, True, False])
 
-    def test_node_attributes(self):
+    def test_11_node_attributes(self):
         """Check node attributes"""
         correct_attributes = {
             # Current position of node
@@ -186,10 +188,10 @@ class RandomTreeTests(unittest.TestCase):
         """Setup Tests"""
         pass
 
-    def test_random_trees(self):
+    def test_12_random_trees(self):
         """Generate 500 random trees"""
         NUM_TREES = 500
-        random_trees = [tree.random_tree(10) for i in xrange(NUM_TREES)]
+        random_trees = [random_tree(10) for i in xrange(NUM_TREES)]
 
         self.assertEqual(len(random_trees), NUM_TREES)
 
@@ -200,46 +202,44 @@ class TreeTests(unittest.TestCase):
 
     def setUp(self):
         """Setup Tests"""
-        self.N = 4
-        self.M = 1
-        self.x = np.linspace(0, float(self.M) * np.pi, self.N)
-        self.y = np.linspace(0, 2.0 * float(self.M) * np.pi, self.N)
-        self.TRUTH = (self.x ** 2) + (self.y ** 2)
 
-        self.tree = tree.Tree(
-            node.Node(n_add,
-                node.Node('x'),
-                node.Node(n_mul,
-                    node.Node(10),
-                    node.Node(n_abs,
-                        node.Node(-4)
+        eugene.Config.var = {'x' : np.arange(0, 5)}
+        eugene.Config.truth = eugene.Config.var['x'] + (10 * abs(-4))
+
+        self.tree = Tree(
+            Node('n_add',
+                Node('x'),
+                Node('n_mul',
+                    Node(10),
+                    Node('n_abs',
+                        Node(-4)
                     )
                 )
             )
         )
 
-    def test_tree_string(self):
+    def test_13_tree_string(self):
         """Check tree string"""
-        correct_string = '[0:0] <built-in function add> (3) - {6|15}\n    |-[1:1] x (0) - {1|1}\n    \\-[1:2] <built-in function mul> (2) - {4|8}\n          |-[2:3] 10 (0) - {1|1}\n          \\-[2:4] <built-in function abs> (1) - {2|3}\n                \\-[3:5] -4 (0) - {1|1}'
+        correct_string = '[0:0] n_add (3) - {6|15}\n    |-[1:1] x (0) - {1|1}\n    \\-[1:2] n_mul (2) - {4|8}\n          |-[2:3] 10 (0) - {1|1}\n          \\-[2:4] n_abs (1) - {2|3}\n                \\-[3:5] -4 (0) - {1|1}'
         tree_string = self.tree.display()
 
         self.assertEqual(tree_string, correct_string)
 
-    def test_node_list(self):
+    def test_14_node_list(self):
         """Check tree node list"""
-        correct_nodes = "[<built-in function add>, 'x', <built-in function mul>, 10, <built-in function abs>, -4]"
+        correct_nodes = "['n_add', 'x', 'n_mul', 10, 'n_abs', -4]"
         tree_nodes = str(self.tree.list_nodes())
 
         self.assertEqual(str(tree_nodes), correct_nodes)
 
-    def test_edge_list(self):
+    def test_15_edge_list(self):
         """Check tree edge list"""
-        correct_edges = "[(<built-in function add>, 'x'), (<built-in function add>, <built-in function mul>), (<built-in function mul>, 10), (<built-in function mul>, <built-in function abs>), (<built-in function abs>, -4)]"
+        correct_edges = "[('n_add', 'x'), ('n_add', 'n_mul'), ('n_mul', 10), ('n_mul', 'n_abs'), ('n_abs', -4)]"
         tree_edges = str(self.tree.list_edges())
 
         self.assertEqual(str(tree_edges), correct_edges)
 
-    def test_tree_attributes(self):
+    def test_16_tree_attributes(self):
         """Check tree attributes"""
         correct_attributes = {
             # Summary of children
@@ -262,21 +262,74 @@ class TreeTests(unittest.TestCase):
 
         self.assertEqual(attributes, correct_attributes)
 
-    def test_tree_get_node(self):
+    def test_17_evaluate(self):
+        """Evaluate Tree expression"""
+
+        result = self.tree.evaluate()
+
+        self.assertEqual(result.tolist(), eugene.Config.truth.tolist())
+
+    def test_18_tree_get_node(self):
         """Check tree get node"""
         node = self.tree.get_node(3)
 
         self.assertEqual(node.value, 10)
 
-    def test_tree_set_node(self):
+    def test_19_tree_set_node(self):
         """Check tree set node"""
-        self.tree.set_node(3, node.Node(123))
-        correct_string = '[0:0] <built-in function add> (3) - {6|15}\n    |-[1:1] x (0) - {1|1}\n    \\-[1:2] <built-in function mul> (2) - {4|8}\n          |-[2:3] 123 (0) - {1|1}\n          \\-[2:4] <built-in function abs> (1) - {2|3}\n                \\-[3:5] -4 (0) - {1|1}'
+        self.tree.set_node(3, Node(123))
+        correct_string = '[0:0] n_add (3) - {6|15}\n    |-[1:1] x (0) - {1|1}\n    \\-[1:2] n_mul (2) - {4|8}\n          |-[2:3] 123 (0) - {1|1}\n          \\-[2:4] n_abs (1) - {2|3}\n                \\-[3:5] -4 (0) - {1|1}'
         tree_string = self.tree.display()
 
         self.assertEqual(tree_string, correct_string)
 
-    def test_tree_pruning(self):
+    def test_20_tree_pruning(self):
         """Check tree pruning"""
 
         self.tree.prune()
+
+class IndividualTests(unittest.TestCase):
+    """
+    Test the Individual Module.
+    """
+
+    def setUp(self):
+        """Setup Tests"""
+        N = 4
+        M = 1
+        eugene.Config.var = {
+            'x' : np.linspace(0, float(M) * np.pi, N),
+            'y' :  np.linspace(0, 2.0 * float(M) * np.pi, N)
+        }
+        eugene.Config.truth = (eugene.Config.var['x'] ** 2.0) + (eugene.Config.var['y'] ** 2.0)
+
+        self.ind = Individual(Tree(
+            Node(n_add,
+                Node(n_pow,
+                    Node('x'),
+                    Node(2.0)
+                ),
+                Node(n_pow,
+                    Node('y'),
+                    Node(2.0)
+                )
+            )
+        ))
+
+    def test_21_individual_size(self):
+        """Check Individual size"""
+        self.assertEqual(self.ind.size, 7)
+
+    def test_22_gene_expression(self):
+        """Evaluate Gene Expression"""
+        pass
+
+
+class PopulationTests(unittest.TestCase):
+    """
+    Test the Population Module.
+    """
+
+    def setUp(self):
+        """Setup Tests"""
+        pass
