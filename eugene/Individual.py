@@ -122,7 +122,7 @@ class Individual(object):
             #     mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
             # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
             else:
-                mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]
+                mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]()
 
             # mutate node value (keeps children, if applicable)
             node.value = mutated_value

@@ -1,10 +1,12 @@
 
 Eugene Testing Report
-Sat Nov 26 14:26:19 PST 2016
+Sat Nov 26 15:16:55 PST 2016
 =========================================
 
 Check Individual size ... ok
 Evaluate Gene Expression ... ok
+Test individual mutation ... ok
+Test individual crossover ... ok
 Check node numbers ... ok
 Check node string printing ... ok
 Check node Arity ... ok
@@ -29,16 +31,16 @@ Run the progress bar ... ok
 Name                   Stmts   Miss Branch BrPart  Cover
 --------------------------------------------------------
 eugene/Config.py           3      0      0      0   100%
-eugene/Individual.py      59     41     16      0    24%
-eugene/Node.py            81      7     32      3    86%
+eugene/Individual.py      59     16     16      3    69%
+eugene/Node.py            81      1     32      3    96%
 eugene/Population.py     186    157     34      0    13%
 eugene/Primatives.py      96     17      2      0    81%
 eugene/Tree.py            92      3     26      2    96%
 eugene/Util.py            37      0      2      0   100%
 eugene.py                 12      0      0      0   100%
 --------------------------------------------------------
-TOTAL                    566    225    112      5    58%
+TOTAL                    566    194    112      8    64%
 ----------------------------------------------------------------------
-Ran 22 tests in 0.075s
+Ran 24 tests in 0.080s
 
 OK

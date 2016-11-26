@@ -4,6 +4,7 @@ Eguene.py - tests the eugene package.
 
 import unittest
 
+import copy
 import numpy as np
 
 import eugene.Config
@@ -298,32 +299,64 @@ class IndividualTests(unittest.TestCase):
         N = 4
         M = 1
         eugene.Config.VAR = {
-            'x' : np.linspace(0, float(M) * np.pi, N),
-            'y' :  np.linspace(0, 2.0 * float(M) * np.pi, N)
+            'x' : np.linspace(0, float(M) * np.pi, 1),
+            'y' :  np.linspace(0, 2.0 * float(M) * np.pi, 4)
         }
-        eugene.Config.truth = (eugene.Config.VAR['x'] ** 2.0) + (eugene.Config.VAR['y'] ** 2.0)
+        eugene.Config.TRUTH = (eugene.Config.VAR['x'] ** 2.0) + (eugene.Config.VAR['y'] ** 2.0)
 
-        self.ind = Individual(Tree(
-            Node(n_add,
-                Node(n_pow,
+        self.ind1 = Individual(Tree(
+            Node('n_add',
+                Node('n_pow',
                     Node('x'),
                     Node(2.0)
                 ),
-                Node(n_pow,
+                Node('n_pow',
                     Node('y'),
                     Node(2.0)
+                )
+            )
+        ))
+        self.ind2 = Individual(Tree(
+            Node('n_add',
+                Node('x'),
+                Node('n_mul',
+                    Node(10),
+                    Node('n_abs',
+                        Node(-4)
+                    )
                 )
             )
         ))
 
     def test_21_individual_size(self):
         """Check Individual size"""
-        self.assertEqual(self.ind.size, 7)
+        self.assertEqual(self.ind1.size, 7)
 
     def test_22_gene_expression(self):
         """Evaluate Gene Expression"""
-        pass
+        error, time, complexity = self.ind1.compute_gene_expression(rmse, eugene.Config.TRUTH)
+        self.assertEqual(error, 0.0)
+        self.assertEqual(complexity, 17.0)
 
+        # def error_and_complexity(gene_expression, scale):
+        #     """user fitness function, weighted combination of error and complexity"""
+        #     print gene_expression
+        #     weights = np.array([0.95, 0.025, 0.025])
+        #     scaled_gene_expression = 1.0 / (gene_expression / scale)
+        #
+        #     return np.dot(scaled_gene_expression, weights)
+
+    def test_23_mutate(self):
+        """Test individual mutation"""
+        ind1_orig = copy.deepcopy(self.ind1)
+        self.assertEqual(str(ind1_orig), str(self.ind1))
+        for _ in xrange(10):
+            self.ind1.mutate()
+        self.assertNotEqual(str(ind1_orig), str(self.ind1))
+
+    def test_24_crossover(self):
+        """Test individual crossover"""
+        pass
 
 class PopulationTests(unittest.TestCase):
     """
