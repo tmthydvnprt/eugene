@@ -84,7 +84,7 @@ class Tree(object):
         Return a node from the tree.
         """
 
-        # search tree until node number is found and take sub tree
+        # Search tree until node number is found and take sub tree
         if self.nodes.num == n:
             return cp.deepcopy(self.nodes)
         elif len(self.nodes.children) > 0:
@@ -101,13 +101,13 @@ class Tree(object):
         Set a node in the tree.
         """
 
-        # search tree until node number is found, and store sub tree
+        # Search tree until node number is found, and store sub tree
         if self.nodes.num == n:
             self.nodes = node
         else:
             self.nodes.children = tuple([Tree(c, subtree=True).set_node(n, node) for c in self.nodes.children])
 
-        # rebase the numbers of the Tree
+        # Rebase the numbers of the Tree
         self.nodes.set_nums()
         return self.nodes
 
@@ -117,7 +117,7 @@ class Tree(object):
         Get edges of tree.
         """
 
-        # get list of tuple edges between nodes e.g. [(n1,n2),(n1,n3)...]
+        # Get list of tuple edges between nodes e.g. [(n1,n2),(n1,n3)...]
         edges = [(self.nodes.value, c.value if len(c.children) > 0 else c.value) for c in self.nodes.children]
         children_nodes = [Tree(c, subtree=True).list_edges() for c in self.nodes.children if len(c.children) > 0]
         for i in xrange(len(children_nodes)):
@@ -130,12 +130,12 @@ class Tree(object):
         Return nodes of tree.
         """
 
-        # get list of nodes
+        # Get list of nodes
         node_list = []
         node_list.append(self.nodes.value)
-        # add children
+        # Add children
         node_list.extend([c.value for c in self.nodes.children if len(c.children) == 0])
-        # add children's children
+        # Add children's children
         grand_children = [Tree(c, subtree=True).list_nodes() for c in self.nodes.children if len(c.children) > 0]
         node_list.extend([node for grand_child in grand_children for node in grand_child])
 
@@ -147,29 +147,29 @@ class Tree(object):
         Go thru nodes and remove or replace dead / constant branches (subtrees).
         """
 
-        # create subtree
+        # Create subtree
         sub_tree = Tree(self.nodes, subtree=True)
-        # check if the tree contains a variable
+        # Check if the tree contains a variable
         contains_variable = any([n in VARIABLES for n in sub_tree.list_nodes()])
-        # evaluate subtree for inefficiencies
+        # Evaluate subtree for inefficiencies
         sub_eval = sub_tree.evaluate()
-        # check is evaluation exactly equals one of the variables
+        # Check is evaluation exactly equals one of the variables
         equals_variable = [v for v in VARIABLES if np.array(Tree(Node(v)).evaluate() == sub_eval).all()]
 
-        # if subtree of node does not contain variable, it must be constant
+        # If subtree of node does not contain variable, it must be constant
         if not contains_variable:
             self.nodes.value = sub_eval
             self.nodes.children = ()
-        # if subtree contains a variable, but evaluates to exactly the variable, replace with variable
+        # If subtree contains a variable, but evaluates to exactly the variable, replace with variable
         elif equals_variable:
             self.nodes.value = equals_variable[0]
             self.nodes.children = ()
-        # can't make more effiecient
+        # Can't make more effiecient
         else:
             for child in self.nodes.children:
                 Tree(child, subtree=True).prune()
 
-        # rebase the numbers of the Tree
+        # Rebase the numbers of the Tree
         self.nodes.set_nums()
         return self.nodes
 
