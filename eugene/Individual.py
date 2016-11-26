@@ -33,11 +33,11 @@ class Individual(object):
     def __str__(self):
         return str(self.chromosomes)
 
-    def display(self):
+    def display(self, stdout=True):
         """
         Display helper.
         """
-        self.chromosomes.display()
+        return self.chromosomes.display(stdout=stdout)
 
     # @profile
     def compute_gene_expression(self, error_function=None, target=None):
