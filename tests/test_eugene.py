@@ -69,7 +69,7 @@ class RandomNodeTests(unittest.TestCase):
         pass
 
     def test_random_trees(self):
-        """Generate 500 random trees"""
+        """Generate 500 random nodes"""
         NUM_NODES = 500
         random_nodes = [node.random_node(10) for i in xrange(NUM_NODES)]
 
@@ -187,7 +187,7 @@ class RandomTreeTests(unittest.TestCase):
         pass
 
     def test_random_trees(self):
-        """Generate 100 random trees"""
+        """Generate 500 random trees"""
         NUM_TREES = 500
         random_trees = [tree.random_tree(10) for i in xrange(NUM_TREES)]
 
