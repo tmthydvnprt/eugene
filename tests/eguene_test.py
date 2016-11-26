@@ -1,21 +1,20 @@
 """
 eugene_test.py
 """
+
 import os
 import sys
 import numpy as np
 import pandas as pd
 
-sys.path.append('/Users/timothydavenport/GitHub/eugene')
+sys.path.append('~/GitHub/eugene')
 
-import eugene.Primatives
-
-eugene.Primatives.x = np.linspace(0, 8.0 * np.pi, 1024)
-eugene.Primatives.TRUTH = eugene.Primatives.x * np.sin(eugene.Primatives.x) + eugene.Primatives.x/2.0 + 1.61
-
+import eugene.Config
 from eugene.Population import Population
-import numpy as np
-import scipy.signal
+
+# Setup up variable and truth configuration
+eugene.Config.var['x'] = np.linspace(0, 8.0 * np.pi, 1024)
+eugene.Config.truth = eugene.Config.var['x'] * np.sin(eugene.Config.var['x']) + eugene.Config.var['x']/2.0 + 1.61
 
 @profile
 def error_and_complexity(gene_expression, scale):
@@ -26,15 +25,18 @@ def error_and_complexity(gene_expression, scale):
 
     return np.dot(scaled_gene_expression, weights)
 
+# Setup Population
 P = Population(
     init_population_size=1000,
     objective_function=error_and_complexity,
     max_generations=100,
     init_tree_size=2,
-    target=eugene.Primatives.TRUTH,
+    target=eugene.Config.truth,
     pruning=False
 )
 
+# Initialize Population
 P.initialize()
 
-P.run(50)
+# Run the Population
+P.run(20)
