@@ -14,7 +14,7 @@ def rmse(predicted, truth):
             result = np.inf
         else:
             result = np.sqrt(((predicted - truth) ** 2).mean())
-    except TypeError:
+    except (TypeError, AttributeError):
         result = np.inf
     return result
 

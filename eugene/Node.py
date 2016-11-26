@@ -96,18 +96,18 @@ class Node(object):
     """
 
     def __init__(self, value=None, *children):
-        # node properties
+        # Node properties
         self.value = value
         self.children = children
-        # current position of node
+        # Current position of node
         self.num = None
         self.level = None
-        # summary of children
+        # Summary of children
         self.height = None
         self.node_num = None
         self.leaf_num = None
         self.edge_num = None
-        # sum of subtrees
+        # Sum of subtrees
         self.complexity = None
 
     @property
@@ -128,10 +128,10 @@ class Node(object):
         return self.__str__()
 
     def __str__(self):
-        # node is a variable or constant
+        # Node is a variable or constant
         if len(self.children) == 0:
             return '%s' % self.value
-        # node is a unary, binary or n-ary function
+        # Node is a unary, binary or n-ary function
         else:
             if self.value in NARIES:
                 return '%s([%s])' % (self.value, ', '.join([str(c) for c in self.children]))
@@ -139,35 +139,36 @@ class Node(object):
                 return '%s(%s)' % (self.value, ', '.join([str(c) for c in self.children]))
 
     # @profile
-    def set_nums(self, node_counter=-1, level_counter=0, leaf_count=-1, edge_count=-1):
+    def set_nums(self, node_counter=-1, level_counter=0, leaf_count=0, edge_count=0):
         """
         Set node numbers (depth first).
         """
 
-        # count this node
+        # Count this node
         node_counter += 1
         self.num = node_counter
         self.level = level_counter
         complexity = 0
         node_count = 1
 
-        # traverse children if present or count as leaf node
+        # Traverse children if present or count as leaf node
         if len(self.children) > 0:
             level_counter += 1
             edge_count += len(self.children)
             height_count = 1
             for c in self.children:
-                child_numbers = c.set_nums(node_counter, level_counter, leaf_count, edge_count)
-                node_counter, child_node_count, child_height, leaf_count, edge_count, child_complexity = child_numbers
+                child_numbers = c.set_nums(node_counter, level_counter, leaf_count, 0)
+                node_counter, child_node_count, child_height, leaf_count, child_edge_count, child_complexity = child_numbers
                 height_count = max(height_count, child_height)
                 complexity += child_complexity
                 node_count += child_node_count
+                edge_count += child_edge_count
         else:
             leaf_count += 1
             height_count = 0
             edge_count = 0
 
-        # store counts of children below
+        # Store counts of children below
         self.height = height_count
         self.node_num = node_count
         self.leaf_num = leaf_count
