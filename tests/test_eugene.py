@@ -356,7 +356,12 @@ class IndividualTests(unittest.TestCase):
 
     def test_24_crossover(self):
         """Test individual crossover"""
-        pass
+        self.assertNotEqual(str(self.ind1), str(self.ind2))
+        child1, child2 = self.ind1.crossover(self.ind2)
+        self.assertNotEqual(str(child1), str(self.ind1))
+        self.assertNotEqual(str(child2), str(self.ind2))
+        self.assertNotEqual(str(child1), str(child2))
+
 
 class PopulationTests(unittest.TestCase):
     """

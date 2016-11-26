@@ -1,6 +1,6 @@
 
 Eugene Testing Report
-Sat Nov 26 15:16:55 PST 2016
+Sat Nov 26 15:19:41 PST 2016
 =========================================
 
 Check Individual size ... ok
@@ -31,16 +31,16 @@ Run the progress bar ... ok
 Name                   Stmts   Miss Branch BrPart  Cover
 --------------------------------------------------------
 eugene/Config.py           3      0      0      0   100%
-eugene/Individual.py      59     16     16      3    69%
-eugene/Node.py            81      1     32      3    96%
+eugene/Individual.py      59      7     16      7    81%
+eugene/Node.py            81      3     32      5    93%
 eugene/Population.py     186    157     34      0    13%
 eugene/Primatives.py      96     17      2      0    81%
-eugene/Tree.py            92      3     26      2    96%
+eugene/Tree.py            92      3     26      1    97%
 eugene/Util.py            37      0      2      0   100%
 eugene.py                 12      0      0      0   100%
 --------------------------------------------------------
-TOTAL                    566    194    112      8    64%
+TOTAL                    566    187    112     13    65%
 ----------------------------------------------------------------------
-Ran 24 tests in 0.080s
+Ran 24 tests in 0.079s
 
 OK
