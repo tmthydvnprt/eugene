@@ -7,16 +7,16 @@ import sys
 import numpy as np
 import pandas as pd
 
-sys.path.append('~/GitHub/eugene')
+sys.path.append(os.path.expanduser('~/GitHub/eugene'))
 
 import eugene.Config
 from eugene.Population import Population
 
 # Setup up variable and truth configuration
-eugene.Config.var['x'] = np.linspace(0, 8.0 * np.pi, 1024)
-eugene.Config.truth = eugene.Config.var['x'] * np.sin(eugene.Config.var['x']) + eugene.Config.var['x']/2.0 + 1.61
+eugene.Config.VAR['x'] = np.linspace(0, 8.0 * np.pi, 1024)
+eugene.Config.TRUTH = eugene.Config.VAR['x'] * np.sin(eugene.Config.VAR['x']) + eugene.Config.VAR['x']/2.0 + 1.61
 
-@profile
+# @profile
 def error_and_complexity(gene_expression, scale):
     """user fitness function, weighted combination of error and complexity"""
 
@@ -31,7 +31,7 @@ P = Population(
     objective_function=error_and_complexity,
     max_generations=100,
     init_tree_size=2,
-    target=eugene.Config.truth,
+    target=eugene.Config.TRUTH,
     pruning=False
 )
 
