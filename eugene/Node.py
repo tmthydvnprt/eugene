@@ -20,10 +20,10 @@ def random_node(max_level=20, min_level=1, current_level=0):
             node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
         # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
         elif rand_node == 1:
-            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]())
         # node = EPHEMERAL constant random integer
         elif rand_node == 2:
-            node = Node(EPHEMERAL[0])
+            node = Node(EPHEMERAL[0]())
         # node = variable
         elif rand_node == 3:
             node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])
@@ -35,10 +35,10 @@ def random_node(max_level=20, min_level=1, current_level=0):
             node = Node(CONSTS[r.randint(0, len(CONSTS) - 1)])
         # node = EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
         elif rand_node == 1:
-            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)])
+            node = Node(EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]())
         # node = EPHEMERAL constant random integer
         elif rand_node == 2:
-            node = Node(EPHEMERAL[0])
+            node = Node(EPHEMERAL[0]())
         # node = variable
         elif rand_node == 3:
             node = Node(VARIABLES[r.randint(0, len(VARIABLES) - 1)])

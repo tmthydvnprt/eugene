@@ -26,10 +26,10 @@ NARIES = ['']
 CONSTS = ['np.pi', 'np.e']
 # random constants
 EPHEMERAL = {
-    0: r.randint(-500, 500),
-    1: r.random(),
-    2: r.uniform(-500, 500),
-    3: r.normalvariate(0, 100)
+    0: lambda: r.randint(-500, 500),
+    1: lambda: r.random(),
+    2: lambda: r.uniform(-500, 500),
+    3: lambda: r.normalvariate(0, 100)
 }
 # UNARIES = [
 #     'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \
