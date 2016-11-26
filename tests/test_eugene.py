@@ -262,6 +262,20 @@ class TreeTests(unittest.TestCase):
 
         self.assertEqual(attributes, correct_attributes)
 
+    def test_tree_get_node(self):
+        """Check tree get node"""
+        node = self.tree.get_node(3)
+
+        self.assertEqual(node.value, 10)
+
+    def test_tree_set_node(self):
+        """Check tree set node"""
+        self.tree.set_node(3, node.Node(123))
+        correct_string = '[0:0] <built-in function add> (3) - {6|15}\n    |-[1:1] x (0) - {1|1}\n    \\-[1:2] <built-in function mul> (2) - {4|8}\n          |-[2:3] 123 (0) - {1|1}\n          \\-[2:4] <built-in function abs> (1) - {2|3}\n                \\-[3:5] -4 (0) - {1|1}'
+        tree_string = self.tree.display()
+
+        self.assertEqual(tree_string, correct_string)
+
     def test_tree_pruning(self):
         """Check tree pruning"""
 
