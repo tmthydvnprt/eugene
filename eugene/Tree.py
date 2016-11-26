@@ -46,14 +46,14 @@ class Tree(object):
         """
         Return the number of leaves in the tree.
         """
-        return self.nodes.leaf_num + 1
+        return self.nodes.leaf_num
 
     @property
     def edge_num(self):
         """
         Return the number of edges in the tree.
         """
-        return self.nodes.edge_num + 1
+        return self.nodes.edge_num
 
     @property
     def complexity(self):
@@ -173,9 +173,9 @@ class Tree(object):
         self.nodes.set_nums()
         return self.nodes
 
-    def display(self, level=0, level_list=None):
+    def display(self, level=0, level_list=None, tree_string='', stdout=True):
         """
-        Display helper.
+        Display helper. Returns variable and prints to stdout (default stdout=True).
         """
         level_list = level_list if level_list else []
 
@@ -203,6 +203,16 @@ class Tree(object):
                 self.nodes.node_num,
                 self.nodes.complexity
             )
-        print node_str
+        # Place this node of the tree
+        if stdout:
+            print node_str
+        tree_string += node_str
+        # Append children nodes
         for i, child in enumerate(self.nodes.children):
-            Tree(child, subtree=True).display(level + 1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '])
+            child_string = Tree(child, subtree=True).display(
+                level + 1, level_list + ['      ' if i == len(self.nodes.children) - 1 else '|     '],
+                stdout=stdout
+            )
+            tree_string += '\n'
+            tree_string += child_string
+        return tree_string
