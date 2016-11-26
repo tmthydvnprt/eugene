@@ -20,7 +20,9 @@ class Individual(object):
 
     @property
     def size(self):
-        """return size of individual"""
+        """
+        Return size of individual.
+        """
         return self.chromosomes.node_num
 
     def __repr__(self):
@@ -30,12 +32,16 @@ class Individual(object):
         return str(self.chromosomes)
 
     def display(self):
-        """display helper"""
+        """
+        Display helper.
+        """
         self.chromosomes.display()
 
     # @profile
     def compute_gene_expression(self, error_function=None, target=None):
-        """compute gene expression by evaluating function stored in tree, and keep track of time"""
+        """
+        Compute gene expression by evaluating function stored in tree, and keep track of time.
+        """
 
         # evaluate function and time to compute
         t0 = time.time()
@@ -51,7 +57,9 @@ class Individual(object):
 
     # @profile
     def crossover(self, spouse=None):
-        """randomly crossover two chromosomes"""
+        """
+        Randomly crossover two chromosomes.
+        """
 
         # create random crossover points
         x1 = r.randint(0, self.size - 1)
@@ -75,7 +83,9 @@ class Individual(object):
 
     # @profile
     def mutate(self, pruning=False):
-        """ alter a random node in chromosomes"""
+        """
+        Alter a random node in chromosomes.
+        """
 
         # randomly select node to mutate
         mpoint = r.randint(0, self.size - 1)

@@ -1,5 +1,5 @@
 """
-eugene
+Eugene
 """
 
 __all__ = ["Primatives", "Node", "Tree", "Individual", "Population", "Util"]

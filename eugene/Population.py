@@ -19,7 +19,7 @@ def par_fit():
 
 class Population(object):
     """
-    Defines Population of Individuals with ability to create generations and evaluate fitness
+    Defines Population of Individuals with ability to create generations and evaluate fitness.
     """
 
     def __init__(
@@ -72,12 +72,16 @@ class Population(object):
 
     @property
     def size(self):
-        """return the size of the population"""
+        """
+        Return the size of the population.
+        """
         return len(self.individuals)
 
     @property
     def fitness(self):
-        """return the fitness of each individual in population"""
+        """
+        Return the fitness of each individual in population.
+        """
         if self._fitness.shape == (0, ):
             self.calc_fitness()
         return self._fitness
@@ -85,8 +89,8 @@ class Population(object):
     @property
     def stagnate(self):
         """
-        determine if the population has stagnated and reached local min
-        where average fitness over last n generations has not changed
+        Determine if the population has stagnated and reached local min where average fitness over last n generations has
+        not changed.
         """
         if self.generation <= self.stagnation_timeout:
             return False
@@ -102,7 +106,9 @@ class Population(object):
         self.describe_current()
 
     def describe_init(self):
-        """print out parameters used to intialize population"""
+        """
+        Print out parameters used to intialize population.
+        """
         print '\nPopulation Initialized w/ Parameters:'
         data = [
             ['Initial number of individuals:', self.init_population_size],
@@ -119,7 +125,9 @@ class Population(object):
         print tabulate.tabulate(data)
 
     def describe_current(self):
-        """print out status about current population"""
+        """
+        Print out status about current population.
+        """
         print '\nCurrent Population Status:'
         # initialize VARIABLES
         data = [
@@ -147,7 +155,9 @@ class Population(object):
 
     # @profile
     def initialize(self, seed=None):
-        """initialize a population based on seed or randomly"""
+        """
+        Initialize a population based on seed or randomly.
+        """
 
         self.describe_init()
         self.created = True
@@ -176,7 +186,9 @@ class Population(object):
 
     # @profile
     def calc_fitness(self):
-        """calculate the fitness of each individual."""
+        """
+        Calculate the fitness of each individual.
+        """
 
         if self.parallel:
             pool = Pool()
@@ -204,13 +216,17 @@ class Population(object):
 
     # @profile
     def rank(self):
-        """create ranking of individuals"""
+        """
+        Create ranking of individuals.
+        """
         self.ranking = zip(self.fitness, self.individuals)
         self.ranking.sort()
 
     # @profile
     def roulette(self, number=None):
-        """select parent pairs based on roulette method (probability proportional to fitness)"""
+        """
+        Select parent pairs based on roulette method (probability proportional to fitness).
+        """
         number = number if number else self.size
         selections = []
 
@@ -227,7 +243,9 @@ class Population(object):
         return selections
 
     def stochastic(self, number=None):
-        """select parent pairs based on stochastic method (probability uniform across fitness)"""
+        """
+        Select parent pairs based on stochastic method (probability uniform across fitness).
+        """
         number = number if number else self.size
 
         # unpack
@@ -248,7 +266,9 @@ class Population(object):
         return selections
 
     def tournament(self, number=None, tournaments=4):
-        """select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins)"""
+        """
+        Select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins).
+        """
         number = number if number else self.size
         selections = []
         for _ in xrange(number):
@@ -262,7 +282,9 @@ class Population(object):
         return selections
 
     def rank_roulette(self, number=None, pressure=2):
-        """select parent pairs based on rank roulette method (probability proportional to fitness rank)"""
+        """
+        Select parent pairs based on rank roulette method (probability proportional to fitness rank).
+        """
         number = number if number else self.size
         selections = []
 
@@ -286,13 +308,17 @@ class Population(object):
 
     # @profile
     def select(self, number=None):
-        """select individuals thru various methods"""
+        """
+        Select individuals thru various methods.
+        """
         selections = self.roulette(number)
         return selections
 
     # @profile
     def create_generation(self):
-        """create the next generations, this is main function that loops"""
+        """
+        Create the next generations, this is main function that loops.
+        """
 
         # determine fitness of current generations and log average fitness
         self.calc_fitness()
@@ -339,7 +365,9 @@ class Population(object):
 
     # @profile
     def run(self, number_of_generations=None):
-        """run algorithm"""
+        """
+        Run algorithm.
+        """
 
         number_of_generations = number_of_generations if number_of_generations else self.max_generations
         pb = ProgressBar(number_of_generations)
@@ -353,7 +381,9 @@ class Population(object):
         print self.generation, 'generations'
 
     def most_fit(self):
-        """return the most fit individual"""
+        """
+        Return the most fit individual.
+        """
 
         # make sure the individuals have been ranked
         self.rank()
