@@ -114,7 +114,7 @@ Ephemeral Variables : - once created stay constant, only can be used during init
 
 Variables:
 ===========
-    a, b, c, ..., x, y, z    - whatever you need, define in `eugene.Config.var`
+    a, b, c, ..., x, y, z    - whatever you need, define in `eugene.Config.VAR`
 
 To add:
 ========

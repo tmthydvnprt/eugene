@@ -27,7 +27,7 @@ def random_node(max_level=20, min_level=1, current_level=0):
             node = Node(EPHEMERAL[0]())
         # node = variable
         elif rand_node == 3:
-            node = Node(eugene.Config.var.keys()[r.randint(0, len(eugene.Config.var.keys()) - 1)])
+            node = Node(eugene.Config.VAR.keys()[r.randint(0, len(eugene.Config.VAR.keys()) - 1)])
     else:
         # rand_node = r.randint(4, 6) if current_level < min_level else r.randint(0, 6)
         rand_node = r.randint(4, 5) if current_level < min_level else r.randint(0, 5)
@@ -42,7 +42,7 @@ def random_node(max_level=20, min_level=1, current_level=0):
             node = Node(EPHEMERAL[0]())
         # node = variable
         elif rand_node == 3:
-            node = Node(eugene.Config.var.keys()[r.randint(0, len(eugene.Config.var.keys()) - 1)])
+            node = Node(eugene.Config.VAR.keys()[r.randint(0, len(eugene.Config.VAR.keys()) - 1)])
         # node = a unary operator
         elif rand_node == 4:
             node = Node(
@@ -131,8 +131,8 @@ class Node(object):
     def __str__(self):
         # Node is a variable or constant
         if len(self.children) == 0:
-            if self.value in eugene.Config.var.keys():
-                return 'eugene.Config.var[\'%s\']' % self.value
+            if self.value in eugene.Config.VAR.keys():
+                return 'eugene.Config.VAR[\'%s\']' % self.value
             else:
                 return '%s' % self.value
         # Node is a unary, binary or n-ary function

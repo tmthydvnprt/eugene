@@ -109,8 +109,8 @@ class Individual(object):
             if node.value in CONSTS:
                 mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
             # variable
-            elif node.value in eugene.Config.var.keys():
-                mutated_value = eugene.Config.var.keys()[r.randint(0, len(eugene.Config.var.keys()) - 1)]
+            elif node.value in eugene.Config.VAR.keys():
+                mutated_value = eugene.Config.VAR.keys()[r.randint(0, len(eugene.Config.VAR.keys()) - 1)]
             # a unary operator
             elif node.value in UNARIES:
                 mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]

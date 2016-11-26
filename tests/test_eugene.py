@@ -115,7 +115,7 @@ class NodeTests(unittest.TestCase):
 
     def test_08_node_string(self):
         """Check node string printing"""
-        correct_str = 'n_add(eugene.Config.var[\'x\'], n_mul(10, n_abs(-4)))'
+        correct_str = 'n_add(eugene.Config.VAR[\'x\'], n_mul(10, n_abs(-4)))'
         node_str = self.node.__repr__()
         self.assertEqual(node_str, correct_str)
 
@@ -203,8 +203,8 @@ class TreeTests(unittest.TestCase):
     def setUp(self):
         """Setup Tests"""
 
-        eugene.Config.var = {'x' : np.arange(0, 5)}
-        eugene.Config.truth = eugene.Config.var['x'] + (10 * abs(-4))
+        eugene.Config.VAR = {'x' : np.arange(0, 5)}
+        eugene.Config.truth = eugene.Config.VAR['x'] + (10 * abs(-4))
 
         self.tree = Tree(
             Node('n_add',
@@ -297,11 +297,11 @@ class IndividualTests(unittest.TestCase):
         """Setup Tests"""
         N = 4
         M = 1
-        eugene.Config.var = {
+        eugene.Config.VAR = {
             'x' : np.linspace(0, float(M) * np.pi, N),
             'y' :  np.linspace(0, 2.0 * float(M) * np.pi, N)
         }
-        eugene.Config.truth = (eugene.Config.var['x'] ** 2.0) + (eugene.Config.var['y'] ** 2.0)
+        eugene.Config.truth = (eugene.Config.VAR['x'] ** 2.0) + (eugene.Config.VAR['y'] ** 2.0)
 
         self.ind = Individual(Tree(
             Node(n_add,

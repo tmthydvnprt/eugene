@@ -11,8 +11,6 @@ import numpy as np
 import scipy.misc as sm
 import scipy.special as sp
 
-import eugene.Config
-
 # + - * / %
 BINARIES = ['n_add', 'n_sub', 'n_mul', 'n_div', 'n_mod', 'n_pow']
 # asb, sqtr, log, exp, sin, cos, tan, min, max,
@@ -22,11 +20,24 @@ NARIES = ['']
 # 3.14..., 2.71...
 CONSTS = ['np.pi', 'np.e']
 # random constants
+
+def random_int(rmin=-500, rmax=500):
+    """Random intgeter with custom defaults"""
+    return r.randint(rmin, rmax)
+
+def random_uniform(rmin=-500, rmax=500):
+    """Random uniform with custom defaults"""
+    return r.randint(rmin, rmax)
+
+def random_normal(rmean=0, rscale=100):
+    """Random uniform with custom defaults"""
+    return r.normalvariate(rmean, rscale)
+
 EPHEMERAL = {
-    0: lambda: r.randint(-500, 500),
-    1: lambda: r.random(),
-    2: lambda: r.uniform(-500, 500),
-    3: lambda: r.normalvariate(0, 100)
+    0: random_int,
+    1: r.random,
+    2: random_uniform,
+    3: random_normal
 }
 # UNARIES = [
 #     'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \

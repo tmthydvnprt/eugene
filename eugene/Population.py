@@ -9,7 +9,6 @@ from multiprocessing import Pool
 import tabulate
 import numpy as np
 
-import eugene.Config
 from eugene.Util import ProgressBar, rmse
 from eugene.Tree import random_tree
 from eugene.Individual import Individual
