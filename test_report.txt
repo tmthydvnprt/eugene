@@ -1,6 +1,6 @@
 
 Eugene Testing Report
-Sat Nov 26 15:26:18 PST 2016
+Sat Nov 26 15:46:15 PST 2016
 =========================================
 
 Check Individual size ... ok
@@ -21,6 +21,8 @@ Check tree node list ... ok
 Check tree edge list ... ok
 Check tree attributes ... ok
 Evaluate Tree expression ... ok
+Evaluate Tree expression with nan in variable ... ok
+Evaluate Tree expression with no set variable ... ok
 Check tree get node ... ok
 Check tree set node ... ok
 Check tree pruning ... ok
@@ -33,16 +35,16 @@ Run the progress bar ... ok
 Name                   Stmts   Miss Branch BrPart  Cover
 --------------------------------------------------------
 eugene/Config.py           3      0      0      0   100%
-eugene/Individual.py      59      1     16      2    96%
+eugene/Individual.py      59      0     16      2    97%
 eugene/Node.py            81      1     32      3    96%
 eugene/Population.py     186    157     34      0    13%
-eugene/Primatives.py      96     16      2      0    82%
-eugene/Tree.py            92      1     26      1    98%
+eugene/Primatives.py      97     17      2      0    81%
+eugene/Tree.py            92      0     26      1    99%
 eugene/Util.py            37      0      2      0   100%
 eugene.py                 12      0      0      0   100%
 --------------------------------------------------------
-TOTAL                    566    176    112      6    68%
+TOTAL                    567    175    112      6    68%
 ----------------------------------------------------------------------
-Ran 26 tests in 0.090s
+Ran 28 tests in 0.103s
 
 OK

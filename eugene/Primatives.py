@@ -11,6 +11,8 @@ import numpy as np
 import scipy.misc as sm
 import scipy.special as sp
 
+np.seterr(all='ignore')
+
 # + - * / %
 BINARIES = ['n_add', 'n_sub', 'n_mul', 'n_div', 'n_mod', 'n_pow']
 # asb, sqtr, log, exp, sin, cos, tan, min, max,

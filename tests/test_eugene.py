@@ -223,7 +223,7 @@ class TreeTests(unittest.TestCase):
         """Check tree string"""
         correct_string = '[0:0] n_add (3) - {6|15}\n    |-[1:1] x (0) - {1|1}\n    \\-[1:2] n_mul (2) - {4|8}\n          |-[2:3] 10 (0) - {1|1}\n          \\-[2:4] n_abs (1) - {2|3}\n                \\-[3:5] -4 (0) - {1|1}'
         tree_string = self.tree.display()
-
+        self.assertEqual(repr(self.tree), str(self.tree))
         self.assertEqual(tree_string, correct_string)
 
     def test_14_node_list(self):
@@ -270,13 +270,29 @@ class TreeTests(unittest.TestCase):
 
         self.assertEqual(result.tolist(), eugene.Config.truth.tolist())
 
-    def test_18_tree_get_node(self):
+    def test_18_evaluate(self):
+        """Evaluate Tree expression with nan in variable"""
+
+        eugene.Config.VAR['x'] = np.NaN
+        result = self.tree.evaluate()
+
+        self.assertTrue(np.isnan(result))
+
+    def test_19_evaluate(self):
+        """Evaluate Tree expression with no set variable"""
+
+        eugene.Config.VAR = {}
+        result = self.tree.evaluate()
+
+        self.assertTrue(np.isnan(result))
+
+    def test_20_tree_get_node(self):
         """Check tree get node"""
         node = self.tree.get_node(3)
 
         self.assertEqual(node.value, 10)
 
-    def test_19_tree_set_node(self):
+    def test_21_tree_set_node(self):
         """Check tree set node"""
         self.tree.set_node(3, Node(123))
         correct_string = '[0:0] n_add (3) - {6|15}\n    |-[1:1] x (0) - {1|1}\n    \\-[1:2] n_mul (2) - {4|8}\n          |-[2:3] 123 (0) - {1|1}\n          \\-[2:4] n_abs (1) - {2|3}\n                \\-[3:5] -4 (0) - {1|1}'
@@ -284,7 +300,7 @@ class TreeTests(unittest.TestCase):
 
         self.assertEqual(tree_string, correct_string)
 
-    def test_20_tree_pruning(self):
+    def test_22_tree_pruning(self):
         """Check tree pruning"""
 
         self.tree.prune()
@@ -328,11 +344,11 @@ class IndividualTests(unittest.TestCase):
             )
         ))
 
-    def test_21_individual_size(self):
+    def test_23_individual_size(self):
         """Check Individual size"""
         self.assertEqual(self.ind1.size, 7)
 
-    def test_22_gene_expression(self):
+    def test_24_gene_expression(self):
         """Evaluate Gene Expression"""
         error, time, complexity = self.ind1.compute_gene_expression(rmse, eugene.Config.TRUTH)
         self.assertEqual(error, 0.0)
@@ -346,31 +362,31 @@ class IndividualTests(unittest.TestCase):
         #
         #     return np.dot(scaled_gene_expression, weights)
 
-    def test_23_mutate(self):
+    def test_25_mutate(self):
         """Test individual mutation"""
         ind1_orig = copy.deepcopy(self.ind1)
-        self.assertEqual(str(ind1_orig), str(self.ind1))
+        self.assertEqual(repr(ind1_orig), repr(self.ind1))
         for _ in xrange(50):
             self.ind1.mutate()
-        self.assertNotEqual(str(ind1_orig), str(self.ind1))
+        self.assertNotEqual(repr(ind1_orig), repr(self.ind1))
 
-    def test_24_mutate(self):
+    def test_26_mutate(self):
         """Test individual mutation with pruning"""
         ind1_orig = copy.deepcopy(self.ind1)
-        self.assertEqual(str(ind1_orig), str(self.ind1))
+        self.assertEqual(repr(ind1_orig), repr(self.ind1))
         for _ in xrange(20):
             self.ind1.mutate(pruning=True)
-        self.assertNotEqual(str(ind1_orig), str(self.ind1))
+        self.assertNotEqual(repr(ind1_orig), repr(self.ind1))
 
-    def test_25_crossover(self):
+    def test_27_crossover(self):
         """Test individual crossover"""
-        self.assertNotEqual(str(self.ind1), str(self.ind2))
+        self.assertNotEqual(repr(self.ind1), repr(self.ind2))
         child1, child2 = self.ind1.crossover(self.ind2)
-        self.assertNotEqual(str(child1), str(self.ind1))
-        self.assertNotEqual(str(child2), str(self.ind2))
-        self.assertNotEqual(str(child1), str(child2))
+        self.assertNotEqual(repr(child1), repr(self.ind1))
+        self.assertNotEqual(repr(child2), repr(self.ind2))
+        self.assertNotEqual(repr(child1), repr(child2))
 
-    def test_26_individual_string(self):
+    def test_28_individual_string(self):
         """Check individual display string"""
         correct_string = '[0:0] n_add (2) - {7|17}\n    |-[1:1] n_pow (1) - {3|5}\n    |     |-[2:2] x (0) - {1|1}\n    |     \\-[2:3] 2.0 (0) - {1|1}\n    \\-[1:4] n_pow (1) - {3|5}\n          |-[2:5] y (0) - {1|1}\n          \\-[2:6] 2.0 (0) - {1|1}'
         tree_string = self.ind1.display()
