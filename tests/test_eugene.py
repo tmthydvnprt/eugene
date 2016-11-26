@@ -350,11 +350,19 @@ class IndividualTests(unittest.TestCase):
         """Test individual mutation"""
         ind1_orig = copy.deepcopy(self.ind1)
         self.assertEqual(str(ind1_orig), str(self.ind1))
-        for _ in xrange(10):
+        for _ in xrange(50):
             self.ind1.mutate()
         self.assertNotEqual(str(ind1_orig), str(self.ind1))
 
-    def test_24_crossover(self):
+    def test_24_mutate(self):
+        """Test individual mutation with pruning"""
+        ind1_orig = copy.deepcopy(self.ind1)
+        self.assertEqual(str(ind1_orig), str(self.ind1))
+        for _ in xrange(20):
+            self.ind1.mutate(pruning=True)
+        self.assertNotEqual(str(ind1_orig), str(self.ind1))
+
+    def test_25_crossover(self):
         """Test individual crossover"""
         self.assertNotEqual(str(self.ind1), str(self.ind2))
         child1, child2 = self.ind1.crossover(self.ind2)
@@ -362,6 +370,12 @@ class IndividualTests(unittest.TestCase):
         self.assertNotEqual(str(child2), str(self.ind2))
         self.assertNotEqual(str(child1), str(child2))
 
+    def test_26_individual_string(self):
+        """Check individual display string"""
+        correct_string = '[0:0] n_add (2) - {7|17}\n    |-[1:1] n_pow (1) - {3|5}\n    |     |-[2:2] x (0) - {1|1}\n    |     \\-[2:3] 2.0 (0) - {1|1}\n    \\-[1:4] n_pow (1) - {3|5}\n          |-[2:5] y (0) - {1|1}\n          \\-[2:6] 2.0 (0) - {1|1}'
+        tree_string = self.ind1.display()
+
+        self.assertEqual(tree_string, correct_string)
 
 class PopulationTests(unittest.TestCase):
     """
