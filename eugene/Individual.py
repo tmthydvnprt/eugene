@@ -4,11 +4,11 @@ Individual.py
 
 import time
 import copy as cp
-import numpy as np
 import random as r
+import numpy as np
 
 from eugene.Tree import random_tree
-from eugene.Primatives import VARIABLES, UNARIES, BINARIES, NARIES, CONSTS, EPHEMERAL
+from eugene.Primatives import VARIABLES, UNARIES, BINARIES, CONSTS, EPHEMERAL # NARIES,
 
 class Individual(object):
     """

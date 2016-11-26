@@ -3,11 +3,11 @@
 Population.py
 """
 
+import random as r
 import bisect
+from multiprocessing import Pool
 import tabulate
 import numpy as np
-import random as r
-from multiprocessing import Pool
 
 from eugene.Util import ProgressBar, rmse
 from eugene.Tree import random_tree

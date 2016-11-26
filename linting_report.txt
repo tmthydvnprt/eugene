@@ -1,28 +1,28 @@
 
 Eugene Linting Report
-2015-08-08 05:40:40 -0700
+2016-11-26 05:18:18 -0800
 =========================================
 
 ************* Module eugene.Node
 I:  1, 0: Locally disabling too-many-branches (R0912) (locally-disabled)
 I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
 I:  1, 0: Locally disabling unused-wildcard-import (W0614) (locally-disabled)
-************* Module eugene.Population
-I:  1, 0: Locally disabling too-many-arguments (R0913) (locally-disabled)
-I:  1, 0: Locally disabling too-many-instance-attributes (R0902) (locally-disabled)
-I:  1, 0: Locally disabling too-many-public-methods (R0904) (locally-disabled)
-************* Module eugene.Primatives
-I:  1, 0: Locally disabling invalid-name (C0103) (locally-disabled)
 ************* Module eugene.Tree
 I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
 I:  1, 0: Locally disabling bare-except (W0702) (locally-disabled)
 I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
 I:  1, 0: Locally disabling unused-wildcard-import (W0614) (locally-disabled)
+************* Module eugene.Primatives
+I:  1, 0: Locally disabling invalid-name (C0103) (locally-disabled)
+************* Module eugene.Population
+I:  1, 0: Locally disabling too-many-arguments (R0913) (locally-disabled)
+I:  1, 0: Locally disabling too-many-instance-attributes (R0902) (locally-disabled)
+I:  1, 0: Locally disabling too-many-public-methods (R0904) (locally-disabled)
 
 
 Report
 ======
-556 statements analysed.
+545 statements analysed.
 
 Statistics by type
 ------------------
@@ -49,8 +49,9 @@ External dependencies
       \-Individual (eugene.Population)
       \-Node (eugene.Tree)
       \-Primatives (eugene.Individual)
-      \-Tree (eugene.Individual,eugene.Population)
-    numpy (eugene.Individual,eugene.Tree,eugene.Util,eugene.Primatives,eugene.Population)
+      \-Tree (eugene.Population)
+      \-Util (eugene.Population)
+    numpy (eugene.Population)
     scipy 
       \-misc (eugene.Primatives)
       \-special (eugene.Primatives)
@@ -64,13 +65,13 @@ Raw metrics
 +----------+-------+------+---------+-----------+
 |type      |number |%     |previous |difference |
 +==========+=======+======+=========+===========+
-|code      |668    |64.67 |668      |=          |
+|code      |644    |51.03 |644      |=          |
 +----------+-------+------+---------+-----------+
-|docstring |221    |21.39 |221      |=          |
+|docstring |300    |23.77 |300      |=          |
 +----------+-------+------+---------+-----------+
-|comment   |58     |5.61  |58       |=          |
+|comment   |170    |13.47 |170      |=          |
 +----------+-------+------+---------+-----------+
-|empty     |86     |8.33  |86       |=          |
+|empty     |148    |11.73 |148      |=          |
 +----------+-------+------+---------+-----------+
 
 

@@ -5,9 +5,9 @@ Primatives.py
 
 from __future__ import division
 
-import numpy as np
 import random as r
 import operator as o
+import numpy as np
 import scipy.misc as sm
 import scipy.special as sp
 
