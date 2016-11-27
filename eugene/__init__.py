@@ -2,7 +2,7 @@
 Eugene
 """
 
-__all__ = ["Primatives", "Node", "Tree", "List", "String", "Individual", "Population", "Util"]
+__all__ = ["Config", "Primatives", "Node", "Tree", "List", "String", "Individual", "Population", "Util"]
 __version__ = '0.1.1'
 __date__ = '2015-08-07 07:09:00 -0700'
 __author__ = 'tmthydvnprt'
@@ -105,16 +105,16 @@ Constants:
     np.p - The mathematical constant pi = 3.141592..., to available precision.
     np.e - The mathematical constant e  = 2.718281..., to available precision.
 
-EPHEMERAL VARIABLES : - once created stay constant, only can be used during initialization or mutation
+Ephemeral Variables : - once created stay constant, only can be used during initialization or mutation
 =====================
     r.random()                 - Returns x in the interval [0, 1).
     r.randint(a, b)            - Returns integer x in range [a, b].
     r.uniform(a, b)            - Returns number x in the range [a, b) or [a, b] depending on rounding.
     r.normalvariate(mu, sigma) - Returns number x from Normal distribution. mu is the mean, and sigma is the standard deviation.
 
-VARIABLES:
+Variables:
 ===========
-    a, b, c, ..., x, y, z    - whatever you need
+    a, b, c, ..., x, y, z    - whatever you need, define in `eugene.Config.VAR`
 
 To add:
 ========

@@ -3,11 +3,11 @@
 Population.py
 """
 
+import random as r
 import bisect
+from multiprocessing import Pool
 import tabulate
 import numpy as np
-import random as r
-from multiprocessing import Pool
 
 from eugene.Util import ProgressBar, rmse
 from eugene.Tree import random_tree
@@ -48,7 +48,6 @@ class Population(object):
     mutation             : Percent of Population that will mutate, defaults to 0.1
     parallel             : Perform evolution in parallel, defaults to False
     pruning              : Removes inefficiencies in Tree based Individuals, defaults to False
-
     """
 
     def __init__(
@@ -69,6 +68,7 @@ class Population(object):
             mating=0.6,
             mutation=0.1,
             parallel=False,
+            selectmethod='roulette',
             pruning=False
         ):
         # parameters
@@ -88,6 +88,7 @@ class Population(object):
         self.mating = mating
         self.mutation = mutation
         self.parallel = parallel
+        self.selectmethod = selectmethod
         self.pruning = pruning
         # initialize variables
         self.created = False
@@ -108,12 +109,16 @@ class Population(object):
 
     @property
     def size(self):
-        """Return the size of the population"""
+        """
+        Return the size of the population.
+        """
         return len(self.individuals)
 
     @property
     def fitness(self):
-        """Return the fitness of each individual in population"""
+        """
+        Return the fitness of each individual in population.
+        """
         if self._fitness.shape == (0, ):
             self.calc_fitness()
         return self._fitness
@@ -138,7 +143,9 @@ class Population(object):
         self.describe_current()
 
     def describe_init(self):
-        """Print out parameters used to intialize population"""
+        """
+        Print out parameters used to intialize population.
+        """
         print '\nPopulation Initialized w/ Parameters:'
         data = [
             ['Initial number of individuals:', self.init_population_size],
@@ -155,9 +162,11 @@ class Population(object):
         print tabulate.tabulate(data)
 
     def describe_current(self):
-        """Print out status about current population"""
+        """
+        Print out status about current population.
+        """
         print '\nCurrent Population Status:'
-        # initialize VARIABLES
+        # initialize data
         data = [
             ['Current generation:', self.generation],
             ['Number of individuals:', self.size]
@@ -183,7 +192,9 @@ class Population(object):
 
     # @profile
     def initialize(self, seed=None):
-        """Initialize a population based on seed or random generation"""
+        """
+        Initialize a population based on seed or randomly.
+        """
 
         self.describe_init()
         self.created = True
@@ -232,7 +243,9 @@ class Population(object):
 
     # @profile
     def calc_fitness(self):
-        """Calculate the fitness of each individual."""
+        """
+        Calculate the fitness of each individual.
+        """
 
         if self.parallel:
             pool = Pool()
@@ -260,7 +273,9 @@ class Population(object):
 
     # @profile
     def rank(self):
-        """Create ranking of individuals"""
+        """
+        Create ranking of individuals.
+        """
         if not self._ranked:
             self.ranking = zip(self.fitness, self.individuals)
             self.ranking.sort()
@@ -268,7 +283,10 @@ class Population(object):
 
     # @profile
     def roulette(self, number=None):
-        """Select parent pairs based on roulette method (probability proportional to fitness)"""
+        """
+        Select parent pairs based on roulette method (probability proportional to fitness).
+        """
+
         number = number if number else self.size
         selections = []
 
@@ -285,7 +303,10 @@ class Population(object):
         return selections
 
     def stochastic(self, number=None):
-        """Select parent pairs based on stochastic method (probability uniform across fitness)"""
+        """
+        Select parent pairs based on stochastic method (probability uniform across fitness).
+        """
+
         number = number if number else self.size
 
         # unpack
@@ -306,7 +327,10 @@ class Population(object):
         return selections
 
     def tournament(self, number=None, tournaments=4):
-        """Select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins)"""
+        """
+        Select parent pairs based on tournament method (random tournaments amoung individuals where fitness wins).
+        """
+
         number = number if number else self.size
         selections = []
         for _ in xrange(number):
@@ -320,7 +344,10 @@ class Population(object):
         return selections
 
     def rank_roulette(self, number=None, pressure=2):
-        """Select parent pairs based on rank roulette method (probability proportional to fitness rank)"""
+        """
+        Select parent pairs based on rank roulette method (probability proportional to fitness rank).
+        """
+
         number = number if number else self.size
         selections = []
 
@@ -343,14 +370,26 @@ class Population(object):
         return selections
 
     # @profile
-    def select(self, number=None):
-        """Select individuals thru various methods"""
-        selections = self.roulette(number)
+    def select(self, number=None, method='roulette'):
+        """
+        Select individuals thru various methods.
+        """
+        if method is 'roulette':
+            selections = self.roulette(number)
+        elif method is 'rank_roulette':
+            selections = self.rank_roulette(number)
+        elif method is 'tournament':
+            selections = self.tournament(number)
+        elif method is 'stochastic':
+            selections = self.stochastic(number)
+
         return selections
 
     # @profile
     def create_generation(self):
-        """Create the next generations, this is main function that loops"""
+        """
+        Create the next generations, this is main function that loops.
+        """
 
         # determine fitness of current generations and log average fitness
         self.calc_fitness()
@@ -370,16 +409,19 @@ class Population(object):
         next_generation = [i[1] for i in self.ranking[-elite_num:]]
 
         # replicate
-        next_generation.extend(self.select(replicate_num))
+        next_generation.extend(self.select(replicate_num, self.selectmethod))
 
         # crossover mate
-        parent_pairs = zip(self.select(mate_num), self.select(mate_num))
+        parent_pairs = zip(
+            self.select(mate_num, self.selectmethod),
+            self.select(mate_num, self.selectmethod)
+        )
         child_pairs = [p1.crossover(p2) for p1, p2 in parent_pairs]
         children = [child for pair in child_pairs for child in pair]
         next_generation.extend(children)
 
         # mutate
-        mutants = self.select(mutate_num)
+        mutants = self.select(mutate_num, self.selectmethod)
         for m in mutants:
             m.mutate(self.pruning)
         next_generation.extend(mutants)
@@ -403,7 +445,9 @@ class Population(object):
 
     # @profile
     def evolve(self, number_of_generations=None):
-        """Evolve the Population (run the algorithm)"""
+        """
+        Evolve the Population (run the algorithm).
+        """
 
         number_of_generations = number_of_generations if number_of_generations else self.max_generations
         pb = ProgressBar(number_of_generations)
@@ -417,11 +461,15 @@ class Population(object):
         print self.generation, 'generations'
 
     def run(self, number_of_generations=None):
-        """Alias for the evolve function"""
+        """
+        Alias for the evolve function.
+        """
         self.evolve(number_of_generations=number_of_generations)
 
     def most_fit(self):
-        """Return the most fit individual"""
+        """
+        Return the most fit individual.
+        """
 
         # make sure the individuals have been ranked
         self.rank()

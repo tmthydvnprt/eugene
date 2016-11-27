@@ -5,17 +5,14 @@ Primatives.py
 
 from __future__ import division
 
-import numpy as np
 import random as r
 import operator as o
+import numpy as np
 import scipy.misc as sm
 import scipy.special as sp
 
-x = np.array(range(10)) # np.linspace(0, 8.0 * np.pi, 1024)
-TRUTH = np.array(range(10)) # x * np.sin(x) + x/2.0 + 1.61
+np.seterr(all='ignore')
 
-# x
-VARIABLES = ['x']
 # + - * / %
 BINARIES = ['n_add', 'n_sub', 'n_mul', 'n_div', 'n_mod', 'n_pow']
 # asb, sqtr, log, exp, sin, cos, tan, min, max,
@@ -25,11 +22,24 @@ NARIES = ['']
 # 3.14..., 2.71...
 CONSTS = ['np.pi', 'np.e']
 # random constants
+
+def random_int(rmin=-500, rmax=500):
+    """Random intgeter with custom defaults"""
+    return r.randint(rmin, rmax)
+
+def random_uniform(rmin=-500, rmax=500):
+    """Random uniform with custom defaults"""
+    return r.randint(rmin, rmax)
+
+def random_normal(rmean=0, rscale=100):
+    """Random uniform with custom defaults"""
+    return r.normalvariate(rmean, rscale)
+
 EPHEMERAL = {
-    0: r.randint(-500, 500),
-    1: r.random(),
-    2: r.uniform(-500, 500),
-    3: r.normalvariate(0, 100)
+    0: random_int,
+    1: r.random,
+    2: random_uniform,
+    3: random_normal
 }
 # UNARIES = [
 #     'n_abs', 'n_inv', 'n_neg', 'n_pos', 'n_acos', 'n_acosh', 'n_asin', 'n_asinh', 'n_atan', 'n_atanh', 'n_ceil', 'n_cos', \

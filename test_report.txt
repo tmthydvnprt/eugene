@@ -1,0 +1,60 @@
+
+Eugene Testing Report
+Sun Nov 27 08:14:17 PST 2016
+=========================================
+
+Check Individual size ... ok
+Evaluate Gene Expression ... ok
+Test individual mutation ... ok
+Test individual mutation with pruning ... ok
+Test individual crossover ... ok
+Check individual display string ... ok
+Check node numbers ... ok
+Check node string printing ... ok
+Check node Arity ... ok
+Check node leafiness ... ok
+Check node attributes ... ok
+Initialize a Random Population ... ok
+Initialize a seeded Population ... ok
+Display Population Info ... ok
+Run Population for 10 generations with roulette selection ... ok
+Run Population for 10 generations with pruning ... ok
+Run Population for 10 generations with stochastic selection ... ok
+Run Population for 10 generations with tournament selection ... ok
+Run Population for 10 generations with rank roulette selection ... ok
+Generate 500 random nodes ... ok
+Generate 500 random trees ... ok
+Check tree string ... ok
+Check tree node list ... ok
+Check tree edge list ... ok
+Check tree attributes ... ok
+Evaluate Tree expression ... ok
+Evaluate Tree expression with nan in variable ... ok
+Evaluate Tree expression with no set variable ... ok
+Check tree get node ... ok
+Check tree set node ... ok
+Check tree pruning ... ok
+Test that RMSE is calculated ... ok
+Test that RMSE fails when shapes do not match ... ok
+Test that RMSE fails when NaN is present ... ok
+Test that RMSE fails when wrong data type is passed ... ok
+Run the progress bar ... ok
+
+Name                   Stmts   Miss Branch BrPart  Cover
+--------------------------------------------------------
+eugene/Config.py           3      0      0      0   100%
+eugene/Individual.py      76     10     30      5    78%
+eugene/List.py            25     17      2      0    30%
+eugene/Node.py            81      1     32      3    96%
+eugene/Population.py     218     18     52      6    90%
+eugene/Primatives.py      97     13      2      0    85%
+eugene/String.py          25     17      2      0    30%
+eugene/Tree.py            93      0     26      1    99%
+eugene/Util.py            37      0      2      0   100%
+eugene.py                 12      0      0      0   100%
+--------------------------------------------------------
+TOTAL                    667     76    148     15    87%
+----------------------------------------------------------------------
+Ran 36 tests in 3.914s
+
+OK

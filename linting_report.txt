@@ -1,28 +1,41 @@
 
 Eugene Linting Report
-2015-08-08 05:40:40 -0700
+2016-11-27 08:04:54 -0800
 =========================================
 
+************* Module eugene.List
+I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
+I:  1, 0: Locally disabling bare-except (W0702) (locally-disabled)
+I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
+I:  1, 0: Locally disabling unused-wildcard-import (W0614) (locally-disabled)
+************* Module eugene.String
+I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
+I:  1, 0: Locally disabling bare-except (W0702) (locally-disabled)
+I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
+I:  1, 0: Locally disabling unused-wildcard-import (W0614) (locally-disabled)
+E: 23,14: Undefined variable 'List' (undefined-variable)
 ************* Module eugene.Node
 I:  1, 0: Locally disabling too-many-branches (R0912) (locally-disabled)
 I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
 I:  1, 0: Locally disabling unused-wildcard-import (W0614) (locally-disabled)
-************* Module eugene.Population
-I:  1, 0: Locally disabling too-many-arguments (R0913) (locally-disabled)
-I:  1, 0: Locally disabling too-many-instance-attributes (R0902) (locally-disabled)
-I:  1, 0: Locally disabling too-many-public-methods (R0904) (locally-disabled)
-************* Module eugene.Primatives
-I:  1, 0: Locally disabling invalid-name (C0103) (locally-disabled)
 ************* Module eugene.Tree
 I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
 I:  1, 0: Locally disabling bare-except (W0702) (locally-disabled)
 I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
 I:  1, 0: Locally disabling unused-wildcard-import (W0614) (locally-disabled)
+************* Module eugene.Primatives
+I:  1, 0: Locally disabling invalid-name (C0103) (locally-disabled)
+************* Module eugene.Individual
+I:  1, 0: Locally disabling redefined-variable-type (R0204) (locally-disabled)
+************* Module eugene.Population
+I:  1, 0: Locally disabling too-many-arguments (R0913) (locally-disabled)
+I:  1, 0: Locally disabling too-many-instance-attributes (R0902) (locally-disabled)
+I:  1, 0: Locally disabling too-many-public-methods (R0904) (locally-disabled)
 
 
 Report
 ======
-556 statements analysed.
+660 statements analysed.
 
 Statistics by type
 ------------------
@@ -30,13 +43,13 @@ Statistics by type
 +---------+-------+-----------+-----------+------------+---------+
 |type     |number |old number |difference |%documented |%badname |
 +=========+=======+===========+===========+============+=========+
-|module   |7      |7          |=          |100.00      |0.00     |
+|module   |10     |10         |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
-|class    |5      |5          |=          |100.00      |0.00     |
+|class    |7      |7          |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
-|method   |52     |52         |=          |100.00      |0.00     |
+|method   |63     |63         |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
-|function |18     |18         |=          |100.00      |0.00     |
+|function |23     |23         |=          |100.00      |0.00     |
 +---------+-------+-----------+-----------+------------+---------+
 
 
@@ -46,11 +59,15 @@ External dependencies
 ::
 
     eugene 
+      \-Config (eugene.Individual)
       \-Individual (eugene.Population)
+      \-List (eugene.Population)
       \-Node (eugene.Tree)
       \-Primatives (eugene.Individual)
-      \-Tree (eugene.Individual,eugene.Population)
-    numpy (eugene.Individual,eugene.Tree,eugene.Util,eugene.Primatives,eugene.Population)
+      \-String (eugene.Population)
+      \-Tree (eugene.Population)
+      \-Util (eugene.Population)
+    numpy (eugene.Population)
     scipy 
       \-misc (eugene.Primatives)
       \-special (eugene.Primatives)
@@ -64,13 +81,13 @@ Raw metrics
 +----------+-------+------+---------+-----------+
 |type      |number |%     |previous |difference |
 +==========+=======+======+=========+===========+
-|code      |668    |64.67 |668      |=          |
+|code      |780    |50.39 |780      |=          |
 +----------+-------+------+---------+-----------+
-|docstring |221    |21.39 |221      |=          |
+|docstring |399    |25.78 |399      |=          |
 +----------+-------+------+---------+-----------+
-|comment   |58     |5.61  |58       |=          |
+|comment   |182    |11.76 |182      |=          |
 +----------+-------+------+---------+-----------+
-|empty     |86     |8.33  |86       |=          |
+|empty     |187    |12.08 |187      |=          |
 +----------+-------+------+---------+-----------+
 
 
@@ -100,23 +117,36 @@ Messages by category
 +-----------+-------+---------+-----------+
 |warning    |0      |0        |=          |
 +-----------+-------+---------+-----------+
-|error      |0      |0        |=          |
+|error      |1      |1        |=          |
 +-----------+-------+---------+-----------+
+
+
+
+% errors / warnings by module
+-----------------------------
+
++--------------+-------+--------+---------+-----------+
+|module        |error  |warning |refactor |convention |
++==============+=======+========+=========+===========+
+|eugene.String |100.00 |0.00    |0.00     |0.00       |
++--------------+-------+--------+---------+-----------+
 
 
 
 Messages
 --------
 
-+-----------------+------------+
-|message id       |occurrences |
-+=================+============+
-|locally-disabled |11          |
-+-----------------+------------+
++-------------------+------------+
+|message id         |occurrences |
++===================+============+
+|locally-disabled   |20          |
++-------------------+------------+
+|undefined-variable |1           |
++-------------------+------------+
 
 
 
 Global evaluation
 -----------------
-Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
+Your code has been rated at 9.92/10 (previous run: 9.92/10, +0.00)
 

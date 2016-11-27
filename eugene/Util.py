@@ -6,21 +6,27 @@ import sys
 import numpy as np
 
 def rmse(predicted, truth):
-    """Return the root mean squared error between a predicted and truth values"""
+    """
+    Return the mean square error.
+    """
     try:
         if np.isnan(predicted).any() or predicted.shape != truth.shape:
             result = np.inf
         else:
             result = np.sqrt(((predicted - truth) ** 2).mean())
-    except TypeError:
+    except (TypeError, AttributeError):
         result = np.inf
     return result
 
 class ProgressBar(object):
-    """Implements a command-line progress bar"""
+    """
+    Implements a comand-line progress bar.
+    """
 
     def __init__(self, iterations):
-        """Create a progress bar"""
+        """
+        Create a progress bar.
+        """
         self.iterations = iterations
         self.prog_bar = '[]'
         self.fill_char = '*'
@@ -28,20 +34,26 @@ class ProgressBar(object):
         self.__update_amount(0)
 
     def animate(self, iterate):
-        """Animate progress"""
+        """
+        Animate progress.
+        """
         print '\r', self,
         sys.stdout.flush()
         self.update_iteration(iterate + 1)
         return self
 
     def update_iteration(self, elapsed_iter):
-        """Increment progress"""
+        """
+        Increment progress.
+        """
         self.__update_amount((elapsed_iter / float(self.iterations)) * 100.0)
         self.prog_bar = '%s  %s of %s complete' % (self.prog_bar, elapsed_iter, self.iterations)
         return self
 
     def __update_amount(self, new_amount):
-        """Update amout of progress"""
+        """
+        Update amout of progress.
+        """
         percent_done = int(round((new_amount / 100.0) * 100.0))
         all_full = self.width - 2
         num_hashes = int(round((percent_done / 100.0) * all_full))
@@ -52,5 +64,7 @@ class ProgressBar(object):
         return self
 
     def __str__(self):
-        """String representation"""
+        """
+        String representation.
+        """
         return str(self.prog_bar)

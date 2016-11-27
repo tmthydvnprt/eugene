@@ -1,16 +1,19 @@
+# pylint: disable=redefined-variable-type
 """
 Individual.py
 """
 
 import time
 import copy as cp
-import numpy as np
 import random as r
+import numpy as np
+
+import eugene.Config
 
 from eugene.Tree import random_tree
 from eugene.List import random_list, List
 from eugene.String import random_string, String
-from eugene.Primatives import VARIABLES, UNARIES, BINARIES, NARIES, CONSTS, EPHEMERAL
+from eugene.Primatives import CONSTS, EPHEMERAL, UNARIES, BINARIES#, NARIES
 
 class Individual(object):
     """
@@ -23,7 +26,9 @@ class Individual(object):
 
     @property
     def size(self):
-        """Return size of individual"""
+        """
+        Return size of individual.
+        """
         return self.chromosomes.node_num if self.type == 'Tree' else len(self.chromosomes)
 
     def __repr__(self):
@@ -32,13 +37,17 @@ class Individual(object):
     def __str__(self):
         return str(self.chromosomes)
 
-    def display(self):
-        """Display helper"""
-        self.chromosomes.display()
+    def display(self, stdout=True):
+        """
+        Display helper.
+        """
+        return self.chromosomes.display(stdout=stdout)
 
     # @profile
     def compute_gene_expression(self, error_function=None, target=None):
-        """Compute gene expression by evaluating function stored in tree, and keep track of time"""
+        """
+        Compute gene expression by evaluating function stored in tree, and keep track of time.
+        """
 
         # evaluate function and time to compute
         t0 = time.time()
@@ -54,7 +63,9 @@ class Individual(object):
 
     # @profile
     def crossover(self, spouse=None):
-        """Randomly crossover two chromosomes"""
+        """
+        Randomly crossover two chromosomes.
+        """
 
         # create random crossover points
         x1 = r.randint(0, self.size - 1)
@@ -87,7 +98,9 @@ class Individual(object):
 
     # @profile
     def mutate(self, pruning=False):
-        """Alter a random point in the chromosomes"""
+        """
+        Alter a random node in chromosomes.
+        """
 
         # randomly select node to mutate
         mpoint = r.randint(0, self.size - 1)
@@ -112,8 +125,8 @@ class Individual(object):
                     if node.value in CONSTS:
                         mutated_value = CONSTS[r.randint(0, len(CONSTS) - 1)]
                     # variable
-                    elif node.value in VARIABLES:
-                        mutated_value = VARIABLES[r.randint(0, len(VARIABLES) - 1)]
+                    elif node.value in eugene.Config.VAR.keys():
+                        mutated_value = eugene.Config.VAR.keys()[r.randint(0, len(eugene.Config.VAR.keys()) - 1)]
                     # a unary operator
                     elif node.value in UNARIES:
                         mutated_value = UNARIES[r.randint(0, len(UNARIES) - 1)]
@@ -125,7 +138,7 @@ class Individual(object):
                     #     mutated_value = NARIES[r.randint(0, len(NARIES) - 1)]
                     # EPHEMERAL constant random ( 0:1, uniform -500:500, or normal -500:500 )
                     else:
-                        mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]
+                        mutated_value = EPHEMERAL[r.randint(1, len(EPHEMERAL) - 1)]()
 
                     # mutate node value (keeps children, if applicable)
                     node.value = mutated_value

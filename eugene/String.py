@@ -3,13 +3,12 @@
 String.py
 """
 
-import copy as cp
-import numpy as np
-
 # @profile
-def random_string(max_length=0, item_factory=None, eval_function=None):
-    """Generate a random string using the item_factory function for each character"""
-    return String([itemfactory() for _ in xrange(max_length)], item_factory, eval_function)
+def random_string(max_length=0, item_factory=None, eval_function=None, uid=None):
+    """
+    Generate a random string using the item_factory function for each character.
+    """
+    return String([item_factory() for _ in xrange(max_length)], item_factory, eval_function, uid=uid)
 
 class String(str):
     """
@@ -20,33 +19,43 @@ class String(str):
     eval_function : the function used to convert the string into something else
     """
 
-    def __init__(self, characters, eval_function=None):
-        """
-        """
-        super(List, self).__init__(items)
+    def __init__(self, characters, item_factory=None, eval_function=None, uid=None):
+        super(List, self).__init__(characters)
         self.type = 'String'
-        self.eval_function = eval_function
         self.item_factory = item_factory
-
-    @property
-    def height(self):
-        return 1
-
-    @property
-    def edge_num(self):
-        return 0
+        self.eval_function = eval_function
+        self.uid = uid
+        self.evaluated = False
+        self.height = 1
+        self.edge_num = 0
+        self._evaluation = None
 
     @property
     def node_num(self):
+        """
+        Return the number of nodes (length of string).
+        """
         return len(self)
 
     @property
     def leaf_num(self):
+        """
+        Return the number of leaves (length of string).
+        """
         return len(self)
 
     @property
     def complexity(self):
+        """
+        Return the complexity of the list (length of string).
+        """
         return len(self)
 
     def evaluate(self):
-        return self.eval_function(self)
+        """
+        Evaluate expression stored in string.
+        """
+        if not self.evaluated:
+            self._evaluation = self.eval_function(self)
+            self.evaluated = True
+        return self._evaluation
