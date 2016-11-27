@@ -1,6 +1,6 @@
 
 Eugene Linting Report
-2016-11-27 08:04:54 -0800
+2016-11-27 09:01:55 -0800
 =========================================
 
 ************* Module eugene.List
@@ -13,7 +13,8 @@ I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
 I:  1, 0: Locally disabling bare-except (W0702) (locally-disabled)
 I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
 I:  1, 0: Locally disabling unused-wildcard-import (W0614) (locally-disabled)
-E: 23,14: Undefined variable 'List' (undefined-variable)
+W: 22, 4: __init__ method from base class 'str' is not called (super-init-not-called)
+W: 22,23: Unused argument 'characters' (unused-argument)
 ************* Module eugene.Node
 I:  1, 0: Locally disabling too-many-branches (R0912) (locally-disabled)
 I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
@@ -23,10 +24,10 @@ I:  1, 0: Locally disabling eval-used (W0123) (locally-disabled)
 I:  1, 0: Locally disabling bare-except (W0702) (locally-disabled)
 I:  1, 0: Locally disabling wildcard-import (W0401) (locally-disabled)
 I:  1, 0: Locally disabling unused-wildcard-import (W0614) (locally-disabled)
-************* Module eugene.Primatives
-I:  1, 0: Locally disabling invalid-name (C0103) (locally-disabled)
 ************* Module eugene.Individual
 I:  1, 0: Locally disabling redefined-variable-type (R0204) (locally-disabled)
+************* Module eugene.Primatives
+I:  1, 0: Locally disabling invalid-name (C0103) (locally-disabled)
 ************* Module eugene.Population
 I:  1, 0: Locally disabling too-many-arguments (R0913) (locally-disabled)
 I:  1, 0: Locally disabling too-many-instance-attributes (R0902) (locally-disabled)
@@ -35,7 +36,7 @@ I:  1, 0: Locally disabling too-many-public-methods (R0904) (locally-disabled)
 
 Report
 ======
-660 statements analysed.
+659 statements analysed.
 
 Statistics by type
 ------------------
@@ -81,11 +82,11 @@ Raw metrics
 +----------+-------+------+---------+-----------+
 |type      |number |%     |previous |difference |
 +==========+=======+======+=========+===========+
-|code      |780    |50.39 |780      |=          |
+|code      |779    |50.32 |780      |-1.00      |
 +----------+-------+------+---------+-----------+
 |docstring |399    |25.78 |399      |=          |
 +----------+-------+------+---------+-----------+
-|comment   |182    |11.76 |182      |=          |
+|comment   |183    |11.82 |182      |+1.00      |
 +----------+-------+------+---------+-----------+
 |empty     |187    |12.08 |187      |=          |
 +----------+-------+------+---------+-----------+
@@ -115,9 +116,9 @@ Messages by category
 +-----------+-------+---------+-----------+
 |refactor   |0      |0        |=          |
 +-----------+-------+---------+-----------+
-|warning    |0      |0        |=          |
+|warning    |2      |0        |+2.00      |
 +-----------+-------+---------+-----------+
-|error      |1      |1        |=          |
+|error      |0      |1        |-1.00      |
 +-----------+-------+---------+-----------+
 
 
@@ -125,28 +126,30 @@ Messages by category
 % errors / warnings by module
 -----------------------------
 
-+--------------+-------+--------+---------+-----------+
-|module        |error  |warning |refactor |convention |
-+==============+=======+========+=========+===========+
-|eugene.String |100.00 |0.00    |0.00     |0.00       |
-+--------------+-------+--------+---------+-----------+
++--------------+------+--------+---------+-----------+
+|module        |error |warning |refactor |convention |
++==============+======+========+=========+===========+
+|eugene.String |0.00  |100.00  |0.00     |0.00       |
++--------------+------+--------+---------+-----------+
 
 
 
 Messages
 --------
 
-+-------------------+------------+
-|message id         |occurrences |
-+===================+============+
-|locally-disabled   |20          |
-+-------------------+------------+
-|undefined-variable |1           |
-+-------------------+------------+
++----------------------+------------+
+|message id            |occurrences |
++======================+============+
+|locally-disabled      |20          |
++----------------------+------------+
+|unused-argument       |1           |
++----------------------+------------+
+|super-init-not-called |1           |
++----------------------+------------+
 
 
 
 Global evaluation
 -----------------
-Your code has been rated at 9.92/10 (previous run: 9.92/10, +0.00)
+Your code has been rated at 9.97/10 (previous run: 9.92/10, +0.05)
 

@@ -5,13 +5,14 @@ Eguene.py - tests the eugene package.
 import unittest
 
 import copy
+import string
 import numpy as np
 
 import eugene.Config
-
 from eugene.Util import rmse, ProgressBar
 from eugene.Primatives import *
-
+from eugene.List import List, random_list
+from eugene.String import String, random_string
 from eugene.Node import Node, random_node
 from eugene.Tree import Tree, random_tree
 from eugene.Individual import Individual
@@ -63,6 +64,52 @@ class UtilTests(unittest.TestCase):
 
         for i in xrange(len(self.predicted)):
             p.animate(i)
+
+class RandomListTests(unittest.TestCase):
+    """
+    Test creation of Random Lists.
+    """
+
+    def setUp(self):
+        """Setup Tests"""
+        pass
+
+    def test_06_random_lists(self):
+        """Generate 500 random lists"""
+        def random_item():
+            return r.randint(0, 100)
+
+        def list_compare(s=None, t=None):
+            from difflib import SequenceMatcher
+            return SequenceMatcher(None, s, t).ratio()
+
+        NUM_LISTS = 500
+        random_lists = [random_list(10, random_item, list_compare) for i in xrange(NUM_LISTS)]
+
+        self.assertEqual(len(random_lists), NUM_LISTS)
+
+class RandomStringTests(unittest.TestCase):
+    """
+    Test creation of Random Strings.
+    """
+
+    def setUp(self):
+        """Setup Tests"""
+        pass
+
+    def test_06_random_strings(self):
+        """Generate 500 random strings"""
+        def random_char():
+            return r.choice(string.ascii_uppercase + string.digits)
+
+        def string_compare(s='', t=''):
+            from difflib import SequenceMatcher
+            return SequenceMatcher(None, s, t).ratio()
+
+        NUM_STRINGS = 500
+        random_strings = [random_string(10, random_char, string_compare) for i in xrange(NUM_STRINGS)]
+
+        self.assertEqual(len(random_strings), NUM_STRINGS)
 
 class RandomNodeTests(unittest.TestCase):
     """

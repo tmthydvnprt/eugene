@@ -8,7 +8,7 @@ def random_string(max_length=0, item_factory=None, eval_function=None, uid=None)
     """
     Generate a random string using the item_factory function for each character.
     """
-    return String([item_factory() for _ in xrange(max_length)], item_factory, eval_function, uid=uid)
+    return String(''.join([item_factory() for _ in xrange(max_length)]), item_factory=item_factory, eval_function=eval_function, uid=uid)
 
 class String(str):
     """
@@ -19,16 +19,17 @@ class String(str):
     eval_function : the function used to convert the string into something else
     """
 
-    def __init__(self, characters, item_factory=None, eval_function=None, uid=None):
-        super(List, self).__init__(characters)
-        self.type = 'String'
-        self.item_factory = item_factory
-        self.eval_function = eval_function
-        self.uid = uid
-        self.evaluated = False
-        self.height = 1
-        self.edge_num = 0
-        self._evaluation = None
+    def __new__(cls, characters=None, item_factory=None, eval_function=None, uid=None):
+        obj = str.__new__(cls, characters)
+        obj.type = 'String'
+        obj.item_factory = item_factory
+        obj.eval_function = eval_function
+        obj.uid = uid
+        obj.evaluated = False
+        obj.height = 1
+        obj.edge_num = 0
+        obj._evaluation = None
+        return obj
 
     @property
     def node_num(self):

@@ -1,6 +1,6 @@
 
 Eugene Testing Report
-Sun Nov 27 08:14:17 PST 2016
+Sun Nov 27 09:10:47 PST 2016
 =========================================
 
 Check Individual size ... ok
@@ -22,7 +22,9 @@ Run Population for 10 generations with pruning ... ok
 Run Population for 10 generations with stochastic selection ... ok
 Run Population for 10 generations with tournament selection ... ok
 Run Population for 10 generations with rank roulette selection ... ok
+Generate 500 random lists ... ok
 Generate 500 random nodes ... ok
+Generate 500 random strings ... ok
 Generate 500 random trees ... ok
 Check tree string ... ok
 Check tree node list ... ok
@@ -44,17 +46,17 @@ Name                   Stmts   Miss Branch BrPart  Cover
 --------------------------------------------------------
 eugene/Config.py           3      0      0      0   100%
 eugene/Individual.py      76     10     30      5    78%
-eugene/List.py            25     17      2      0    30%
+eugene/List.py            25      7      2      0    67%
 eugene/Node.py            81      1     32      3    96%
 eugene/Population.py     218     18     52      6    90%
 eugene/Primatives.py      97     13      2      0    85%
-eugene/String.py          25     17      2      0    30%
+eugene/String.py          26      7      2      0    68%
 eugene/Tree.py            93      0     26      1    99%
 eugene/Util.py            37      0      2      0   100%
 eugene.py                 12      0      0      0   100%
 --------------------------------------------------------
-TOTAL                    667     76    148     15    87%
+TOTAL                    668     56    148     15    89%
 ----------------------------------------------------------------------
-Ran 36 tests in 3.914s
+Ran 38 tests in 3.483s
 
 OK
