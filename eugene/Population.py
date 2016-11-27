@@ -37,6 +37,7 @@ class Population(object):
             mating=0.6,
             mutation=0.1,
             parallel=False,
+            selectmethod='roulette',
             pruning=False
         ):
         # parameters
@@ -53,6 +54,7 @@ class Population(object):
         self.mating = mating
         self.mutation = mutation
         self.parallel = parallel
+        self.selectmethod = selectmethod
         self.pruning = pruning
         # initialize variables
         self.created = False
@@ -307,11 +309,19 @@ class Population(object):
         return selections
 
     # @profile
-    def select(self, number=None):
+    def select(self, number=None, method='roulette'):
         """
         Select individuals thru various methods.
         """
-        selections = self.roulette(number)
+        if method is 'roulette':
+            selections = self.roulette(number)
+        elif method is 'rank_roulette':
+            selections = self.rank_roulette(number)
+        elif method is 'tournament':
+            selections = self.tournament(number)
+        elif method is 'stochastic':
+            selections = self.stochastic(number)
+
         return selections
 
     # @profile
@@ -338,16 +348,19 @@ class Population(object):
         next_generation = [i[1] for i in self.ranking[-elite_num:]]
 
         # replicate
-        next_generation.extend(self.select(replicate_num))
+        next_generation.extend(self.select(replicate_num, self.selectmethod))
 
         # crossover mate
-        parent_pairs = zip(self.select(mate_num), self.select(mate_num))
+        parent_pairs = zip(
+            self.select(mate_num, self.selectmethod),
+            self.select(mate_num, self.selectmethod)
+        )
         child_pairs = [p1.crossover(p2) for p1, p2 in parent_pairs]
         children = [child for pair in child_pairs for child in pair]
         next_generation.extend(children)
 
         # mutate
-        mutants = self.select(mutate_num)
+        mutants = self.select(mutate_num, self.selectmethod)
         for m in mutants:
             m.mutate(self.pruning)
         next_generation.extend(mutants)

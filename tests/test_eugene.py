@@ -415,23 +415,7 @@ class PopulationTests(unittest.TestCase):
 
         # Setup Populations
         self.P1 = Population(
-            init_population_size=1000,
-            objective_function=error_and_complexity,
-            max_generations=100,
-            init_tree_size=2,
-            target=eugene.Config.TRUTH,
-            pruning=False
-        )
-        self.P2 = Population(
-            init_population_size=1000,
-            objective_function=error_and_complexity,
-            max_generations=100,
-            init_tree_size=2,
-            target=eugene.Config.TRUTH,
-            pruning=True
-        )
-        self.P3 = Population(
-            init_population_size=1000,
+            init_population_size=100,
             objective_function=error_and_complexity,
             max_generations=100,
             init_tree_size=2,
@@ -443,11 +427,7 @@ class PopulationTests(unittest.TestCase):
         """Initialize a Random Population"""
         self.P1.initialize()
 
-    def test_30_initialize_population_pruning(self):
-        """Initialize a Random Population with pruning"""
-        self.P2.initialize()
-
-    def test_31_initialize_population(self):
+    def test_30_initialize_population(self):
         """Initialize a seeded Population"""
         inds = [Individual(Tree(
             Node('n_add',
@@ -461,12 +441,38 @@ class PopulationTests(unittest.TestCase):
                 )
             )
         ))]
-        self.P3.initialize(inds)
+        self.P1.initialize(inds)
 
-    def test_32_display_population(self):
+    def test_31_display_population(self):
         """Display Population Info"""
         self.P1.initialize()
         self.P1.describe()
 
-    # # Run the Population
-    # P.run(20)
+    def test_32_run_population_roulette(self):
+        """Run Population for 10 generations with roulette selection"""
+        self.P1.initialize()
+        self.P1.run(10)
+
+    def test_33_run_population_pruning(self):
+        """Run Population for 10 generations with pruning"""
+        self.P1.pruning = True
+        self.P1.initialize()
+        self.P1.run(10)
+
+    def test_34_run_population_stochastic(self):
+        """Run Population for 10 generations with stochastic selection"""
+        self.P1.selectmethod = 'stochastic'
+        self.P1.initialize()
+        self.P1.run(10)
+
+    def test_35_run_population_tournament(self):
+        """Run Population for 10 generations with tournament selection"""
+        self.P1.selectmethod = 'tournament'
+        self.P1.initialize()
+        self.P1.run(10)
+
+    def test_36_run_population_rank_roulette(self):
+        """Run Population for 10 generations with rank roulette selection"""
+        self.P1.selectmethod = 'rank_roulette'
+        self.P1.initialize()
+        self.P1.run(10)
