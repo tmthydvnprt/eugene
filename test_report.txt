@@ -1,6 +1,6 @@
 
 Eugene Testing Report
-Sat Nov 26 15:46:15 PST 2016
+Sat Nov 26 16:16:25 PST 2016
 =========================================
 
 Check Individual size ... ok
@@ -14,6 +14,10 @@ Check node string printing ... ok
 Check node Arity ... ok
 Check node leafiness ... ok
 Check node attributes ... ok
+Initialize a Random Population ... ok
+Initialize a Random Population with pruning ... ok
+Initialize a seeded Population ... ok
+Display Population Info ... ok
 Generate 500 random nodes ... ok
 Generate 500 random trees ... ok
 Check tree string ... ok
@@ -37,14 +41,14 @@ Name                   Stmts   Miss Branch BrPart  Cover
 eugene/Config.py           3      0      0      0   100%
 eugene/Individual.py      59      0     16      2    97%
 eugene/Node.py            81      1     32      3    96%
-eugene/Population.py     186    157     34      0    13%
-eugene/Primatives.py      97     17      2      0    81%
+eugene/Population.py     186     81     34      2    54%
+eugene/Primatives.py      97     13      2      0    85%
 eugene/Tree.py            92      0     26      1    99%
 eugene/Util.py            37      0      2      0   100%
 eugene.py                 12      0      0      0   100%
 --------------------------------------------------------
-TOTAL                    567    175    112      6    68%
+TOTAL                    567     95    112      8    82%
 ----------------------------------------------------------------------
-Ran 28 tests in 0.103s
+Ran 32 tests in 6.706s
 
 OK
